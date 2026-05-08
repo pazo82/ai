@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tema 1 — Dall'attenzione alla predizione del prossimo token</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--indigo);
+    padding: 88px 48px 96px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 580px; height: 580px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-grid {
+    position: absolute;
+    top: 28%; right: 6%;
+    width: 320px; height: 240px;
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 60px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 20px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 48px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--indigo);
+    margin: 28px 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  .callout p { font-size: 15.5px; line-height: 1.7; margin-bottom: 12px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-orange {
+    background: var(--orange-faint);
+    border-left-color: var(--orange);
+  }
+  .callout-orange h4 { color: var(--orange); }
+
+  .callout-indigo {
+    background: var(--indigo-faint);
+    border-left-color: var(--indigo);
+  }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout-teal {
+    background: var(--teal-faint);
+    border-left-color: var(--teal);
+  }
+  .callout-teal h4 { color: var(--teal); }
+
+  .callout-amber {
+    background: var(--amber-faint);
+    border-left-color: var(--amber);
+  }
+  .callout-amber h4 { color: var(--amber); }
+
+  .callout-purple {
+    background: var(--purple-faint);
+    border-left-color: var(--purple);
+  }
+  .callout-purple h4 { color: var(--purple); }
+
+  /* ── METAPHOR BOX ── */
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--purple);
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .metaphor p { margin-bottom: 12px; font-size: 15.5px; line-height: 1.72; }
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  /* ── INSIGHT (saldatura concettuale) ── */
+  .insight {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+
+  .insight em { color: var(--orange-light); font-style: italic; }
+  .insight strong { color: var(--white); }
+
+  /* ── DIAGRAM CONTAINER ── */
+  .diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  .diagram-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .diagram-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .diagram-caption {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--ink-light);
+    text-align: center;
+    margin-top: 18px;
+    padding: 0 16px;
+    line-height: 1.6;
+  }
+
+  /* ── LOGITS DEMO TABLE ── */
+  .logits-demo {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 30px;
+    margin: 28px 0;
+  }
+
+  .logits-demo-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .logits-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  .logits-table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .logits-table td {
+    padding: 12px 12px;
+    border-bottom: 1px solid var(--border2);
+    font-size: 15px;
+  }
+
+  .logits-table .token {
+    font-family: var(--mono);
+    color: var(--indigo);
+    font-weight: 500;
+  }
+
+  .logits-table .logit {
+    font-family: var(--mono);
+    color: var(--ink-mid);
+    text-align: right;
+  }
+
+  .logits-table .prob {
+    font-family: var(--mono);
+    color: var(--orange);
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .logits-table .bar-cell {
+    width: 40%;
+    padding-left: 16px;
+  }
+
+  .logits-bar {
+    height: 10px;
+    background: var(--orange);
+    border-radius: 2px;
+  }
+
+  /* ── STAGES (recap finale) ── */
+  .stages {
+    margin: 32px 0;
+    counter-reset: stage-counter;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 22px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border2);
+    align-items: start;
+  }
+
+  .stage:last-child { border-bottom: none; }
+
+  .stage-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    color: var(--orange);
+    line-height: 1;
+    counter-increment: stage-counter;
+  }
+
+  .stage-num::before { content: counter(stage-counter, decimal-leading-zero); }
+
+  .stage h4 {
+    font-family: var(--sans);
+    font-size: 17px;
+    color: var(--indigo);
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+
+  .stage p {
+    font-size: 15.5px;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(13,122,110,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .takeaway-list em { color: var(--orange-light); font-style: italic; }
+  .takeaway-list strong { color: var(--white); font-weight: 600; }
+
+  /* ── BRIDGE ── */
+  .bridge {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 48px;
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .bridge h3 {
+    margin: 0 0 16px;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--indigo);
+    font-weight: 500;
+  }
+
+  .bridge p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 38px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .insight { padding: 28px 24px; }
+    .takeaways { padding: 40px 28px; }
+    .bridge { padding: 32px 24px; }
+    .diagram { padding: 22px 16px; }
+    .stage { grid-template-columns: 50px 1fr; gap: 14px; }
+    .logits-demo { padding: 22px 18px; }
+    .logits-table th, .logits-table td { padding: 8px 8px; font-size: 13px; }
+    .logits-table .bar-cell { width: 30%; padding-left: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <svg class="hero-bg-grid" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">
+    <!-- Stelline sparse: i token del vocabolario -->
+    <circle cx="40" cy="60" r="3" fill="white" opacity="0.5"/>
+    <circle cx="80" cy="120" r="3" fill="white" opacity="0.5"/>
+    <circle cx="120" cy="40" r="3" fill="white" opacity="0.5"/>
+    <circle cx="160" cy="180" r="3" fill="white" opacity="0.5"/>
+    <circle cx="200" cy="80" r="3" fill="white" opacity="0.5"/>
+    <circle cx="240" cy="160" r="3" fill="white" opacity="0.5"/>
+    <circle cx="280" cy="100" r="3" fill="white" opacity="0.5"/>
+    <circle cx="60" cy="200" r="3" fill="white" opacity="0.5"/>
+    <circle cx="180" cy="120" r="6" fill="#f07040"/>
+    <!-- Freccia di h che punta -->
+    <line x1="40" y1="180" x2="180" y2="120" stroke="#f07040" stroke-width="2" marker-end="url(#heroArrow)"/>
+    <defs>
+      <marker id="heroArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#f07040"/>
+      </marker>
+    </defs>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-label">Tema 1 — Approfondimento</div>
+    <h1>Dall'attenzione alla <em>predizione</em> del prossimo token</h1>
+    <p class="hero-sub">
+      Cosa succede dopo che il meccanismo di attenzione ha contestualizzato i vettori dei
+      token? Come il modello, da decine di vettori contestualizzati, arriva a una
+      distribuzione di probabilità su un vocabolario di centomila parole. Il pezzo che
+      chiude l'anello tra geometria e probabilità.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">Hidden state finale, LM head, logits, softmax</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Tema del percorso</div>
+        <div class="meta-value">1 di 4</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Prerequisiti</div>
+        <div class="meta-value">Punti 2, 3, 4A del percorso precedente</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 — DOVE STIAMO -->
+<section>
+  <div class="section-num">01 — DOVE STIAMO</div>
+  <h2>Il punto in cui ci eravamo fermati, e il malinteso da disinnescare</h2>
+  <p class="lead">
+    Riprendiamo il filo. Nel percorso fatto finora abbiamo costruito un modello mentale
+    abbastanza preciso del meccanismo di attenzione: ogni token del prompt, attraverso
+    decine di strati, viene "riadattato" in funzione del contesto. Il vettore di "banca"
+    in "ho aperto un conto in banca" diventa diverso dal vettore di "banca" in "mi sono
+    seduto sulla banca del fiume", perché ognuno dei due ha assorbito i contributi dei
+    propri vicini. Tutto chiaro fin qui.
+  </p>
+
+  <p>
+    Ma c'è un passaggio che era rimasto in penombra, e che è esattamente il pezzo dove
+    si gioca la predizione. Da quei vettori contestualizzati, come si arriva a decidere
+    qual è il prossimo token? Come si combinano? Si fondono in qualcosa? E come si tira
+    fuori, da quella fusione, una probabilità per ciascuno dei centomila token del
+    vocabolario?
+  </p>
+
+  <h3>Il malinteso da disinnescare prima di tutto</h3>
+  <p>
+    Quando si parla di Transformer è facile cadere in una rappresentazione mentale che
+    suona così: <em>"il modello legge tutto il prompt, costruisce una rappresentazione
+    globale del prompt — un singolo vettore che riassume il contesto — e da quella
+    rappresentazione predice il prossimo token"</em>. È una rappresentazione plausibile,
+    è quella che molti articoli divulgativi suggeriscono, ed è <strong>sbagliata</strong>.
+  </p>
+
+  <p>
+    Il Transformer non costruisce mai un singolo vettore che "riassume" il prompt. Quello
+    che costruisce, dall'inizio alla fine, è sempre la stessa cosa: <strong>una sequenza
+    di vettori, uno per ogni token del prompt</strong>. Se il prompt ha 500 token, il
+    modello lavora su 500 vettori. Strato dopo strato, ognuno di quei 500 vettori viene
+    aggiornato — diventa più contestualizzato, incorpora informazioni dai vicini
+    rilevanti — ma rimangono 500 vettori. Anche all'ultimo strato. Anche all'uscita del
+    modello. Sempre 500.
+  </p>
+
+  <p>
+    Questa è la prima cosa da fissare con chiarezza, perché ribalta una metafora ingenua.
+    Non c'è un punto del processo in cui i 500 vettori si fondono in uno solo. Non c'è
+    "compressione" globale. Ogni token mantiene la sua posizione, dall'inizio alla fine,
+    e ogni posizione mantiene il suo vettore. Quello che cambia, nel passaggio attraverso
+    gli strati, è il <em>contenuto</em> di ciascun vettore, non il loro numero.
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>Il punto da fissare</h4>
+    <p>
+      L'output del Transformer non è un vettore, è una sequenza di vettori. Stessa
+      lunghezza dell'input. Ognuno aggiornato, ma tutti presenti. La predizione del
+      prossimo token non viene fatta da un "vettore globale" che non esiste — viene
+      fatta a partire da uno specifico vettore della sequenza, scelto in base alla sua
+      posizione.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 2 — IL VETTORE DELL'ULTIMA POSIZIONE -->
+<section>
+  <div class="section-num">02 — IL VETTORE CHE CONTA</div>
+  <h2>Cosa è davvero il "vettore di contesto"</h2>
+  <p>
+    Adesso possiamo dire con precisione cosa è quella cosa che fin qui abbiamo chiamato
+    "vettore di contesto finale". Non è un vettore globale. È <strong>uno specifico
+    vettore della sequenza, scelto in base alla sua posizione</strong>: è il vettore
+    associato all'<strong>ultima posizione del prompt</strong>, all'uscita dell'ultimo
+    strato del Transformer.
+  </p>
+
+  <p>
+    Lascia che lo dica in modo ancora più operativo. Se il tuo prompt è "Il gatto beve
+    il", quando tokenizzato diventa qualcosa come <code>[Il] [gatto] [beve] [il]</code>,
+    cioè 4 token. Il modello passa questi 4 token attraverso 32 strati (per fissare un
+    numero), e a ogni strato ognuno dei 4 vettori viene aggiornato in base ai vicini.
+    Alla fine dell'ultimo strato hai 4 vettori contestualizzati. Quello che il modello
+    usa per predire il token successivo è <strong>il quarto</strong> — il vettore
+    associato a "il", l'ultimo token del prompt. Gli altri tre vettori esistono, sono
+    stati calcolati, ma per la predizione del prossimo token non vengono direttamente
+    usati.
+  </p>
+
+  <p>
+    Ti sembrerà strano. È strano. Ti chiederai: <em>"ma come fa un singolo vettore —
+    quello dell'ultimo token — a 'sapere' tutto quello che è successo nel prompt?"</em>.
+    La risposta è la chiave del meccanismo, e merita due passaggi distinti.
+  </p>
+
+  <h3>Perché il vettore dell'ultima posizione "sa tutto" — la profondità</h3>
+  <p>
+    Ricorda quello che fa l'attenzione, strato per strato. A ogni strato, ogni token
+    guarda tutti gli altri token (compreso sé stesso) e mescola nelle proprie coordinate
+    i contributi di quelli rilevanti. È un'operazione di assorbimento: il vettore di
+    ogni posizione, dopo uno strato di attenzione, ha incorporato pezzi di informazione
+    dai suoi vicini.
+  </p>
+
+  <p>
+    Adesso pensa al vettore dell'ultima posizione del prompt. <strong>Anche lui</strong>
+    fa la stessa operazione, a ogni strato. Strato 1: il vettore dell'ultima posizione
+    assorbe contributi dai 4 token del prompt. Strato 2: lo fa di nuovo, ma adesso i 4
+    token che guarda sono già stati aggiornati allo strato 1 — quindi ognuno di loro
+    contiene già informazioni dai propri vicini. Il vettore dell'ultima posizione, allo
+    strato 2, sta in pratica assorbendo <em>informazione di secondo grado</em>: non solo
+    ogni singolo token, ma "ogni token più ciò che ognuno aveva già assorbito al primo
+    strato".
+  </p>
+
+  <p>
+    Strato dopo strato, questo si ripete. Al trentaduesimo strato, il vettore dell'ultima
+    posizione ha assorbito informazione che è passata attraverso 32 cicli di mescolamento.
+    Per quanto sia un singolo vettore — di, diciamo, 12.000 dimensioni — quel vettore è
+    <strong>il risultato di 32 livelli di integrazione progressiva di tutto il
+    contesto</strong>. Non è una compressione brutale: è una distillazione attenta, in
+    cui solo le informazioni rilevanti per "cosa deve venire dopo" tendono a essere
+    mantenute (perché il modello è stato addestrato proprio per quel compito).
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora delle 32 persone in fila</div>
+    <p>
+      Immagina una stanza con 4 persone disposte in fila. A ogni persona viene fatta
+      leggere un pezzo di un testo. Poi parte un primo "round di chiacchiere": ognuno
+      parla con tutti gli altri, raccontando quello che ha letto. Alla fine del primo
+      round, l'ultima persona della fila ha sentito i racconti diretti di tutti gli
+      altri tre, oltre al proprio pezzo.
+    </p>
+    <p>
+      Adesso parte il secondo round: ognuno racconta agli altri <em>non più solo quello
+      che aveva letto, ma anche quello che ha appreso al primo round</em>. L'ultima
+      persona, alla fine del secondo round, sa cose di "secondo livello": non solo i
+      pezzi originali, ma le connessioni che ognuno ha già fatto. Continua per 32 round.
+    </p>
+    <p>
+      Alla fine, l'ultima persona della fila ha una rappresentazione del contenuto del
+      testo che è incredibilmente ricca, perché ha attraversato 32 livelli di
+      rielaborazione collettiva. Non ha "il testo intero in testa" nel senso letterale;
+      ha qualcosa di più astratto e di più denso: una sintesi profondamente
+      contestualizzata, distillata in una direzione specifica. È quello che fa il vettore
+      dell'ultima posizione del prompt nell'ultimo strato del Transformer.
+    </p>
+  </div>
+
+  <h3>Perché proprio l'ultima posizione, e non un'altra</h3>
+  <p>
+    C'è una sottigliezza che fa funzionare tutto, e vale la pena di nominarla. Nel modo
+    in cui i Transformer per LLM sono addestrati esiste una restrizione che si chiama
+    <strong>causal attention</strong> (o attenzione mascherata): <strong>ogni token può
+    guardare solo i token che lo precedono, non quelli che vengono dopo</strong>.
+  </p>
+
+  <p>
+    La ragione è banale ma profonda. Durante l'addestramento, il modello impara a predire
+    ogni token a partire da quelli che vengono prima. Se il token "gatto" potesse guardare
+    il token "beve" che viene dopo, il modello starebbe trucando: durante l'addestramento
+    avrebbe accesso a informazioni che, in fase di generazione, non avrà. Quindi durante
+    l'addestramento si maschera il futuro: ogni posizione vede solo il passato.
+  </p>
+
+  <p>
+    La conseguenza è che <strong>solo l'ultima posizione del prompt può guardare
+    <em>tutto</em> il prompt</strong>. Tutti gli altri token vedono solo un sottoinsieme.
+    Il primo token vede solo sé stesso. Il secondo vede sé stesso più il primo. E così
+    via. Solo l'ultimo vede tutto.
+  </p>
+
+  <p>
+    Quindi non è arbitrario che il modello usi il vettore dell'ultima posizione per
+    predire: è l'unica posizione che ha un'informazione completa del contesto. Le altre
+    posizioni hanno informazioni parziali, e i loro vettori contestualizzati sono "buoni"
+    per altre cose — per esempio, per predire il token che viene <em>dopo di loro</em>,
+    che è esattamente quello che si fa durante l'addestramento. Per la nostra domanda
+    (predire il prossimo token dopo il prompt) l'unica posizione utile è l'ultima.
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>Una piccola pulizia terminologica</h4>
+    <p>
+      D'ora in poi chiameremo quel vettore <code>h</code>, dall'inglese <em>hidden state</em>
+      ("stato interno"). È il nome tecnico standard. Quando leggerai articoli o paper,
+      "hidden state finale" è il modo conciso per dire "il vettore dell'ultima posizione,
+      all'uscita dell'ultimo strato del Transformer".
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 3 — LA TESTA DI OUTPUT -->
+<section>
+  <div class="section-num">03 — DA h ALLA DISTRIBUZIONE</div>
+  <h2>La testa di output: una matrice già esistente, riutilizzata</h2>
+  <p class="lead">
+    Adesso abbiamo in mano <code>h</code>, un vettore di 12.000 dimensioni che incorpora
+    una distillazione di tutto il contesto. Dobbiamo trasformarlo in una distribuzione
+    di probabilità su 100.000 token. Cioè dobbiamo assegnare un numero a ognuno dei
+    100.000 token del vocabolario, in modo che i numeri siano positivi, sommino a 1, e
+    riflettano "quanto è probabile che questo token sia la continuazione giusta del
+    prompt". Come si fa?
+  </p>
+
+  <p>
+    L'operazione si chiama, nel gergo, <strong>LM head</strong> (Language Model head) o
+    <strong>unembedding</strong>. E qui c'è un dettaglio che apre uno scorcio bellissimo
+    sul funzionamento del modello.
+  </p>
+
+  <h3>La matrice di embedding, letta al contrario</h3>
+  <p>
+    All'inizio della pipeline — punto 2 del percorso — i token del prompt vengono
+    trasformati in vettori attraverso una grande tabella di lookup: una matrice di
+    embedding che ha tante righe quanti sono i token del vocabolario, e tante colonne
+    quante sono le dimensioni dello spazio di embedding. Per il token "gatto" il modello
+    cerca la riga corrispondente in questa tabella, e quella riga <em>è</em> il vettore
+    di "gatto". Chiamiamo questa matrice <code>E</code>.
+  </p>
+
+  <p>
+    La testa di output usa <strong>la stessa matrice <code>E</code></strong>, semplicemente
+    "letta al contrario". Invece di prendere un ID di token e restituire un vettore,
+    prende un vettore (<code>h</code>) e restituisce un punteggio per ogni ID di token.
+    Tecnicamente: si fa il prodotto scalare tra <code>h</code> e ognuna delle righe di
+    <code>E</code>, e si ottengono 100.000 numeri — uno per ogni token del vocabolario.
+  </p>
+
+  <p>
+    Lascia che renda concreto cosa vuol dire "prodotto scalare", perché è il punto
+    operativo. Il prodotto scalare tra due vettori è un numero che misura <strong>quanto
+    i due vettori sono allineati</strong>. Se puntano nella stessa direzione, il prodotto
+    scalare è grande e positivo. Se sono perpendicolari, è zero. Se puntano in direzioni
+    opposte, è grande e negativo. Geometricamente: è una misura di "quanto sei nella mia
+    direzione".
+  </p>
+
+  <p>
+    Quindi quello che il modello sta facendo è: per ognuno dei 100.000 token del
+    vocabolario, calcola "quanto il mio <code>h</code> è allineato con il vettore di
+    questo token". Ottiene una lista di 100.000 punteggi, che si chiamano
+    <strong>logits</strong>. I token allineati con <code>h</code> ricevono punteggi alti;
+    quelli puntati altrove ricevono punteggi bassi o negativi. È il momento in cui la
+    geometria dello spazio degli embedding viene interrogata per dare un voto a ogni
+    candidato.
+  </p>
+
+  <div class="callout callout-amber">
+    <h4>Una sottigliezza che vale la pena nominare: il weight tying</h4>
+    <p>
+      Tecnicamente molti modelli (non tutti) condividono effettivamente la stessa matrice
+      <code>E</code> tra l'input e l'output — si chiama <em>weight tying</em>. È sia
+      un'efficienza (risparmi parametri, e con vocabolari da centomila token e dimensioni
+      da decine di migliaia, sono parecchi parametri) sia una scelta semantica: stai
+      dicendo al modello "lo spazio in cui codifichi un token in input è lo stesso spazio
+      in cui produci la sua probabilità in output".
+    </p>
+    <p>
+      Anche quando i due non sono letteralmente la stessa matrice — alcuni modelli ne
+      usano una distinta per l'output, chiamata <code>W_U</code> — lo spazio in cui vivono
+      è funzionalmente lo stesso: quello degli embedding di token. Il vocabolario diventa
+      così un oggetto coerente dall'inizio alla fine della pipeline.
+    </p>
+  </div>
+
+  <h3>La metafora che rende l'operazione visibile</h3>
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora del cielo stellato</div>
+    <p>
+      Hai uno spazio con 100.000 stelle fisse — i token del vocabolario, ognuno un punto
+      in questo cielo a 12.000 dimensioni. Le stelle si sono disposte durante
+      l'addestramento secondo una geometria che riflette il loro significato: parole
+      simili sono vicine, parole opposte sono lontane, le direzioni codificano proprietà
+      semantiche.
+    </p>
+    <p>
+      Adesso il modello ha prodotto un vettore <code>h</code>, che è una <strong>direzione</strong>
+      in quel cielo. Una freccia puntata da qualche parte. La domanda "quale token è la
+      continuazione più probabile?" si traduce nella domanda <em>"quale stella sta più
+      nella direzione in cui sto puntando?"</em>.
+    </p>
+    <p>
+      Per rispondere, il modello fa una cosa molto semplice: per ogni stella, misura
+      quanto la freccia è allineata con quella stella. Le stelle che giacciono nella
+      direzione di <code>h</code> ricevono punteggi alti; quelle in direzioni
+      perpendicolari o opposte ricevono punteggi bassi. Il risultato è una lista di
+      100.000 punteggi di allineamento — i logits.
+    </p>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-label">Lo schema visivo del confronto h ↔ vocabolario</div>
+    <svg class="diagram-svg" viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="vecArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#c94a1a"/>
+        </marker>
+        <marker id="vecArrowFaint" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#6b7280"/>
+        </marker>
+      </defs>
+
+      <!-- Origine -->
+      <circle cx="120" cy="220" r="4" fill="#1e2a5e"/>
+      <text x="120" y="245" font-family="JetBrains Mono" font-size="10" fill="#1e2a5e" text-anchor="middle" font-weight="600">origine</text>
+
+      <!-- Stelle del vocabolario -->
+      <g opacity="0.6">
+        <circle cx="280" cy="80" r="4" fill="#6b7280"/>
+        <text x="290" y="78" font-family="JetBrains Mono" font-size="10" fill="#6b7280">tè</text>
+        <line x1="120" y1="220" x2="280" y2="80" stroke="#6b7280" stroke-width="1" stroke-dasharray="2,3" opacity="0.5"/>
+
+        <circle cx="240" cy="320" r="4" fill="#6b7280"/>
+        <text x="250" y="332" font-family="JetBrains Mono" font-size="10" fill="#6b7280">computer</text>
+        <line x1="120" y1="220" x2="240" y2="320" stroke="#6b7280" stroke-width="1" stroke-dasharray="2,3" opacity="0.5"/>
+
+        <circle cx="380" cy="180" r="4" fill="#6b7280"/>
+        <text x="390" y="178" font-family="JetBrains Mono" font-size="10" fill="#6b7280">caffè</text>
+        <line x1="120" y1="220" x2="380" y2="180" stroke="#6b7280" stroke-width="1" stroke-dasharray="2,3" opacity="0.5"/>
+
+        <circle cx="540" cy="290" r="4" fill="#6b7280"/>
+        <text x="550" y="294" font-family="JetBrains Mono" font-size="10" fill="#6b7280">… 99.997 altri</text>
+        <line x1="120" y1="220" x2="540" y2="290" stroke="#6b7280" stroke-width="1" stroke-dasharray="2,3" opacity="0.5"/>
+      </g>
+
+      <!-- Stella vincitrice (latte) -->
+      <circle cx="540" cy="120" r="7" fill="#c94a1a"/>
+      <text x="555" y="118" font-family="JetBrains Mono" font-size="12" fill="#c94a1a" font-weight="700">latte</text>
+      <line x1="120" y1="220" x2="540" y2="120" stroke="#c94a1a" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.4"/>
+
+      <!-- Vettore h che punta verso latte -->
+      <line x1="120" y1="220" x2="430" y2="145" stroke="#c94a1a" stroke-width="3" marker-end="url(#vecArrow)"/>
+      <text x="270" y="170" font-family="Lora" font-size="16" fill="#c94a1a" font-style="italic" font-weight="600">h</text>
+
+      <!-- Etichetta direzione -->
+      <text x="280" y="195" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" font-style="italic">direzione "puntata" dal contesto</text>
+
+      <!-- Legenda -->
+      <g transform="translate(40, 30)">
+        <text font-family="JetBrains Mono" font-size="11" fill="#374151" font-weight="600" letter-spacing="1px">SPAZIO DEGLI EMBEDDING — 12.000 DIMENSIONI</text>
+        <text y="16" font-family="Lora" font-size="11" fill="#6b7280" font-style="italic">(rappresentato qui in 2D per visualizzazione)</text>
+      </g>
+
+      <!-- Indicatore allineamento -->
+      <g transform="translate(40, 320)">
+        <circle cx="0" cy="0" r="5" fill="#c94a1a"/>
+        <text x="12" y="4" font-family="Outfit" font-size="11" fill="#374151">stella più allineata con h → logit alto → probabilità alta</text>
+      </g>
+    </svg>
+    <div class="diagram-caption">
+      Il vettore <code>h</code> (in arancione) è una direzione nello spazio degli embedding.
+      Il prodotto scalare con ogni token del vocabolario misura quanto quel token è
+      allineato con <code>h</code>. Il token più allineato vince.
+    </div>
+  </div>
+</section>
+
+<!-- SEZIONE 4 — IL SOFTMAX -->
+<section>
+  <div class="section-num">04 — DAI PUNTEGGI ALLE PROBABILITÀ</div>
+  <h2>Il softmax: come si chiude il calcolo</h2>
+  <p>
+    A questo punto il problema della predizione è quasi risolto: i candidati con i
+    punteggi più alti sono i token più probabili. Manca solo un passaggio formale per
+    convertire questi punteggi in una distribuzione di probabilità che si comporti come
+    tale. Ed è quello che fa il softmax.
+  </p>
+
+  <p>
+    I logits sono numeri arbitrari. Possono essere positivi o negativi, possono essere
+    grandi o piccoli, e — soprattutto — non sono probabilità. Per essere probabilità
+    devono essere tutti positivi e devono sommare a 1. Il <strong>softmax</strong> è la
+    funzione che fa esattamente questa conversione.
+  </p>
+
+  <h3>Come funziona, in concreto</h3>
+  <p>
+    Il softmax funziona così: prende ogni logit, lo eleva a esponenziale (cioè:
+    <code>e</code> alla logit), e poi divide ogni risultato per la somma di tutti gli
+    esponenziali. Detto così suona astratto, ma le sue conseguenze sono molto concrete e
+    vale la pena vederle.
+  </p>
+
+  <p>
+    La <strong>prima conseguenza</strong> è che tutti i numeri diventano positivi
+    (l'esponenziale di qualsiasi numero, anche negativo, è positivo) e sommano a 1 (per
+    come è costruita la divisione). Quindi formalmente abbiamo una distribuzione di
+    probabilità. Bene.
+  </p>
+
+  <p>
+    La <strong>seconda conseguenza</strong> è più interessante e meno ovvia. L'esponenziale
+    <strong>amplifica le differenze</strong>. Un logit di 10 e un logit di 8 — che sono
+    numericamente vicini — diventano, dopo l'esponenziale, <code>e^10 ≈ 22.000</code> e
+    <code>e^8 ≈ 3.000</code>: una differenza di circa 7 volte. Un logit di 10 e un logit
+    di 5 diventano <code>e^10 ≈ 22.000</code> e <code>e^5 ≈ 148</code>: una differenza
+    di circa 150 volte. Il softmax non è una rinormalizzazione neutra: è una
+    rinormalizzazione che <strong>enfatizza i vincitori</strong>. Il token con il logit
+    più alto non solo si prende la probabilità maggiore: se la prende in modo
+    sproporzionato, schiacciando i candidati appena sotto.
+  </p>
+
+  <h3>Un esempio concreto</h3>
+  <p>
+    Prendiamo il prompt "Il gatto beve il". Ipotizziamo che, dopo il prodotto scalare
+    con la matrice di embedding, i logits siano questi (valori plausibili semplificati):
+  </p>
+
+  <div class="logits-demo">
+    <div class="logits-demo-label">Esempio: dai logits alle probabilità</div>
+    <table class="logits-table">
+      <thead>
+        <tr>
+          <th>Token candidato</th>
+          <th style="text-align:right;">Logit</th>
+          <th style="text-align:right;">e<sup>logit</sup></th>
+          <th style="text-align:right;">Probabilità</th>
+          <th class="bar-cell">Visualizzazione</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="token">latte</td>
+          <td class="logit">12.0</td>
+          <td class="logit">~163.000</td>
+          <td class="prob">90.0%</td>
+          <td class="bar-cell"><div class="logits-bar" style="width: 100%;"></div></td>
+        </tr>
+        <tr>
+          <td class="token">tè</td>
+          <td class="logit">7.0</td>
+          <td class="logit">~1.100</td>
+          <td class="prob">5.5%</td>
+          <td class="bar-cell"><div class="logits-bar" style="width: 6%;"></div></td>
+        </tr>
+        <tr>
+          <td class="token">caffè</td>
+          <td class="logit">6.0</td>
+          <td class="logit">~400</td>
+          <td class="prob">3.0%</td>
+          <td class="bar-cell"><div class="logits-bar" style="width: 3.3%;"></div></td>
+        </tr>
+        <tr>
+          <td class="token">vino</td>
+          <td class="logit">4.0</td>
+          <td class="logit">~55</td>
+          <td class="prob">0.3%</td>
+          <td class="bar-cell"><div class="logits-bar" style="width: 0.3%;"></div></td>
+        </tr>
+        <tr>
+          <td class="token">computer</td>
+          <td class="logit">-3.0</td>
+          <td class="logit">~0.05</td>
+          <td class="prob">~0%</td>
+          <td class="bar-cell"><div class="logits-bar" style="width: 0%;"></div></td>
+        </tr>
+        <tr>
+          <td class="token" style="color: var(--ink-light);">… 99.995 altri</td>
+          <td class="logit" style="color: var(--ink-light);">vari</td>
+          <td class="logit" style="color: var(--ink-light);">briciole</td>
+          <td class="prob" style="color: var(--ink-light);">~1.2%</td>
+          <td class="bar-cell"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Vedi cosa è successo. La differenza tra "latte" (logit 12) e "tè" (logit 7) era di
+    5 unità. Dopo l'esponenziale e la normalizzazione, "latte" si prende il 90% della
+    probabilità e "tè" il 5%. Una distribuzione <strong>molto concentrata</strong>. È
+    una proprietà tipica: nelle distribuzioni reali di un LLM, i pochi candidati top si
+    spartiscono quasi tutta la probabilità, e i 99.000+ token meno probabili si dividono
+    briciole infinitesimali.
+  </p>
+
+  <h3>La temperatura, riletta con questi occhiali</h3>
+  <p>
+    Adesso la temperatura, di cui hai già parlato nel punto 3 del percorso, acquista un
+    significato preciso. La temperatura è un parametro che si introduce nel softmax
+    <strong>dividendo i logits per essa prima dell'esponenziale</strong>.
+  </p>
+
+  <p>
+    Una temperatura <strong>bassa</strong> (per esempio 0.5) è come moltiplicare i logits
+    per 2: aumenta le distanze tra loro, quindi <em>amplifica ulteriormente le
+    differenze</em> dopo l'esponenziale. Il vincitore vince ancora di più, e la
+    distribuzione diventa molto piccata. Estremo: a temperatura 0, tutta la probabilità
+    va al vincitore (è il <em>greedy decoding</em>).
+  </p>
+
+  <p>
+    Una temperatura <strong>alta</strong> (per esempio 2) è come dividere i logits per 2:
+    riduce le distanze tra loro, quindi <em>comprime le differenze</em>. La distribuzione
+    si appiattisce e i candidati meno probabili diventano competitivi. Estremo: a
+    temperatura infinita, tutti i token sarebbero ugualmente probabili (puro caso).
+  </p>
+
+  <p>
+    Adesso vedi, spero, perché la temperatura funziona così: stai scalando i logits prima
+    di passarli all'esponenziale, e l'esponenziale è esattamente l'operazione che amplifica
+    o comprime le differenze in modo non lineare. Cambiando la scala dei logits di un
+    fattore costante prima del softmax, cambi quanto la distribuzione finale è "decisa"
+    o "incerta".
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Un piccolo bonus concettuale</h4>
+    <p>
+      Capendo che il softmax amplifica esponenzialmente le differenze tra logits, capisci
+      anche perché gli LLM, anche con temperatura standard, tendono a essere
+      <em>sorprendentemente decisi</em>. Anche differenze piccolissime tra logits
+      diventano differenze enormi tra probabilità. È una delle ragioni strutturali per
+      cui gli LLM raramente "esitano in modo equilibrato" tra due opzioni: l'architettura
+      della loro testa di output spinge sempre verso una scelta marcata.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 5 — LA SALDATURA -->
+<section>
+  <div class="section-num">05 — IL QUADRO INTERO</div>
+  <h2>La saldatura concettuale: una sola operazione, due fasi geometriche</h2>
+  <p>
+    Riprendiamo il filo dall'inizio del Tema 1 e proviamo a vedere il quadro intero,
+    adesso che abbiamo tutti i pezzi.
+  </p>
+
+  <div class="stages">
+    <div class="stage">
+      <div class="stage-num"></div>
+      <div>
+        <h4>Tokenizzazione e embedding</h4>
+        <p>
+          Il prompt arriva, viene tokenizzato, ogni token diventa un vettore di embedding
+          attraverso la matrice <code>E</code>. Hai una sequenza di vettori che parte dalla
+          tabella di lookup. <em>Nessuna contestualizzazione, ancora.</em>
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num"></div>
+      <div>
+        <h4>Passaggio attraverso il Transformer</h4>
+        <p>
+          I vettori entrano nel Transformer. Decine di strati di attenzione li trasformano:
+          a ogni strato, ogni token guarda gli altri (con il vincolo della causalità: solo
+          i precedenti) e mescola nei propri parametri le informazioni rilevanti. Alla
+          fine dell'ultimo strato, hai una sequenza di vettori contestualizzati.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num"></div>
+      <div>
+        <h4>Selezione dell'hidden state finale</h4>
+        <p>
+          Prendi l'ultimo della sequenza: è <code>h</code>, il vettore associato all'ultima
+          posizione del prompt. È l'unico che ha potuto guardare l'intero prompt (causalità)
+          e ha attraversato decine di strati di integrazione. Una direzione nello spazio
+          degli embedding che dice "ecco dove cade la continuazione".
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num"></div>
+      <div>
+        <h4>LM head: prodotto scalare con il vocabolario</h4>
+        <p>
+          Confronta <code>h</code> con i vettori di tutti i token del vocabolario,
+          attraverso il prodotto scalare con la matrice <code>E</code> (la stessa matrice
+          dell'embedding di input, in caso di weight tying). Ottiene 100.000 punteggi di
+          allineamento — i logits.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num"></div>
+      <div>
+        <h4>Softmax: dai logits alle probabilità</h4>
+        <p>
+          Passa i logits attraverso il softmax (eventualmente scalato per la temperatura).
+          Diventano una distribuzione di probabilità: positiva, sommante a 1, con il
+          vincitore enfatizzato in modo non lineare. La concentrazione tipica fa sì che
+          pochi candidati top si prendano quasi tutta la probabilità.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num"></div>
+      <div>
+        <h4>Sampling e ciclo autoregressivo</h4>
+        <p>
+          Da quella distribuzione, secondo la strategia di sampling scelta (greedy,
+          sampling con temperatura, top-k, top-p), si seleziona un token specifico. Quel
+          token viene aggiunto al prompt, e tutto ricomincia: il nuovo prompt — quello
+          originale più il token appena generato — è l'input per la prossima iterazione.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">La saldatura geometrica</div>
+    <p>
+      Predire il prossimo token significa: <em>trovare il punto nello spazio degli
+      embedding che meglio "completa" il prompt</em> — questo lo fa l'attenzione,
+      costruendo <code>h</code> — <em>e poi cercare in quel punto i token reali più
+      vicini</em> — questo lo fa la testa di output, attraverso il prodotto scalare con
+      la matrice di embedding.
+    </p>
+    <p>
+      In altre parole: il Transformer non fa due cose diverse, "elaborare il prompt" e
+      poi "scegliere il prossimo token". Fa una cosa sola, in due fasi geometriche. La
+      prima fase costruisce una direzione nello spazio semantico. La seconda fase cerca,
+      nello stesso spazio, i token che giacciono in quella direzione. <strong>Lo spazio
+      è uno solo, ed è lo spazio degli embedding.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 6 — UNA SOTTIGLIEZZA SULL'ADDESTRAMENTO -->
+<section>
+  <div class="section-num">06 — UNA NOTA AGGIUNTIVA</div>
+  <h2>I logits per tutte le posizioni: una sottigliezza che apre una porta</h2>
+  <p>
+    Prima di chiudere, c'è un dettaglio che merita di essere nominato perché chiarisce
+    qualcosa di profondo sull'architettura — e ti darà uno strumento se in futuro vorrai
+    capire come si addestra effettivamente un LLM.
+  </p>
+
+  <p>
+    Quando il modello calcola i logits, calcola tecnicamente i logits per
+    <strong>tutte</strong> le posizioni del prompt, non solo per l'ultima. Cioè: alla
+    fine del Transformer, da ognuno dei 4 vettori (nel nostro esempio del prompt "Il
+    gatto beve il") si potrebbero produrre 100.000 logits. Per la prima posizione, per
+    la seconda, per la terza e per la quarta.
+  </p>
+
+  <p>
+    In fase di <strong>inferenza</strong> — quando stai usando il modello per generare
+    testo — al modello interessa solo l'ultima posizione, e in pratica gli altri logits
+    vengono ignorati o nemmeno calcolati (con varie ottimizzazioni di calcolo). Ma in
+    fase di <strong>addestramento</strong>, tutti questi logits vengono usati. Il modello
+    sta imparando, per ogni posizione del prompt di addestramento, a predire il token
+    che viene immediatamente dopo.
+  </p>
+
+  <p>
+    Pensa cosa significa. Per il prompt "Il gatto beve il", durante l'addestramento il
+    modello sta facendo simultaneamente quattro predizioni: dalla posizione 1 cerca di
+    predire "gatto" (il token che viene dopo "Il"); dalla posizione 2 cerca di predire
+    "beve"; dalla posizione 3 cerca di predire "il"; dalla posizione 4 cerca di predire
+    "latte". Ogni posizione ha il suo logit-set, ognuno viene confrontato con il token
+    corretto, ogni confronto produce un errore, e tutti gli errori contribuiscono
+    all'aggiornamento dei parametri del modello.
+  </p>
+
+  <p>
+    È un'osservazione importante perché ti aiuta a capire perché il vincolo della
+    causalità (ogni token vede solo i precedenti) è così cruciale: serve per fare in
+    modo che, quando dalla posizione <code>k</code> si predice il token in posizione
+    <code>k+1</code>, il modello non stia "spiando" il token che dovrebbe predire. Ogni
+    posizione, durante l'addestramento, è una piccola predizione indipendente. E tutte
+    queste piccole predizioni — ripetute miliardi di volte su trilioni di token — sono
+    ciò che insegna al modello a fare quello che fa.
+  </p>
+
+  <p>
+    Per la nostra domanda — come si predice il token successivo a un prompt — basta
+    sapere che a inferenza si guarda solo l'ultima posizione. Ma se in futuro vorrai
+    capire come si addestra effettivamente un LLM, questa è la chiave che apre la porta.
+  </p>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Sei cose da portarsi via dal Tema 1</h3>
+    <ol class="takeaway-list">
+      <li>
+        Il Transformer non costruisce mai un singolo vettore che "riassume" il prompt:
+        mantiene sempre <strong>una sequenza di vettori, uno per token</strong>, dall'input
+        all'output. Quello che cambia attraverso gli strati è il contenuto di ogni vettore,
+        non il loro numero.
+      </li>
+      <li>
+        Quello che chiamiamo "vettore di contesto" — il punto di partenza della predizione —
+        è semplicemente <code>h</code>, il <strong>vettore dell'ultima posizione del
+        prompt all'uscita dell'ultimo strato</strong>. È speciale per due ragioni: è
+        l'unico che ha potuto guardare tutto il prompt (per via dell'attenzione causale),
+        e ha attraversato decine di strati di integrazione progressiva.
+      </li>
+      <li>
+        La testa di output (<em>LM head</em>) trasforma <code>h</code> in 100.000 punteggi
+        — i <strong>logits</strong> — facendo il prodotto scalare con la matrice di
+        embedding del vocabolario. Geometricamente: misura quanto <code>h</code> è
+        allineato con ogni stella del cielo dei token.
+      </li>
+      <li>
+        Il <strong>softmax</strong> trasforma i logits in probabilità (positive, sommanti
+        a 1) ma <em>non in modo neutro</em>: l'esponenziale amplifica le differenze, e i
+        vincitori si prendono quote sproporzionate. Anche differenze piccole tra logits
+        producono distribuzioni molto piccate.
+      </li>
+      <li>
+        La <strong>temperatura</strong> agisce esattamente qui: scala i logits prima del
+        softmax. Bassa temperatura amplifica ulteriormente le differenze (più decisi);
+        alta temperatura le comprime (più creativi/incerti). È una manopola sull'amplificatore
+        esponenziale.
+      </li>
+      <li>
+        La saldatura concettuale: <em>predire il prossimo token</em> è un'unica operazione
+        in due fasi geometriche nello stesso spazio. <strong>Prima:</strong> l'attenzione
+        costruisce una direzione (<code>h</code>) nello spazio degli embedding. <strong>Poi:</strong>
+        la testa di output cerca, nello stesso spazio, i token reali che giacciono in
+        quella direzione. Geometria e probabilità sono la stessa operazione vista da due
+        angolazioni.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- BRIDGE -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="bridge">
+    <div class="bridge-label">Prossimo tema</div>
+    <h3>Il Transformer come architettura completa</h3>
+    <p>
+      Adesso abbiamo chiuso l'anello dall'attenzione alla predizione. Ma abbiamo anche
+      lasciato in ombra una serie di componenti del Transformer che non sono operazioni
+      di attenzione né operazioni di output: i <em>feed-forward layers</em>, le
+      <em>layer normalization</em>, le <em>residual connections</em>. Sono il "tessuto
+      connettivo" tra le operazioni di attenzione, e ognuno ha un ruolo concettualmente
+      preciso che vale la pena vedere.
+    </p>
+    <p>
+      Nel <strong>Tema 2</strong> faremo zoom-out e ricomporremo l'intera architettura
+      del Transformer in un quadro unico, visualizzando come i pezzi che abbiamo studiato
+      (l'attenzione del 4A, la testa di output che abbiamo appena costruito) si tengono
+      insieme con quelli che ancora non abbiamo trattato. È il pezzo che chiude
+      definitivamente il "cosa c'è dentro un LLM" — dopodiché potremo passare al Tema 3,
+      dove la domanda non sarà più "come funziona" ma "cosa significa, davvero, che
+      questa cosa <em>ragioni</em>".
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Tema 1 di 4 — Percorso di approfondimento su LLM e prompting (seconda chat)</p>
+  <p>Dall'attenzione alla predizione del prossimo token</p>
+</footer>
+
+</body>
+</html>

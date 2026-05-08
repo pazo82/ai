@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Punto 4A — Attenzione e contesto dinamico: il meccanismo</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --red: #9a2020;
+    --red-faint: rgba(154,32,32,0.07);
+    --red-border: rgba(154,32,32,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: var(--indigo);
+    padding: 72px 48px 88px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -80px; right: -120px;
+    width: 540px; height: 540px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -100px; left: -50px;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(13,122,110,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-network {
+    position: absolute;
+    top: 35%; right: 6%;
+    width: 280px; height: 200px;
+    pointer-events: none;
+    opacity: 0.25;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 54px;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 19px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 760px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 40px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 36px 0 14px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.3;
+    color: var(--indigo-mid);
+    margin: 24px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 16px;
+    line-height: 1.75;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--indigo-border);
+  }
+
+  .insight {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 32px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(240,112,64,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 18px;
+    line-height: 1.6;
+    margin: 0;
+    position: relative;
+    font-family: var(--serif);
+    font-style: italic;
+  }
+
+  .callout {
+    padding: 22px 26px;
+    border-radius: 6px;
+    margin: 24px 0;
+    border-left: 4px solid;
+  }
+
+  .callout-orange { background: var(--orange-faint); border-color: var(--orange); }
+  .callout-teal { background: var(--teal-faint); border-color: var(--teal); }
+  .callout-amber { background: var(--amber-faint); border-color: var(--amber); }
+  .callout-purple { background: var(--purple-faint); border-color: var(--purple); }
+  .callout-indigo { background: var(--indigo-faint); border-color: var(--indigo-light); }
+
+  .callout h4 { margin-top: 0; margin-bottom: 8px; font-size: 11px; }
+  .callout-orange h4 { color: var(--orange); }
+  .callout-teal h4 { color: var(--teal); }
+  .callout-amber h4 { color: var(--amber); }
+  .callout-purple h4 { color: var(--purple); }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout p { font-size: 15.5px; margin-bottom: 10px; line-height: 1.7; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ── METAPHOR BOX ── */
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--purple);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .metaphor p { margin-bottom: 12px; font-size: 15.5px; line-height: 1.7; }
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  /* ── EXAMPLE SENTENCE ── */
+  .example-sentence {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-style: italic;
+    color: var(--indigo);
+    text-align: center;
+    padding: 20px 24px;
+    background: var(--bg2);
+    border-radius: 6px;
+    margin: 22px 0;
+    border: 1px solid var(--border);
+    line-height: 1.5;
+  }
+
+  .example-sentence .highlight {
+    background: var(--orange-faint);
+    color: var(--orange);
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+
+  .example-sentence .highlight-teal {
+    background: var(--teal-faint);
+    color: var(--teal);
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+
+  /* ── QKV DIAGRAM ── */
+  .qkv-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px 32px;
+    margin: 32px 0;
+  }
+
+  .qkv-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  .qkv-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .qkv-card {
+    background: var(--bg2);
+    border-radius: 6px;
+    padding: 22px 20px;
+    border-top: 3px solid;
+    text-align: center;
+  }
+
+  .qkv-q { border-top-color: var(--orange); }
+  .qkv-k { border-top-color: var(--teal); }
+  .qkv-v { border-top-color: var(--purple); }
+
+  .qkv-letter {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .qkv-q .qkv-letter { color: var(--orange); }
+  .qkv-k .qkv-letter { color: var(--teal); }
+  .qkv-v .qkv-letter { color: var(--purple); }
+
+  .qkv-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+
+  .qkv-desc {
+    font-size: 14px;
+    color: var(--ink-mid);
+    font-style: italic;
+    line-height: 1.5;
+    font-family: var(--serif);
+  }
+
+  /* ── STEPS ── */
+  .steps-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    margin: 28px 0;
+  }
+
+  .step-row {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px dashed var(--border2);
+  }
+
+  .step-row:last-child { border-bottom: none; }
+
+  .step-marker {
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--orange);
+    font-weight: 500;
+    line-height: 1;
+    font-style: italic;
+  }
+
+  .step-content h5 {
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .step-content p {
+    font-size: 14.5px;
+    line-height: 1.7;
+    margin-bottom: 8px;
+    color: var(--ink-mid);
+  }
+
+  .step-content p:last-child { margin-bottom: 0; }
+
+  /* ── HEADS GRID ── */
+  .heads-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 28px 0;
+  }
+
+  .head-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 22px;
+    border-left: 3px solid;
+  }
+
+  .head-card:nth-child(1) { border-left-color: var(--orange); }
+  .head-card:nth-child(2) { border-left-color: var(--teal); }
+  .head-card:nth-child(3) { border-left-color: var(--purple); }
+  .head-card:nth-child(4) { border-left-color: var(--amber); }
+  .head-card:nth-child(5) { border-left-color: var(--indigo-light); }
+
+  .head-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .head-card h5 {
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .head-card p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  /* ── POSITION DIAGRAM ── */
+  .pos-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    margin: 28px 0;
+  }
+
+  .pos-equation {
+    font-family: var(--mono);
+    font-size: 14px;
+    background: var(--indigo-faint2);
+    border: 1px solid var(--indigo-border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    color: var(--ink);
+    line-height: 2;
+    text-align: center;
+  }
+
+  .pos-equation .vec { color: var(--indigo); font-weight: 600; }
+  .pos-equation .pos { color: var(--orange); font-weight: 600; }
+  .pos-equation .op { color: var(--ink-mid); font-weight: 700; margin: 0 8px; }
+  .pos-equation .res { color: var(--teal); font-weight: 600; }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  /* ── BRIDGE ── */
+  .bridge {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 48px;
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .bridge h3 {
+    margin: 0 0 16px;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--indigo);
+    font-weight: 500;
+  }
+
+  .bridge p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 48px 24px 60px; }
+    .hero h1 { font-size: 36px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .qkv-grid { grid-template-columns: 1fr; }
+    .heads-grid { grid-template-columns: 1fr; }
+    .takeaways { padding: 40px 28px; }
+    .bridge { padding: 32px 24px; }
+    .step-row { grid-template-columns: 40px 1fr; gap: 14px; }
+    .example-sentence { font-size: 17px; padding: 16px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <svg class="hero-bg-network" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+    <line x1="40" y1="40" x2="120" y2="100" stroke="white" stroke-width="1"/>
+    <line x1="40" y1="40" x2="200" y2="60" stroke="white" stroke-width="1"/>
+    <line x1="40" y1="40" x2="240" y2="140" stroke="white" stroke-width="1"/>
+    <line x1="120" y1="100" x2="200" y2="60" stroke="white" stroke-width="1"/>
+    <line x1="120" y1="100" x2="240" y2="140" stroke="white" stroke-width="1"/>
+    <line x1="120" y1="100" x2="80" y2="170" stroke="white" stroke-width="1"/>
+    <line x1="200" y1="60" x2="240" y2="140" stroke="white" stroke-width="1"/>
+    <line x1="80" y1="170" x2="240" y2="140" stroke="white" stroke-width="1"/>
+    <circle cx="40" cy="40" r="5" fill="white"/>
+    <circle cx="120" cy="100" r="5" fill="white"/>
+    <circle cx="200" cy="60" r="5" fill="white"/>
+    <circle cx="240" cy="140" r="5" fill="white"/>
+    <circle cx="80" cy="170" r="5" fill="white"/>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-label">Punto 4A — Fondamenti del prompting</div>
+    <h1>Attenzione e contesto dinamico: <em>il meccanismo</em></h1>
+    <p class="hero-sub">
+      Come ogni token "guarda" gli altri token del contesto e ne assorbe il significato.
+      Il cuore dell'architettura Transformer, raccontato attraverso la metafora della
+      biblioteca e la specializzazione spontanea delle teste di attenzione.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">Q-K-V, multi-head, posizione</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Punto del percorso</div>
+        <div class="meta-value">4A di 6+1</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Prerequisito per</div>
+        <div class="meta-value">Punto 4B (context window)</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 — IL PROBLEMA -->
+<section>
+  <div class="section-num">01 — IL PROBLEMA DA RISOLVERE</div>
+  <h2>Il significato di una parola dipende dalle parole intorno</h2>
+  <p class="lead">
+    Negli ultimi tre punti abbiamo costruito una catena solida: il testo diventa token
+    (punto 1), i token diventano vettori in uno spazio semantico (punto 2), il modello
+    calcola probabilità sul prossimo token sfruttando la geometria di quei vettori (punto
+    3). Ma c'è una cosa che abbiamo dato per scontata e che è in realtà il problema
+    centrale del linguaggio.
+  </p>
+
+  <p>
+    L'embedding di un token che esce dalla tabella di lookup è <strong>uno solo</strong>:
+    è lo stesso vettore per quel token, indipendentemente da dove appare nella frase. Ma il
+    significato di una parola dipende dalle parole intorno. Considera questi due esempi:
+  </p>
+
+  <div class="example-sentence">
+    "Ho aperto un conto in <span class="highlight">banca</span>"
+  </div>
+  <div class="example-sentence">
+    "Mi sono seduto sulla <span class="highlight-teal">banca</span> del fiume"
+  </div>
+
+  <p>
+    "Banca" è lo stesso token in entrambi i casi, e quindi ha lo stesso embedding di
+    partenza. Ma chiaramente il significato è diverso. Nel primo caso parla di un istituto
+    finanziario, nel secondo di un argine, di un terrapieno. L'embedding "statico" non può
+    catturare la differenza, perché non dipende dal contesto.
+  </p>
+
+  <p>
+    Serve qualcosa che, <em>dopo</em> aver convertito i token in embedding, li
+    <strong>modifichi in base al contesto</strong> in cui si trovano. Quel qualcosa è
+    l'attenzione.
+  </p>
+
+  <h3>Due esempi più sottili</h3>
+  <p>
+    Il problema della contestualizzazione non riguarda solo i casi di omonimia come quello
+    di "banca". Va molto più in profondità. Considera questa frase:
+  </p>
+
+  <div class="example-sentence">
+    "Marco ha visto Luca al parco. <span class="highlight">Lui</span> era stanco."
+  </div>
+
+  <p>
+    Quando il modello legge "Lui", a quale persona si riferisce — Marco o Luca? Per un
+    umano è ambiguo, ma il modello deve comunque <em>fare qualcosa</em> con quel "Lui".
+    Deve assegnargli un significato contestuale, e quel significato deve essere costruito
+    guardando il resto della frase, in particolare i token "Marco" e "Luca". L'embedding
+    di partenza di "Lui" è uguale in qualsiasi contesto, ma il vettore contestualizzato
+    deve incorporare l'informazione su chi è il referente.
+  </p>
+
+  <p>
+    Considera adesso questa, meno ambigua ma sintatticamente più complessa:
+  </p>
+
+  <div class="example-sentence">
+    "Il <span class="highlight-teal">gatto</span> che il cane ha inseguito è <span class="highlight">scappato</span> sul tetto."
+  </div>
+
+  <p>
+    Quando il modello arriva a "è scappato", deve capire chi è scappato: è il gatto, non
+    il cane. Ma il soggetto "Il gatto" è all'inizio della frase, e in mezzo c'è una
+    proposizione relativa che parla di un cane. Il modello deve essere capace di
+    <strong>scavalcare</strong> il cane e andare a riprendersi il gatto come riferimento
+    del verbo "scappato".
+  </p>
+
+  <p>
+    Questo è il problema dell'attenzione: come fa ogni token, mentre viene elaborato, a
+    "guardare indietro" agli altri token del contesto e a prendere da loro l'informazione
+    rilevante? E come fa a sapere quali sono rilevanti?
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Idea chiave</div>
+    <p>
+      L'attenzione è il meccanismo che permette ai token di "guardarsi a vicenda" e
+      modificare i propri vettori in base ai vicini. È il pezzo che trasforma gli embedding
+      generici (uguali per tutti i contesti) in embedding contestualizzati (specifici per
+      la frase in cui appaiono).
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 2 — METAFORA -->
+<section>
+  <div class="section-num">02 — L'INTUIZIONE</div>
+  <h2>L'idea di base, attraverso una metafora</h2>
+  <p>
+    Prima di vedere il meccanismo formale, vale la pena costruire un'intuizione. Immagina
+    di essere a una riunione di lavoro. Stai ascoltando il tuo collega Andrea che parla di
+    un progetto, e a un certo punto dice:
+  </p>
+
+  <div class="example-sentence">
+    "...e quindi il cliente è soddisfatto del risultato."
+  </div>
+
+  <p>
+    Per capire bene quella frase, la tua mente fa automaticamente una cosa: <strong>rivolge
+    l'attenzione</strong> ai pezzi di contesto rilevanti.
+  </p>
+
+  <p>
+    Quale cliente? Torni con la mente a quando Andrea aveva nominato il cliente all'inizio
+    del discorso. Quale risultato? Torni a quando aveva descritto cosa avevano consegnato.
+    Soddisfatto in che senso? Torni al tono generale che stava usando, alle aspettative
+    iniziali del cliente di cui aveva parlato.
+  </p>
+
+  <p>
+    Non riconsideri <em>tutto</em> quello che ha detto Andrea con la stessa intensità. Pesi
+    i pezzi: alcuni meritano molta attenzione (sono direttamente rilevanti per quella
+    frase), altri pochissima (erano discorsi tangenziali). Ed è proprio questa
+    <strong>pesatura selettiva</strong> che rende possibile capire una frase complessa: se
+    dovessi ricordare tutto in modo uniforme, saresti sopraffatto.
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>Il principio fondamentale</h4>
+    <p>
+      Il meccanismo di attenzione fa esattamente questo, ma sui token. Per ogni token del
+      contesto, calcola quanto sono rilevanti tutti gli altri token, e poi costruisce una
+      rappresentazione "arricchita" che incorpora le informazioni dai token più rilevanti.
+      Pesa selettivamente, e da quella pesatura selettiva emerge la contestualizzazione.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 3 — Q-K-V -->
+<section>
+  <div class="section-num">03 — IL MECCANISMO Q-K-V</div>
+  <h2>Tre versioni di sé stesso, tre ruoli diversi</h2>
+  <p>
+    Adesso entriamo nel cuore tecnico del meccanismo. Per ogni token nella sequenza,
+    l'attenzione fa tre cose. Le presento una alla volta.
+  </p>
+
+  <h3>Primo: ogni token genera tre versioni di sé stesso</h3>
+  <p>
+    Sembra strano, ma ha un senso preciso. Da ogni vettore embedding, il modello ricava
+    (tramite tre trasformazioni matematiche apprese durante l'addestramento) tre nuovi
+    vettori che si chiamano:
+  </p>
+
+  <div class="qkv-diagram">
+    <div class="qkv-label">I tre vettori derivati per ogni token</div>
+    <div class="qkv-grid">
+      <div class="qkv-card qkv-q">
+        <div class="qkv-letter">Q</div>
+        <div class="qkv-name">Query</div>
+        <div class="qkv-desc">"che cosa sto cercando?"</div>
+      </div>
+      <div class="qkv-card qkv-k">
+        <div class="qkv-letter">K</div>
+        <div class="qkv-name">Key</div>
+        <div class="qkv-desc">"che cosa offro a chi mi sta cercando?"</div>
+      </div>
+      <div class="qkv-card qkv-v">
+        <div class="qkv-letter">V</div>
+        <div class="qkv-name">Value</div>
+        <div class="qkv-desc">"che informazione fornisco se vengo selezionato?"</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora della biblioteca</div>
+    <p>
+      Quando entri in biblioteca con una domanda in testa (la tua <em>query</em>), guardi
+      le etichette sui dorsi dei libri (le <em>key</em>) per capire quali libri rispondono
+      alla tua domanda, e poi apri il libro selezionato e leggi il contenuto (il
+      <em>value</em>).
+    </p>
+    <p>
+      Ogni token, in pratica, "entra in biblioteca" portando con sé una sua query, e
+      contemporaneamente fa parte della biblioteca offrendo agli altri token la sua key e
+      il suo value. Tutti i token sono al tempo stesso lettori (con una query) e libri sugli
+      scaffali (con key e value). Ognuno cerca informazioni e ognuno le offre.
+    </p>
+  </div>
+
+  <p>
+    La distinzione tra Key e Value spesso confonde la prima volta. Sono due cose diverse
+    anche se in apparenza simili. La <strong>key</strong> è "come mi presento agli altri",
+    è quello su cui ricevo richieste di attenzione. Il <strong>value</strong> è "cosa
+    effettivamente porto se vengo scelto", è il contenuto effettivo che condivido. Nella
+    metafora della biblioteca: la key è il dorso del libro con titolo e parole chiave, il
+    value è il contenuto effettivo delle pagine. Possono essere correlati, ma non sono la
+    stessa cosa.
+  </p>
+
+  <h3>Secondo: confronto query-key</h3>
+  <p>
+    Il token che sta "cercando" (con la sua query) confronta la sua query con le key di
+    tutti gli altri token (compreso sé stesso). Il confronto avviene tramite il
+    <strong>prodotto scalare</strong> — la stessa operazione che abbiamo visto nel punto 3
+    per misurare l'allineamento tra vettori. Più due vettori sono "puntati nella stessa
+    direzione", più alto sarà il loro prodotto scalare.
+  </p>
+
+  <p>
+    Il risultato è un <strong>punteggio di rilevanza</strong> per ogni coppia
+    (token-che-cerca, token-candidato). Punteggio alto significa "questo token è molto
+    rilevante per me in questo momento". Punteggio basso significa "questo token non mi
+    interessa molto adesso".
+  </p>
+
+  <p>
+    Questi punteggi vengono poi normalizzati con una funzione <strong>softmax</strong> (la
+    stessa del punto 3) in modo che sommino a 1, diventando <strong>pesi di attenzione</strong>.
+    Se un token ha peso 0.7 verso un altro token e 0.05 verso un terzo, sta dicendo "il
+    primo è 14 volte più rilevante per me del secondo".
+  </p>
+
+  <h3>Terzo: aggregazione dei value</h3>
+  <p>
+    Una volta che il token sa quanto è rilevante ogni altro token, prende i loro value e li
+    <strong>mescola</strong> secondo i pesi appena calcolati. Il risultato è un nuovo
+    vettore — il vettore <em>contestualizzato</em> di quel token — che è una combinazione
+    pesata dei value di tutti i token, dove i pesi riflettono quanto erano rilevanti.
+  </p>
+
+  <p>
+    In pratica: il nuovo vettore di "banca" è prevalentemente il value di "banca" stesso,
+    ma con un'iniezione del value di "conto" (se erano vicini nella frase) o del value di
+    "fiume" (se erano vicini quegli altri). E quell'iniezione <strong>trasforma</strong> il
+    significato del vettore di "banca", spostandolo verso la regione dello spazio semantico
+    che corrisponde a "banca finanziaria" o a "banca del fiume" a seconda dei casi.
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Il momento in cui si chiude il cerchio col punto 2</h4>
+    <p>
+      Gli embedding partono da una rappresentazione semantica generica (uguale per tutti i
+      contesti), e l'attenzione li trasforma in una rappresentazione contestualizzata.
+      Quello che nel punto 2 chiamavamo "embedding contestuale" è esattamente l'output
+      dell'attenzione. La rappresentazione che cattura "banca finanziaria" o "banca del
+      fiume" non sta nell'embedding di partenza — sta nel vettore prodotto dall'attenzione,
+      dopo aver mescolato i value dei token vicini.
+    </p>
+  </div>
+
+  <h3>Riepilogo del meccanismo Q-K-V</h3>
+  <p>
+    Mettiamo tutto insieme in tre passi sequenziali, come riferimento da consultare.
+  </p>
+
+  <div class="steps-block">
+    <div class="step-row">
+      <div class="step-marker">1</div>
+      <div class="step-content">
+        <h5>Generazione di Q, K, V</h5>
+        <p>Da ogni vettore embedding di input, il modello deriva tre vettori — query, key, value — tramite tre trasformazioni apprese (tre matrici di pesi calibrate durante l'addestramento). Ogni token produce i suoi tre vettori.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-marker">2</div>
+      <div class="step-content">
+        <h5>Calcolo dei pesi di attenzione</h5>
+        <p>Per ogni token, la sua query viene confrontata (tramite prodotto scalare) con le key di tutti gli altri token. I punteggi vengono normalizzati con softmax e diventano pesi che sommano a 1. Punteggi alti significano "questo token è rilevante per me".</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-marker">3</div>
+      <div class="step-content">
+        <h5>Aggregazione dei value</h5>
+        <p>Il nuovo vettore contestualizzato del token è la combinazione pesata dei value di tutti i token, dove i pesi sono quelli appena calcolati. Il risultato è un vettore che incorpora informazioni dai token rilevanti, lasciando fuori (o quasi) quelli irrilevanti.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- SEZIONE 4 — UN CHIARIMENTO: PAROLE O TOKEN -->
+<section>
+  <div class="section-num">04 — UN CHIARIMENTO IMPORTANTE</div>
+  <h2>Parole o token?</h2>
+  <p>
+    Prima di proseguire, vale la pena fissare un punto che fino ad ora abbiamo trattato
+    con una certa libertà nel parlato. Nel punto 1 abbiamo stabilito con cura che il
+    modello non lavora su parole ma su token, e che la distinzione è importante:
+    "biblioteca" può diventare un solo token o spezzarsi in "biblio" + "teca" a seconda del
+    tokenizer; "il" è un token; uno spazio può essere parte di un token; e così via.
+  </p>
+
+  <p>
+    Negli esempi precedenti, parlando del cliente o del gatto o di banca, ho usato "parola"
+    qualche volta per pigrizia espositiva. Parlare del "token cliente" suona più
+    macchinoso di parlare della "parola cliente". Ma è una scorciatoia che vale la pena
+    correggere mentalmente.
+  </p>
+
+  <p>
+    La regola precisa è: <strong>l'attenzione lavora sui token, sempre</strong>. Ogni
+    token ha la sua query, la sua key, il suo value. Se una parola si è spezzata in più
+    token, ognuno di essi ha le sue tre versioni, e l'attenzione li tratta come unità
+    distinte.
+  </p>
+
+  <p>
+    Per il modello non esiste la "parola biblioteca" come entità unificata: esistono due
+    token (poniamo: "biblio" e "teca") che, durante l'addestramento, sono finiti in
+    posizioni dello spazio semantico che riflettono il fatto che spesso compaiono insieme,
+    ma sono trattati come due unità distinte dal meccanismo di attenzione. Ognuno ha la
+    sua query, la sua key, il suo value, e ognuno viene contestualizzato indipendentemente.
+  </p>
+
+  <p>
+    Quindi quando ho detto "la parola <em>cliente</em> porta una query", la versione
+    precisa è "il token (o i token) corrispondenti a <em>cliente</em> portano ognuno una
+    propria query". Per le parole brevi e frequenti come "cliente" molto probabilmente è
+    un singolo token, e in quei casi parlare di "parola" o "token" è sostanzialmente
+    equivalente — ma è un'equivalenza accidentale, non strutturale.
+  </p>
+
+  <div class="callout callout-amber">
+    <h4>Una conseguenza pratica</h4>
+    <p>
+      Questa precisazione ha un risvolto interessante per il prompting: parole inusuali o
+      tecniche che si spezzano in molti token vengono "viste" dal modello come una
+      sequenza di pezzi, non come un'unità. Questo a volte spiega perché certe parole
+      molto specifiche (nomi propri rari, terminologia tecnica) vengono gestite meno
+      bene rispetto a parole comuni: il modello non ha mai visto i pezzi nello stesso
+      ordine abbastanza spesso da costruire pattern di attenzione affidabili.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 5 — COME IL MODELLO SA CHE È UN SOSTANTIVO -->
+<section>
+  <div class="section-num">05 — UN APPROFONDIMENTO INTERESSANTE</div>
+  <h2>Come fa il modello a sapere che è un sostantivo?</h2>
+  <p class="lead">
+    Quando ho descritto il meccanismo di attenzione, a un certo punto ho detto qualcosa
+    del tipo: "la query di un pronome cerca, tra le key degli altri token, quelli che sono
+    sostantivi candidati come antecedenti". Ma fermiamoci a chiederci: come fa il modello
+    a sapere che un token è un sostantivo? Da nessuna parte gliel'abbiamo detto.
+  </p>
+
+  <p>
+    Questa è una domanda profonda, perché tocca il modo in cui il modello rappresenta la
+    grammatica. La risposta breve è: <strong>il modello non lo sa nel modo in cui pensiamo
+    che lo sappia</strong>. Non c'è un'etichetta che dice "sostantivo". Ma c'è qualcosa di
+    più sottile che produce lo stesso effetto. Andiamo per gradi.
+  </p>
+
+  <h3>Cosa il modello non fa</h3>
+  <p>
+    Non c'è un dizionario interno in cui per ogni token è scritto "categoria grammaticale:
+    sostantivo maschile singolare". Non c'è un parser sintattico che analizza la frase e
+    assegna ruoli. Quel tipo di analisi grammaticale esplicita esisteva nei sistemi
+    linguistici pre-LLM — i parser tradizionali costruiti negli anni '80-2000 — ma negli
+    LLM moderni non è presente. Non è stata programmata, e nessuno l'ha inserita.
+  </p>
+
+  <h3>Cosa il modello fa, in realtà</h3>
+  <p>
+    Ricorda quello che abbiamo visto nel punto 2: l'embedding di ogni token è un vettore
+    in uno spazio di migliaia di dimensioni, e quel vettore codifica — in forma
+    distribuita — molte proprietà semantiche e grammaticali del token. Tra le proprietà
+    che emergono spontaneamente durante l'addestramento c'è anche la classe grammaticale.
+  </p>
+
+  <p>
+    Non è in una dimensione specifica (lo abbiamo visto nel punto 2: niente è in una
+    singola dimensione), ma è una <strong>direzione</strong> nello spazio: i sostantivi
+    tendono a "puntare" in certe direzioni dello spazio, i verbi in altre, gli articoli in
+    altre ancora. La "sostantività" diventa una direzione codificata implicitamente nei
+    vettori.
+  </p>
+
+  <p>
+    Questo emerge naturalmente dall'addestramento per un motivo semplice: i sostantivi
+    compaiono in contesti grammaticalmente simili (dopo articoli, prima di verbi,
+    eccetera) e i verbi in contesti diversi. Per predire bene il prossimo token, il
+    modello ha bisogno di rappresentare in modo simile token che si comportano in modo
+    simile. Risultato: i sostantivi finiscono in regioni vicine dello spazio degli
+    embedding, e così i verbi, e così gli avverbi.
+  </p>
+
+  <h3>E adesso l'attenzione</h3>
+  <p>
+    Qui torniamo al meccanismo Q-K-V e si capisce qualcosa di importante. Quando ho detto
+    "la query di <em>cliente</em> si allineerà bene con le key dei sostantivi candidati",
+    non intendevo che il modello consulti un'etichetta "sostantivo". Intendevo che le
+    query e le key sono <strong>vettori derivati dagli embedding</strong>, e quindi
+    ereditano le strutture geometriche di quei vettori — incluse le direzioni che
+    (implicitamente) codificano la classe grammaticale.
+  </p>
+
+  <p>
+    In pratica funziona così: durante l'addestramento, il modello ha imparato a generare
+    query e key in modo che certe query siano "naturalmente attratte" da certe key. Quando
+    "cliente" deve trovare il suo referente, la trasformazione che produce la sua query
+    (una matrice di pesi appresa dal modello) è stata calibrata in modo da produrre un
+    vettore che si allinea bene con le key prodotte da token che hanno una certa "forma
+    semantica" — quella che noi chiameremmo "essere un sostantivo che può funzionare da
+    antecedente".
+  </p>
+
+  <p>
+    Il modello non sa di star cercando un sostantivo: sta cercando vettori-key con certe
+    caratteristiche geometriche, e quelle caratteristiche, di fatto, corrispondono a
+    quello che noi chiamiamo "essere un sostantivo".
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">Una metafora che aiuta</div>
+    <p>
+      Pensa a qualcuno che non ha mai studiato grammatica formalmente, ma parla bene la
+      sua lingua materna. Se gli chiedi "qual è il soggetto di questa frase?", potrebbe
+      non saperti rispondere usando categorie grammaticali. Ma se gli chiedi di completare
+      una frase ambigua come "il gatto che il cane ha inseguito è scappato sul ___",
+      risponderà correttamente "tetto" e capirà perfettamente che è il gatto a essere
+      scappato, non il cane.
+    </p>
+    <p>
+      Sa applicare la grammatica senza saperla nominare. Le categorie grammaticali sono
+      <em>implicite</em> nella sua competenza linguistica.
+    </p>
+    <p>
+      Il modello è in una situazione simile, ma estremizzata: non solo non nomina le
+      categorie, non le rappresenta nemmeno come entità discrete. Le ha "sciolte" in
+      posizioni geometriche nello spazio degli embedding, e i suoi meccanismi (incluso
+      l'attenzione) operano su quella geometria. La grammaticalità non è un livello sopra
+      il modello, è una struttura emergente dentro la geometria.
+    </p>
+  </div>
+
+  <h3>Una conseguenza per il prompting</h3>
+  <p>
+    Detto questo, c'è una conseguenza importante per il prompting che vale la pena
+    tenere a mente: <strong>il modello non ha categorie linguistiche pulite, ha pattern
+    statistici</strong>.
+  </p>
+
+  <p>
+    Questo spiega alcuni comportamenti che altrimenti sembrerebbero strani. A volte un
+    LLM "sbaglia" la concordanza in modi che nessun parser tradizionale farebbe (perché un
+    parser ha l'etichetta "femminile singolare" e ci ragiona logicamente, mentre il
+    modello ha solo direzioni geometriche che possono essere "tirate" dal contesto). Ma
+    altre volte gestisce sfumature stilistiche che nessun parser saprebbe gestire (perché
+    il parser non vede il contesto, vede solo le etichette).
+  </p>
+
+  <p>
+    Il modello è meno "rigoroso" di un sistema simbolico classico, ma è più
+    <em>contestualmente sensibile</em>. È un trade-off architetturale, non un difetto.
+  </p>
+</section>
+
+<!-- SEZIONE 6 — MULTI-HEAD ATTENTION -->
+<section>
+  <div class="section-num">06 — MULTI-HEAD ATTENTION</div>
+  <h2>Molti tipi di rilevanza, in parallelo</h2>
+  <p class="lead">
+    Adesso facciamo il salto dall'attenzione "singola" all'attenzione "multipla". È
+    un'estensione del meccanismo che abbiamo appena visto, ed è una di quelle idee che,
+    una volta capita, sembra ovvia in retrospettiva. Ma è il pezzo che fa il salto di
+    qualità tra "attenzione che funziona" e "attenzione che rende possibile la potenza dei
+    Transformer moderni".
+  </p>
+
+  <h3>Il problema che risolve</h3>
+  <p>
+    Torniamo per un momento all'esempio della frase ambigua di Marco e Luca:
+  </p>
+
+  <div class="example-sentence">
+    "Marco ha visto Luca al parco. <span class="highlight">Lui</span> era stanco."
+  </div>
+
+  <p>
+    Quando il token "Lui" deve essere contestualizzato, abbiamo detto che la sua query
+    cerca, tra le key degli altri token, quelli rilevanti come antecedenti. Ma fermiamoci
+    un secondo a chiederci: cosa significa <strong>"rilevante"</strong> qui? Ci sono almeno
+    due tipi diversi di rilevanza in gioco.
+  </p>
+
+  <p>
+    Da una parte c'è una rilevanza <strong>sintattica</strong>: "Lui" è un pronome al
+    maschile singolare, quindi cerca antecedenti che siano sostantivi maschili singolari.
+    Sia "Marco" che "Luca" sono candidati validi, mentre "parco" probabilmente no (anche
+    se grammaticalmente sarebbe possibile, semanticamente è poco plausibile come soggetto
+    di "era stanco").
+  </p>
+
+  <p>
+    Da un'altra parte c'è una rilevanza <strong>semantica</strong>: chi è plausibile sia
+    stanco? Forse il contesto dice qualcosa al riguardo. E ancora, c'è una rilevanza
+    <strong>di posizione</strong>: quale dei due nomi è più recente? Quale è in posizione
+    di soggetto della frase precedente?
+  </p>
+
+  <p>
+    Ognuno di questi è un <em>modo diverso</em> in cui un token può essere rilevante per
+    un altro. E qui sta il problema: se il meccanismo di attenzione produce <strong>una
+    sola query e una sola key</strong> per ogni token, allora deve in qualche modo
+    "fondere" tutti questi tipi di rilevanza in un unico punteggio di attenzione. Ma
+    questo è limitante. Sarebbe come se il tuo cervello, mentre ascolta una frase, dovesse
+    decidere se prestare attenzione "in generale" a un pezzo di contesto, senza poter
+    distinguere se gli interessa per la grammatica, per il significato, per il tono, per
+    la coreferenza, o per chissà cos'altro.
+  </p>
+
+  <p>
+    Il <strong>multi-head attention</strong> è la soluzione: invece di calcolare una
+    singola attenzione, il modello ne calcola <strong>molte in parallelo</strong>, ognuna
+    su un asse diverso di rilevanza.
+  </p>
+
+  <h3>Come funziona, concretamente</h3>
+  <p>
+    L'idea è semplice ma potente. Per ogni token, invece di produrre <em>una</em> query,
+    <em>una</em> key e <em>un</em> value, il modello ne produce <strong>molti set in
+    parallelo</strong>. Tipicamente si parla di 8, 16, 32, fino a 128 set diversi, a
+    seconda della dimensione del modello. Ognuno di questi set si chiama una <strong>testa
+    di attenzione</strong> (in inglese <em>attention head</em>, da cui "multi-head").
+  </p>
+
+  <p>
+    Ogni testa è un'istanza completa del meccanismo Q-K-V che abbiamo descritto, ma con un
+    dettaglio cruciale: le tre trasformazioni che producono Q, K e V (ricorda: erano
+    matrici di pesi apprese dal modello) sono <strong>diverse per ogni testa</strong>. La
+    testa numero 1 ha le sue tre matrici, la testa numero 2 ne ha altre tre, e così via.
+  </p>
+
+  <p>
+    Il risultato è che ogni testa, partendo dallo stesso embedding di partenza, produce
+    versioni diverse di query, key e value — e quindi ogni testa calcola un'attenzione
+    diversa, focalizzata su un aspetto diverso della relazione tra token. Tutte le teste
+    lavorano <strong>simultaneamente, in parallelo</strong>. Non in sequenza una dopo
+    l'altra: contemporaneamente, sullo stesso input.
+  </p>
+
+  <p>
+    Alla fine, il modello prende l'output di tutte le teste e li <strong>concatena</strong>
+    (li mette uno accanto all'altro), poi li passa attraverso un'altra trasformazione che
+    li mescola e produce il vettore finale contestualizzato. Quel vettore finale incorpora
+    <em>tutti</em> i tipi di rilevanza scoperti dalle diverse teste.
+  </p>
+
+  <h3>Cosa fanno effettivamente le teste, in pratica</h3>
+  <p>
+    Ed ecco il punto interessante, quello che ha sorpreso i ricercatori quando hanno
+    cominciato ad analizzare cosa fanno le teste dentro un modello addestrato. Si è
+    scoperto che diverse teste <strong>si specializzano spontaneamente</strong> in compiti
+    diversi, durante l'addestramento. Nessuno gliel'ha detto. Nessuno ha programmato la
+    testa numero 7 perché si occupasse di concordanza grammaticale.
+  </p>
+
+  <p>
+    Ma quando si va a guardare cosa fanno le teste in un modello finito, si trovano
+    pattern ricorrenti. Eccone alcuni dei più comuni:
+  </p>
+
+  <div class="heads-grid">
+    <div class="head-card">
+      <div class="head-num">Testa specializzata in</div>
+      <h5>Rilevanza posizionale</h5>
+      <p>Presta molta attenzione al token immediatamente precedente, o a due posizioni di distanza, o all'inizio della frase. Utile per catturare strutture sintattiche di prossimità, come "articolo + sostantivo" o "soggetto + verbo".</p>
+    </div>
+    <div class="head-card">
+      <div class="head-num">Testa specializzata in</div>
+      <h5>Risoluzione di pronomi</h5>
+      <p>Quando elabora un pronome, attiva forte attenzione sui sostantivi candidati come antecedenti, ignorando il resto. È esattamente quello che servirebbe per la frase di Marco e Luca.</p>
+    </div>
+    <div class="head-card">
+      <div class="head-num">Testa specializzata in</div>
+      <h5>Dipendenze a lunga distanza</h5>
+      <p>Cattura relazioni tra token lontani nella frase, scavalcando il materiale in mezzo. Per "Il gatto che il cane ha inseguito è scappato", connette "scappato" a "Il gatto" passando sopra alla relativa.</p>
+    </div>
+    <div class="head-card">
+      <div class="head-num">Testa specializzata in</div>
+      <h5>Relazioni semantiche</h5>
+      <p>Connette parole che appartengono allo stesso campo semantico, parole con relazione causa-effetto, parole con relazione parte-tutto. Sfrutta la struttura dello spazio degli embedding lungo direzioni semantiche specifiche.</p>
+    </div>
+    <div class="head-card">
+      <div class="head-num">Testa specializzata in</div>
+      <h5>Pattern di concordanza</h5>
+      <p>Si occupa di pattern grammaticali fini come la concordanza di genere e numero: connette soggetti e verbi, sostantivi e aggettivi che devono concordare. Lavora su tratti linguistici sottili.</p>
+    </div>
+  </div>
+
+  <p>
+    Detto in modo suggestivo: ogni testa è come un <strong>punto di vista diverso</strong>
+    sullo stesso input. Una guarda la frase con gli occhi della sintassi, una con gli
+    occhi della coreferenza, una con gli occhi della prossimità, una con gli occhi della
+    semantica. E poi le loro intuizioni vengono fuse insieme nel vettore finale.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">Torniamo alla riunione di lavoro</div>
+    <p>
+      Mentre Andrea parla, la tua mente non fa una sola operazione di attenzione. Fa molte
+      cose contemporaneamente: una parte della tua attenzione segue il <em>filo logico</em>
+      del discorso (cause, conseguenze, conclusioni); una parte segue le <em>persone</em>
+      menzionate (chi è il cliente? chi è il responsabile?); una parte registra il
+      <em>tono emotivo</em> (Andrea è preoccupato? entusiasta?); una parte tiene traccia
+      della <em>cronologia</em> (questo evento è successo prima o dopo l'altro?); una
+      parte fa attenzione alle <em>parole tecniche</em> che potrebbero essere importanti.
+    </p>
+    <p>
+      Tutte queste tracce di attenzione lavorano in parallelo dentro la tua testa, e alla
+      fine si fondono in una comprensione unificata di quello che Andrea sta dicendo. Il
+      multi-head attention è esattamente questo: il modello non si concentra su un solo
+      aspetto alla volta, mantiene molti canali di attenzione attivi contemporaneamente,
+      ognuno specializzato su una dimensione diversa della relazione tra parti del testo.
+    </p>
+  </div>
+
+  <h3>Una sottigliezza importante</h3>
+  <p>
+    C'è un dettaglio tecnico che ha conseguenze concettuali interessanti: quando il
+    modello divide il calcolo in molte teste, <strong>non aumenta il calcolo totale</strong>,
+    lo <em>suddivide</em> in canali separati. Se l'embedding è di dimensione 4096 e ci
+    sono 32 teste, ogni testa lavora su uno spazio di dimensione 128 (4096 diviso 32).
+  </p>
+
+  <p>
+    Ogni singola testa è quindi più "piccola" della singola attenzione che avremmo avuto
+    senza le teste; ma il fatto che ce ne siano molte, e che siano specializzate, rende il
+    sistema complessivamente molto più potente.
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>Un principio architetturale</h4>
+    <p>
+      È un esempio di un principio generale negli LLM: la potenza non viene dal fare
+      un'operazione singola enorme, ma dal fare molte operazioni più piccole in parallelo,
+      ognuna delle quali coglie un aspetto diverso, e poi combinarle. Lo stesso principio,
+      come vedremo subito, si vede ripetuto anche negli strati: un Transformer non ha
+      <em>uno</em> strato di multi-head attention, ne ha decine impilate uno sopra l'altro.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 7 — STRATIFICAZIONE -->
+<section>
+  <div class="section-num">07 — STRATIFICAZIONE</div>
+  <h2>Decine di strati, uno sopra l'altro</h2>
+  <p>
+    C'è ancora un livello di profondità che dobbiamo aggiungere alla nostra mappa, ed è
+    quello degli <strong>strati</strong> (in inglese <em>layers</em>). Quello che abbiamo
+    descritto fino ad ora — il meccanismo Q-K-V con multi-head attention — è quello che
+    succede in <em>uno solo</em> strato del modello. Ma un Transformer moderno ne ha decine,
+    impilati uno sopra l'altro.
+  </p>
+
+  <p>
+    Il modello prende i vettori di input (gli embedding di partenza dei token), li passa
+    attraverso il primo strato di multi-head attention, ottiene vettori contestualizzati
+    "leggermente migliori", li passa al secondo strato, ottiene vettori ancora più
+    contestualizzati, e così via fino all'ultimo strato. Ogni strato lavora sull'output del
+    precedente.
+  </p>
+
+  <h3>Cosa succede strato dopo strato</h3>
+  <p>
+    Ed ecco un'immagine che chiude bene tutto: quando un token come "banca" attraversa un
+    Transformer moderno, viene contestualizzato non solo da molte teste in parallelo
+    (multi-head attention), ma anche da molti strati in sequenza. Al primo strato, le
+    teste catturano relazioni di prossimità e sintassi locale — chi è l'articolo che
+    precede, chi è il verbo che segue.
+  </p>
+
+  <p>
+    Al secondo strato, lavorando su vettori già contestualizzati dal primo, le teste
+    possono cogliere relazioni più astratte — perché stanno operando su rappresentazioni
+    che già "sanno" qualcosa del contesto immediato. Forse cominciano a catturare il
+    soggetto della frase, l'oggetto, il tempo verbale.
+  </p>
+
+  <p>
+    Al terzo strato, lavorando su vettori che già rappresentano la struttura della frase
+    locale, le teste possono cogliere il significato dell'intera frase. Al quarto, le
+    relazioni tra frasi del paragrafo. Al quinto, il discorso più ampio. E così via,
+    strato dopo strato.
+  </p>
+
+  <p>
+    Alla fine, il vettore di "banca" che esce dall'ultimo strato è una rappresentazione
+    profondamente contestuale, frutto di centinaia di operazioni di attenzione combinate.
+    Ha incorporato, attraverso la stratificazione, tutti i livelli di contesto: la sintassi
+    locale, la struttura della frase, il significato del paragrafo, il discorso intero.
+  </p>
+
+  <div class="callout callout-indigo">
+    <h4>Il ruolo della stratificazione</h4>
+    <p>
+      Una singola passata di attenzione cattura relazioni dirette tra token. Più passate
+      in sequenza permettono di costruire relazioni di relazioni: un token attraverso un
+      altro attraverso un altro ancora. Per questo i Transformer profondi possono
+      catturare strutture linguistiche sofisticate. La profondità (numero di strati) è uno
+      dei parametri principali che distingue i modelli piccoli dai modelli grandi: GPT-3,
+      per esempio, ha 96 strati di attenzione impilati. Ognuno raffina il precedente.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 8 — POSITIONAL ENCODING -->
+<section>
+  <div class="section-num">08 — APPROFONDIMENTO</div>
+  <h2>Come il modello sa l'ordine dei token</h2>
+  <p class="lead">
+    Comincio con un'osservazione che forse non ti sei mai posto, ma che è curiosa una
+    volta che la noti: <strong>il meccanismo di attenzione, per come l'abbiamo descritto,
+    non ha alcuna nozione di ordine</strong>. Questa cosa, una volta vista, illumina
+    qualcosa di profondo sui Transformer.
+  </p>
+
+  <h3>Il problema: l'attenzione è cieca all'ordine</h3>
+  <p>
+    Pensaci. Nel multi-head attention, ogni token confronta la sua query con le key di
+    tutti gli altri token, e poi mescola i value secondo i pesi. Questa operazione è
+    <strong>simmetrica</strong>: il token A guarda il token B esattamente nello stesso
+    modo in cui il token B guarda il token A, e niente in questa operazione tiene conto
+    del fatto che A viene prima di B nella frase.
+  </p>
+
+  <p>
+    Se prendessi la frase "Il cane morde l'uomo" e la rimescolassi in "morde l'uomo Il
+    cane", il meccanismo di attenzione produrrebbe esattamente gli stessi pesi e gli
+    stessi vettori contestualizzati. Sarebbero indistinguibili.
+  </p>
+
+  <p>
+    Ma è ovvio che l'ordine conta. <strong>"Il cane morde l'uomo" e "L'uomo morde il cane"
+    hanno significati opposti</strong>, e contengono esattamente gli stessi token. Se
+    l'attenzione non distingue tra i due, il modello non potrebbe mai capire la
+    differenza. Da dove arriva, allora, la sensibilità all'ordine?
+  </p>
+
+  <h3>La soluzione: positional encoding</h3>
+  <p>
+    La risposta è che, prima di entrare nel meccanismo di attenzione, ogni embedding viene
+    <strong>modificato</strong> in modo che il vettore che rappresenta quel token incorpori
+    anche un'informazione sulla sua posizione nella sequenza. Si chiama <strong>positional
+    encoding</strong> (codifica posizionale).
+  </p>
+
+  <p>
+    L'idea concettuale è semplice: il vettore di "cane" in posizione 2 deve essere
+    leggermente diverso dal vettore di "cane" in posizione 5. Se due token uguali in
+    posizioni diverse hanno vettori diversi, allora l'attenzione (che guarda i vettori) li
+    distinguerà. La distinzione viene introdotta artificialmente, "iniettando"
+    l'informazione di posizione direttamente nel vettore.
+  </p>
+
+  <p>
+    Il modo più semplice per farlo è il seguente: si genera un secondo vettore, della
+    stessa dimensione dell'embedding, che dipende solo dalla posizione (non dal contenuto
+    del token). Il vettore di posizione 1 è uno specifico pattern di numeri, il vettore di
+    posizione 2 ne è un altro, e così via. Poi questo vettore di posizione viene
+    <strong>sommato</strong> all'embedding del token, e il risultato è il vero input
+    dell'attenzione.
+  </p>
+
+  <div class="pos-diagram">
+    <div class="pos-equation">
+      <span class="vec">embedding("cane")</span><span class="op">+</span><span class="pos">positional_encoding(posizione 2)</span><span class="op">=</span><span class="res">vettore_finale("cane" in posizione 2)</span>
+    </div>
+  </div>
+
+  <p>
+    In questo modo, "cane in posizione 2" e "cane in posizione 5" finiscono in punti
+    leggermente diversi dello spazio. Il meccanismo di attenzione, che opera sulla
+    geometria di questi punti, può a questo punto distinguerli. La sensibilità all'ordine,
+    che il meccanismo nudo non aveva, è stata <strong>iniettata dall'esterno</strong>.
+  </p>
+
+  <h3>Una scelta sorprendentemente delicata</h3>
+  <p>
+    Ed ecco la cosa interessante: scegliere <em>come</em> costruire questi vettori di
+    posizione è una decisione architetturale tutt'altro che banale, e ha conseguenze
+    pratiche.
+  </p>
+
+  <p>
+    Le prime versioni dei Transformer (incluso il paper originale del 2017, "Attention is
+    All You Need") usavano vettori posizionali costruiti con funzioni trigonometriche —
+    sinusoidi e cosinusoidi a frequenze diverse. Era una scelta elegante che aveva una
+    proprietà particolare: dato il vettore di posizione N, era possibile derivare il
+    vettore di posizione N+K tramite operazioni semplici. Questo permetteva al modello di
+    "ragionare sulle distanze" in modo geometrico.
+  </p>
+
+  <p>
+    Modelli più recenti hanno introdotto variazioni più sofisticate. Una particolarmente
+    importante è il <strong>RoPE</strong> (<em>Rotary Positional Encoding</em>), che
+    invece di sommare un vettore di posizione, <strong>ruota</strong> i vettori di query
+    e key di un angolo che dipende dalla posizione. È un'idea elegante perché trasforma
+    l'informazione di posizione in qualcosa che si compone in modo naturale con le
+    operazioni di prodotto scalare dell'attenzione. La maggior parte dei modelli moderni
+    usa varianti di RoPE.
+  </p>
+
+  <h3>Perché ti racconto tutto questo</h3>
+  <p>
+    C'è una conseguenza pratica che vale la pena conoscere, e che spiega cose che
+    altrimenti sembrerebbero strane. Diversi schemi di codifica posizionale
+    <strong>generalizzano in modo diverso a contesti più lunghi</strong> di quelli visti
+    durante l'addestramento.
+  </p>
+
+  <p>
+    Se un modello è stato addestrato su sequenze di massimo 4.000 token, e tu gli mandi un
+    prompt di 8.000 token, il modello si trova davanti a posizioni "mai viste prima" — e
+    il modo in cui gestisce questa situazione dipende dalla codifica posizionale che usa.
+  </p>
+
+  <p>
+    Alcune codifiche generalizzano male: il modello "si perde" su token oltre la lunghezza
+    di addestramento. Altre generalizzano meglio, e hanno permesso di estendere le context
+    window dei modelli senza riaddestrarli da zero. È uno dei motivi per cui sono nati i
+    modelli con finestre da 100.000 o 1.000.000 di token: non solo meccanismi di attention
+    più efficienti, ma anche codifiche posizionali capaci di estendersi.
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>Una lezione più ampia</h4>
+    <p>
+      Più in generale, questa storia illustra un principio importante: <strong>le proprietà
+      che sembrano "naturali" del linguaggio — l'ordine, la grammatica, la coerenza — non
+      sono naturali per il modello, sono iniettate da scelte architetturali specifiche</strong>.
+      Il modello "sa" che le parole hanno un ordine non perché il linguaggio glielo dice,
+      ma perché qualcuno ha deciso di sommare un vettore di posizione ai suoi embedding.
+      Cambiare quella decisione cambia profondamente come il modello si comporta.
+    </p>
+    <p>
+      È una lezione utile da tenere a mente: gli LLM moderni sono entità prodotte da una
+      serie di scelte tecniche specifiche, e ogni componente che funziona "perfettamente"
+      dietro le quinte è il frutto di anni di ricerca. La fluidità con cui sembrano operare
+      nasconde una stratificazione di soluzioni a problemi che inizialmente erano
+      tutt'altro che ovvi.
+    </p>
+  </div>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Sei cose da portarsi via dal punto 4A</h3>
+    <ol class="takeaway-list">
+      <li>
+        L'embedding di un token è uno solo, ma il significato di una parola dipende dal
+        contesto. L'attenzione è il meccanismo che trasforma gli embedding generici in
+        rappresentazioni contestualizzate, "iniettando" nel vettore di ogni token le
+        informazioni dai token vicini rilevanti.
+      </li>
+      <li>
+        Il meccanismo Q-K-V funziona come una biblioteca: ogni token è simultaneamente
+        lettore (con una query) e libro sullo scaffale (con key e value). La query cerca
+        le key che le si addicono, e i value dei token più rilevanti vengono mescolati nel
+        nuovo vettore contestualizzato.
+      </li>
+      <li>
+        Il modello non ha categorie linguistiche pulite (sostantivo, verbo, soggetto). Le
+        categorie esistono come direzioni implicite nello spazio degli embedding,
+        emergenti dall'addestramento. Il modello applica la grammatica senza saperla
+        nominare, come una persona madrelingua che non ha studiato analisi logica.
+      </li>
+      <li>
+        Il multi-head attention calcola molte attenzioni in parallelo, ognuna su un asse
+        di rilevanza diverso. Le teste si specializzano spontaneamente: alcune in
+        prossimità, altre in coreferenza, altre in concordanza, altre in dipendenze a
+        lunga distanza. Nessuno gliel'ha detto.
+      </li>
+      <li>
+        Un Transformer non ha uno strato di attenzione, ne ha decine impilati. Ogni strato
+        raffina i vettori prodotti dal precedente, costruendo rappresentazioni sempre più
+        astratte: dalla sintassi locale al significato della frase al discorso più ampio.
+        Profondità + parallelismo = potenza.
+      </li>
+      <li>
+        L'attenzione, di per sé, è cieca all'ordine dei token. La sensibilità all'ordine
+        viene iniettata tramite il positional encoding, sommato (o ruotato in versioni più
+        moderne come RoPE) sopra agli embedding. Le proprietà che sembrano naturali del
+        linguaggio sono spesso scelte architetturali specifiche.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- BRIDGE -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="bridge">
+    <div class="bridge-label">Prossimo punto</div>
+    <h3>Le conseguenze pratiche dell'attenzione</h3>
+    <p>
+      Adesso che abbiamo capito <em>come funziona</em> l'attenzione, è il momento di
+      vedere <em>cosa significa</em> per chi scrive prompt. L'attenzione ha un costo
+      computazionale che cresce in modo quadratico con la lunghezza dell'input — e da
+      questa proprietà nasce un vincolo pratico fondamentale: la <strong>finestra di
+      contesto</strong> (context window) finita, e un fenomeno controintuitivo chiamato
+      <em>lost in the middle</em>: il modello presta più attenzione ai token vicini
+      all'inizio e alla fine del contesto, e meno a quelli in mezzo.
+    </p>
+    <p>
+      Da queste osservazioni nascono principi pratici concreti per strutturare i prompt:
+      cosa mettere all'inizio, cosa mettere alla fine, come gestire il materiale di
+      contesto, quando usare la ridondanza intelligente. È il punto 4B, dedicato a tradurre
+      tutto quello che abbiamo costruito qui in conoscenza operativa.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Punto 4A di 6+1 — Percorso di approfondimento su LLM e prompting</p>
+  <p>Attenzione e contesto dinamico: il meccanismo</p>
+</footer>
+
+</body>
+</html>

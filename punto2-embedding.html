@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Punto 2 — Embedding: come il token acquisisce significato</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --red: #9a2020;
+    --red-faint: rgba(154,32,32,0.07);
+    --red-border: rgba(154,32,32,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: var(--indigo);
+    padding: 72px 48px 88px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 520px; height: 520px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.28) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -80px; left: -50px;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(13,122,110,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-dots {
+    position: absolute;
+    top: 50%; right: 8%;
+    transform: translateY(-50%);
+    width: 280px; height: 280px;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1.5px, transparent 1.5px);
+    background-size: 22px 22px;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 19px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 760px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 40px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 36px 0 14px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.3;
+    color: var(--indigo-mid);
+    margin: 24px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 16px;
+    line-height: 1.75;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--indigo-border);
+  }
+
+  .insight {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 32px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(240,112,64,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 18px;
+    line-height: 1.6;
+    margin: 0;
+    position: relative;
+    font-family: var(--serif);
+    font-style: italic;
+  }
+
+  .callout {
+    padding: 22px 26px;
+    border-radius: 6px;
+    margin: 24px 0;
+    border-left: 4px solid;
+  }
+
+  .callout-orange { background: var(--orange-faint); border-color: var(--orange); }
+  .callout-teal { background: var(--teal-faint); border-color: var(--teal); }
+  .callout-amber { background: var(--amber-faint); border-color: var(--amber); }
+  .callout-purple { background: var(--purple-faint); border-color: var(--purple); }
+  .callout-indigo { background: var(--indigo-faint); border-color: var(--indigo-light); }
+
+  .callout h4 { margin-top: 0; margin-bottom: 8px; font-size: 11px; }
+  .callout-orange h4 { color: var(--orange); }
+  .callout-teal h4 { color: var(--teal); }
+  .callout-amber h4 { color: var(--amber); }
+  .callout-purple h4 { color: var(--purple); }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout p { font-size: 15.5px; margin-bottom: 10px; line-height: 1.7; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ── METAPHOR BOX ── */
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--purple);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .metaphor p { margin-bottom: 12px; font-size: 15.5px; line-height: 1.7; }
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  /* ── VECTOR VIZ ── */
+  .vector-viz {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    margin: 32px 0;
+  }
+
+  .vector-viz-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  .vector-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 0;
+    border-bottom: 1px dashed var(--border2);
+  }
+
+  .vector-row:last-child { border-bottom: none; }
+
+  .vector-token {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--indigo);
+    font-style: italic;
+    min-width: 130px;
+  }
+
+  .vector-arrow {
+    color: var(--ink-light);
+    font-size: 16px;
+  }
+
+  .vector-numbers {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-mid);
+    flex: 1;
+    background: var(--bg2);
+    padding: 10px 14px;
+    border-radius: 4px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .vector-numbers .pos { color: var(--teal); }
+  .vector-numbers .neg { color: var(--orange); }
+
+  /* ── SPACE SCHEMA ── */
+  .space-schema {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px;
+    margin: 32px 0;
+    position: relative;
+  }
+
+  .space-canvas {
+    position: relative;
+    height: 320px;
+    background: var(--bg2);
+    border-radius: 6px;
+    border: 1px solid var(--border2);
+    overflow: hidden;
+  }
+
+  .space-cluster {
+    position: absolute;
+    border: 1.5px dashed;
+    border-radius: 50%;
+    opacity: 0.4;
+  }
+
+  .cluster-animals { top: 30px; left: 60px; width: 220px; height: 110px; border-color: var(--purple); }
+  .cluster-vehicles { bottom: 30px; left: 240px; width: 240px; height: 120px; border-color: var(--teal); }
+  .cluster-foods { top: 50px; right: 60px; width: 200px; height: 110px; border-color: var(--orange); }
+
+  .space-cluster-label {
+    position: absolute;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    font-weight: 600;
+  }
+
+  .label-animals { top: 10px; left: 90px; color: var(--purple); }
+  .label-vehicles { bottom: 10px; left: 300px; color: var(--teal); }
+  .label-foods { top: 30px; right: 110px; color: var(--orange); }
+
+  .space-token {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .space-token::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--serif);
+    font-size: 14px;
+    color: var(--ink);
+    font-style: italic;
+    white-space: nowrap;
+  }
+
+  .token-purple { background: var(--purple); }
+  .token-teal { background: var(--teal); }
+  .token-orange { background: var(--orange); }
+
+  /* ── DIMENSIONS GRID ── */
+  .dim-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin: 24px 0;
+  }
+
+  .dim-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--ink-mid);
+    border-left: 3px solid var(--indigo-light);
+  }
+
+  .dim-item strong {
+    display: block;
+    color: var(--indigo);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  /* ── ARITHMETIC ── */
+  .math-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 24px 0;
+  }
+
+  .math-equation {
+    font-family: var(--mono);
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 2.2;
+    padding: 14px 18px;
+    background: var(--indigo-faint2);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    border: 1px solid var(--indigo-border);
+  }
+
+  .math-equation:last-child { margin-bottom: 0; }
+  .math-equation .vec-token { color: var(--indigo); font-weight: 600; }
+  .math-equation .op { color: var(--orange); font-weight: 700; margin: 0 4px; }
+  .math-equation .result { color: var(--teal); font-weight: 600; }
+
+  .math-meaning {
+    font-size: 14px;
+    color: var(--ink-light);
+    font-style: italic;
+    padding-left: 14px;
+    border-left: 2px solid var(--border);
+  }
+
+  /* ── STATIC VS CONTEXTUAL ── */
+  .static-vs-contextual {
+    margin: 28px 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--white);
+  }
+
+  .svc-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .svc-row:last-child { border-bottom: none; }
+
+  .svc-cell { padding: 24px 28px; }
+
+  .svc-cell:first-child { border-right: 1px solid var(--border2); }
+
+  .svc-header {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .svc-static .svc-header { color: var(--orange); }
+  .svc-contextual .svc-header { color: var(--teal); }
+
+  .svc-text {
+    font-family: var(--serif);
+    font-size: 17px;
+    color: var(--ink);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  .svc-meta {
+    font-size: 14px;
+    color: var(--ink-light);
+    line-height: 1.5;
+  }
+
+  .svc-vector-mini {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg2);
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 12px;
+    color: var(--ink-mid);
+  }
+
+  /* ── Q&A ── */
+  .qa-block {
+    margin: 32px 0;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .qa-question {
+    background: var(--bg2);
+    padding: 20px 28px 20px 56px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .qa-question::before {
+    content: 'Q';
+    position: absolute;
+    left: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 24px;
+    color: var(--orange);
+    font-weight: 500;
+  }
+
+  .qa-question p {
+    margin: 0;
+    font-size: 16px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .qa-answer { padding: 28px 32px; }
+  .qa-answer p { margin-bottom: 14px; }
+  .qa-answer p:last-child { margin-bottom: 0; }
+
+  .qa-answer h4 {
+    margin: 22px 0 10px;
+    font-size: 14px;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--indigo);
+    font-weight: 600;
+  }
+
+  .qa-answer ul {
+    list-style: none;
+    margin: 12px 0;
+    padding: 0;
+  }
+
+  .qa-answer ul li {
+    padding: 10px 0 10px 24px;
+    font-size: 15.5px;
+    color: var(--ink-mid);
+    position: relative;
+    line-height: 1.65;
+  }
+
+  .qa-answer ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--orange);
+    font-weight: 600;
+  }
+
+  /* ── IMPLICATIONS ── */
+  .implication-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 32px 0;
+  }
+
+  .implication-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 26px;
+    border-top: 3px solid;
+  }
+
+  .implication-card:nth-child(1) { border-top-color: var(--orange); }
+  .implication-card:nth-child(2) { border-top-color: var(--teal); }
+  .implication-card:nth-child(3) { border-top-color: var(--purple); }
+
+  .implication-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--ink-light);
+    margin-bottom: 10px;
+  }
+
+  .implication-card h4 {
+    margin: 0 0 14px;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 18px;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+
+  .implication-card p {
+    font-size: 14.5px;
+    line-height: 1.65;
+    margin: 0 0 10px;
+  }
+
+  .implication-card p:last-child { margin: 0; }
+
+  /* ── STATS ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 28px 0;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 24px 22px;
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: var(--serif);
+    font-size: 38px;
+    color: var(--orange);
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--ink-light);
+    line-height: 1.4;
+  }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  /* ── BRIDGE ── */
+  .bridge {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 48px;
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .bridge h3 {
+    margin: 0 0 16px;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--indigo);
+    font-weight: 500;
+  }
+
+  .bridge p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+  }
+
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 48px 24px 60px; }
+    .hero h1 { font-size: 36px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .implication-grid { grid-template-columns: 1fr; }
+    .stat-row { grid-template-columns: 1fr; }
+    .svc-row { grid-template-columns: 1fr; }
+    .svc-cell:first-child { border-right: none; border-bottom: 1px solid var(--border2); }
+    .takeaways { padding: 40px 28px; }
+    .bridge { padding: 32px 24px; }
+    .dim-grid { grid-template-columns: 1fr; }
+    .vector-row { flex-direction: column; align-items: flex-start; }
+    .space-canvas { height: 380px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <div class="hero-bg-dots"></div>
+  <div class="hero-inner">
+    <div class="hero-label">Punto 2 — Fondamenti del prompting</div>
+    <h1>Embedding: come il token <em>acquisisce</em> significato</h1>
+    <p class="hero-sub">
+      Gli ID numerici prodotti dalla tokenizzazione sono solo etichette arbitrarie.
+      Gli embedding li trasformano in posizioni in uno spazio matematico dove la vicinanza
+      riflette la somiglianza semantica. È qui che il modello comincia a "capire".
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">Embedding & spazio semantico</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Punto del percorso</div>
+        <div class="meta-value">2 di 6</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Prerequisito per</div>
+        <div class="meta-value">Predizione, Attenzione</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 — IL PROBLEMA -->
+<section>
+  <div class="section-num">01 — IL PROBLEMA DA RISOLVERE</div>
+  <h2>Gli ID, da soli, non significano nulla</h2>
+  <p class="lead">
+    Alla fine del punto 1 abbiamo lasciato il modello con una sequenza di ID numerici.
+    Per esempio, la frase "Il gatto dorme" diventa qualcosa come <code>[2347, 8912, 15673,
+    4421]</code>. Ma c'è un problema enorme: questi numeri non hanno alcuna relazione utile
+    tra loro.
+  </p>
+
+  <p>
+    L'ID 2347 non è "più vicino" a 2348 che a 99999. Sono solo etichette arbitrarie. Se il
+    modello dovesse fare ragionamenti basati su questi ID, sarebbe come provare a fare
+    geometria conoscendo solo i numeri di matricola: due numeri vicini non ti dicono nulla
+    sulla relazione tra le entità che rappresentano.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">Una metafora che aiuta</div>
+    <p>
+      Pensa ai CAP delle città italiane. Il 20121 (Milano) e il 20122 (sempre Milano) sono
+      numericamente vicini, ma il 00100 (Roma) e il 90100 (Palermo) sono lontani in modi
+      che non riflettono la geografia reale. I numeri non ti dicono nulla sulle relazioni:
+      due CAP simili possono indicare città vicine, ma anche no. Per capire le relazioni
+      tra città servirebbe una rappresentazione diversa, una in cui la vicinanza numerica
+      corrispondesse a vicinanza geografica.
+    </p>
+    <p>
+      Il problema con gli ID dei token è esattamente questo. Se il modello dovesse predire
+      il prossimo token guardando solo gli ID, sarebbe cieco a tutte le relazioni semantiche.
+    </p>
+  </div>
+
+  <p>
+    Il modello ha bisogno di una rappresentazione <strong>in cui la vicinanza numerica
+    corrisponda a una vicinanza semantica</strong>. Una rappresentazione in cui "gatto" e
+    "felino" siano vicini, "gatto" e "automobile" siano lontani, e "gatto" stia in una
+    relazione precisa rispetto a "cane" (entrambi animali domestici) e a "tigre" (entrambi
+    felini).
+  </p>
+
+  <p>
+    <strong>Gli embedding sono questa rappresentazione.</strong>
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Idea chiave</div>
+    <p>
+      Gli embedding sono la rappresentazione che dà "senso" al token. Tutto il resto del
+      modello — attenzione, generazione del token successivo — lavora su questi vettori,
+      non sui token grezzi. Sono il punto di passaggio tra "elenco di numeri arbitrari"
+      e "matematica del significato".
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 2 — COSA SONO -->
+<section>
+  <div class="section-num">02 — COSA SONO, CONCRETAMENTE</div>
+  <h2>Vettori di numeri come rappresentazione</h2>
+  <p>
+    Un embedding è un <strong>vettore di numeri</strong> associato a un token. "Vettore" è
+    un termine matematico ma il concetto è semplice: è una lista ordinata di numeri. Per
+    esempio:
+  </p>
+
+  <div class="vector-viz">
+    <div class="vector-viz-label">Esempio di embedding (versione semplificata, 6 dimensioni)</div>
+    <div class="vector-row">
+      <div class="vector-token">"gatto"</div>
+      <div class="vector-arrow">→</div>
+      <div class="vector-numbers">[<span class="pos">0.234</span>, <span class="neg">-0.891</span>, <span class="pos">1.453</span>, <span class="pos">0.012</span>, <span class="neg">-0.667</span>, <span class="pos">0.789</span>]</div>
+    </div>
+    <div class="vector-row">
+      <div class="vector-token">"cane"</div>
+      <div class="vector-arrow">→</div>
+      <div class="vector-numbers">[<span class="pos">0.198</span>, <span class="neg">-0.823</span>, <span class="pos">1.401</span>, <span class="pos">0.045</span>, <span class="neg">-0.701</span>, <span class="pos">0.812</span>]</div>
+    </div>
+    <div class="vector-row">
+      <div class="vector-token">"automobile"</div>
+      <div class="vector-arrow">→</div>
+      <div class="vector-numbers">[<span class="neg">-0.756</span>, <span class="pos">0.234</span>, <span class="neg">-0.123</span>, <span class="pos">1.234</span>, <span class="pos">0.567</span>, <span class="neg">-0.890</span>]</div>
+    </div>
+  </div>
+
+  <p>
+    Nota qualcosa di importante in questo esempio: i vettori di "gatto" e "cane" hanno
+    valori molto simili in tutte le posizioni. Ogni numero è vicino al corrispondente
+    nell'altro vettore: 0.234 vs 0.198, -0.891 vs -0.823, e così via. Il vettore di
+    "automobile" invece è completamente diverso. <strong>La somiglianza semantica si traduce
+    in somiglianza numerica.</strong>
+  </p>
+
+  <p>
+    Negli LLM moderni, la lunghezza di questo vettore (chiamata <strong>dimensione
+    dell'embedding</strong>) è tipicamente tra <strong>4.000 e 12.000 numeri</strong>.
+    Quindi ogni token è rappresentato da migliaia di numeri.
+  </p>
+
+  <p>
+    A questo punto ti starai chiedendo: perché tanti numeri? Cosa rappresenta ognuno di
+    essi? Andiamo a vederlo.
+  </p>
+
+  <div class="callout callout-indigo">
+    <h4>Punto fisso da tenere a mente</h4>
+    <p>
+      <strong>L'ID del token è un'etichetta arbitraria; il vettore embedding porta il
+      significato.</strong> A ogni ID nel vocabolario è associato esattamente un vettore.
+      L'associazione è fissa una volta terminato l'addestramento del modello: stesso ID,
+      stesso vettore, sempre. È una tabella di lookup gigantesca.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 3 — LO SPAZIO SEMANTICO -->
+<section>
+  <div class="section-num">03 — LO SPAZIO SEMANTICO</div>
+  <h2>Vicinanza numerica = vicinanza semantica</h2>
+  <p>
+    La cosa magica è cosa succede quando si dispongono tutti i vettori di tutti i token
+    insieme: emerge uno <strong>spazio semantico strutturato</strong>. Token con significato
+    simile finiscono in regioni vicine; token con significato diverso finiscono lontani.
+  </p>
+
+  <div class="space-schema">
+    <div class="space-canvas">
+      <div class="space-cluster cluster-animals"></div>
+      <div class="space-cluster-label label-animals">animali</div>
+      <div class="space-token token-purple" data-label="gatto" style="top: 60px; left: 110px;"></div>
+      <div class="space-token token-purple" data-label="cane" style="top: 95px; left: 180px;"></div>
+      <div class="space-token token-purple" data-label="lupo" style="top: 120px; left: 130px;"></div>
+
+      <div class="space-cluster cluster-vehicles"></div>
+      <div class="space-cluster-label label-vehicles">trasporti</div>
+      <div class="space-token token-teal" data-label="auto" style="bottom: 70px; left: 290px;"></div>
+      <div class="space-token token-teal" data-label="moto" style="bottom: 95px; left: 380px;"></div>
+      <div class="space-token token-teal" data-label="bici" style="bottom: 50px; left: 430px;"></div>
+
+      <div class="space-cluster cluster-foods"></div>
+      <div class="space-cluster-label label-foods">cibi</div>
+      <div class="space-token token-orange" data-label="pasta" style="top: 75px; right: 130px;"></div>
+      <div class="space-token token-orange" data-label="pizza" style="top: 100px; right: 90px;"></div>
+      <div class="space-token token-orange" data-label="riso" style="top: 130px; right: 150px;"></div>
+    </div>
+  </div>
+
+  <p>
+    Quello che vedi è una rappresentazione bidimensionale a scopo illustrativo. "Gatto",
+    "cane" e "lupo" sono vicini perché sono tutti animali. "Auto", "moto" e "bici" sono
+    vicini perché sono tutti mezzi di trasporto. "Pasta", "pizza" e "riso" sono vicini
+    perché sono tutti cibi. E tra i tre gruppi c'è distanza, perché sono concetti di
+    categorie diverse.
+  </p>
+
+  <p>
+    <strong>Una nota importante</strong>: il diagramma mostra solo 2 dimensioni (orizzontale
+    e verticale). Negli embedding reali le dimensioni sono migliaia, non due. È impossibile
+    da disegnare, ma il principio è lo stesso: <strong>vicinanza = somiglianza, distanza =
+    differenza</strong>.
+  </p>
+
+  <h3>Perché tante dimensioni?</h3>
+  <p>
+    A questo punto la domanda naturale è: perché 4.000-12.000 numeri per ogni token? Non
+    sembrano un po' troppi? In realtà sono <em>pochi</em> per quello che devono fare. Pensa
+    a tutte le proprietà semantiche che un token può avere:
+  </p>
+
+  <div class="dim-grid">
+    <div class="dim-item">
+      <strong>Proprietà grammaticali</strong>
+      Sostantivo o verbo? Singolare o plurale? Maschile o femminile?
+    </div>
+    <div class="dim-item">
+      <strong>Proprietà ontologiche</strong>
+      Animato o inanimato? Concreto o astratto? Naturale o artificiale?
+    </div>
+    <div class="dim-item">
+      <strong>Connotazioni emotive</strong>
+      Positivo, negativo, neutro? Formale o colloquiale?
+    </div>
+    <div class="dim-item">
+      <strong>Dominio di appartenenza</strong>
+      Medicina, sport, cucina, finanza, tecnologia?
+    </div>
+    <div class="dim-item">
+      <strong>Frequenza e familiarità</strong>
+      Comune o tecnica? Quotidiana o letteraria?
+    </div>
+    <div class="dim-item">
+      <strong>Lingua di appartenenza</strong>
+      Prevalentemente italiana, inglese, latina?
+    </div>
+  </div>
+
+  <p>
+    E poi centinaia di altre proprietà sottili. Ognuna di queste proprietà occuperà,
+    idealmente, una "direzione" diversa nello spazio degli embedding. <strong>Ogni dimensione
+    del vettore può essere pensata come un asse che codifica una proprietà semantica.</strong>
+    Avere 4.000-12.000 dimensioni significa avere quel numero di "assi" per descrivere il
+    token.
+  </p>
+
+  <h3>Una sottigliezza importante: la rappresentazione è distribuita</h3>
+  <p>
+    C'è un punto sottile che vale la pena chiarire subito perché altrimenti la mappa mentale
+    rischia di essere troppo pulita. <strong>Non possiamo identificare in modo netto quale
+    dimensione codifica cosa.</strong>
+  </p>
+
+  <p>
+    Le proprietà semantiche non sono allineate perfettamente con gli assi del vettore. Una
+    proprietà come "essere un animale" è diluita su molte dimensioni, e ogni dimensione
+    contribuisce un po' a molte proprietà diverse. È un sistema di rappresentazione
+    <em>distribuito</em>: il significato non sta in un punto, ma è spalmato sull'intero
+    vettore.
+  </p>
+
+  <p>
+    Questa è una proprietà importante, perché rende il sistema molto robusto: se anche una
+    dimensione viene perturbata, il significato rimane sostanzialmente intatto, perché era
+    distribuito su molte dimensioni. E approfondiremo bene questo aspetto della
+    distribuzione tra poco, nella sezione sulle direzioni.
+  </p>
+</section>
+
+<!-- SEZIONE 4 — APPRENDIMENTO -->
+<section>
+  <div class="section-num">04 — COME SI IMPARANO</div>
+  <h2>Dall'iniziale casualità alla struttura emergente</h2>
+  <p>
+    All'inizio dell'addestramento del modello, <strong>gli embedding sono completamente
+    casuali</strong>. Ogni token ha un vettore di numeri casuali assegnato. Niente
+    significato, niente vicinanze utili.
+  </p>
+
+  <p>
+    Poi inizia l'addestramento, e il meccanismo è elegante. Si dà al modello sequenze di
+    testo reale e si chiede di predire il token successivo. Per esempio, dato "Il gatto
+    beve il ___", il modello deve calcolare la probabilità di ogni possibile token come
+    continuazione. Inizialmente sbaglia continuamente, perché i vettori sono casuali. Ma a
+    ogni errore, un algoritmo (chiamato <strong>gradiente discendente</strong>) calcola in
+    che direzione modificare leggermente i vettori per ridurre l'errore.
+  </p>
+
+  <p>
+    Dopo miliardi di esempi, succede qualcosa di notevole: i vettori dei token si
+    autodispongono in posizioni che riflettono come quei token si comportano nel mondo.
+    <strong>Nessuno ha "scritto" che gatto è simile a cane: è emerso naturalmente</strong>
+    dal fatto che gatto e cane compaiono in contesti simili (entrambi "abbaiano/miagolano",
+    entrambi "vivono in casa", entrambi "mangiano croccantini"), e quindi il modello, per
+    predirli bene, ha bisogno di rappresentarli in modo simile.
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>La distributional hypothesis</h4>
+    <p>
+      Questo principio — che il significato di una parola è determinato dalle parole che
+      la circondano — si chiama <em>distributional hypothesis</em> ed è una delle idee
+      fondamentali della linguistica computazionale.
+    </p>
+    <p>
+      In termini pratici: <strong>due parole che compaiono negli stessi contesti tendono ad
+      avere significati simili</strong>. Il modello sfrutta questa regolarità per costruire
+      la sua rappresentazione semantica, semplicemente cercando di prevedere bene il prossimo
+      token. Il significato emerge come effetto collaterale dell'allenamento alla predizione.
+    </p>
+  </div>
+
+  <p>
+    Detta in altro modo: il modello non viene addestrato a "capire" il significato delle
+    parole. Viene addestrato a predire il prossimo token. Ma per riuscirci bene, sviluppa
+    spontaneamente rappresentazioni che catturano il significato. È un risultato emergente,
+    non programmato. È una cosa che continua a stupire i ricercatori perché funziona così
+    bene.
+  </p>
+</section>
+
+<!-- SEZIONE 5 — ARITMETICA -->
+<section>
+  <div class="section-num">05 — LE PROPRIETÀ ARITMETICHE</div>
+  <h2>Le relazioni semantiche diventano operazioni vettoriali</h2>
+  <p>
+    Una conseguenza meravigliosa di questa rappresentazione è che lo spazio degli embedding
+    ha proprietà <strong>aritmetiche</strong>. Le relazioni semantiche diventano operazioni
+    sui vettori. L'esempio classico, scoperto attorno al 2013 con i primi modelli di word
+    embedding (Word2Vec), è diventato celebre:
+  </p>
+
+  <div class="math-block">
+    <div class="math-equation">
+      <span class="vec-token">vettore("re")</span> <span class="op">−</span> <span class="vec-token">vettore("uomo")</span> <span class="op">+</span> <span class="vec-token">vettore("donna")</span> <span class="op">≈</span> <span class="result">vettore("regina")</span>
+    </div>
+    <div class="math-meaning">
+      Cosa significa? Che la "differenza" tra re e uomo (cioè il concetto astratto di
+      "regalità maschile") è simile alla differenza tra regina e donna ("regalità femminile").
+      Quando sottrai uomo da re, ottieni un vettore che codifica "essere un sovrano". Se
+      aggiungi questo a donna, ottieni qualcosa di molto vicino a regina.
+    </div>
+  </div>
+
+  <p>
+    Non è un caso isolato: le stesse proprietà valgono per altre relazioni concettuali.
+    Vediamo altri esempi.
+  </p>
+
+  <div class="math-block">
+    <div class="math-equation">
+      <span class="vec-token">vettore("Parigi")</span> <span class="op">−</span> <span class="vec-token">vettore("Francia")</span> <span class="op">+</span> <span class="vec-token">vettore("Italia")</span> <span class="op">≈</span> <span class="result">vettore("Roma")</span>
+    </div>
+    <div class="math-meaning">
+      La "capitalità" è una direzione nello spazio. La differenza tra una capitale e il suo
+      paese è sostanzialmente costante, e si può applicare ad altre nazioni.
+    </div>
+  </div>
+
+  <div class="math-block">
+    <div class="math-equation">
+      <span class="vec-token">vettore("camminare")</span> <span class="op">−</span> <span class="vec-token">vettore("camminato")</span> <span class="op">+</span> <span class="vec-token">vettore("nuotato")</span> <span class="op">≈</span> <span class="result">vettore("nuotare")</span>
+    </div>
+    <div class="math-meaning">
+      Anche la coniugazione del verbo è una direzione: la trasformazione "infinito ↔
+      participio passato" è codificata in un vettore di differenza riutilizzabile.
+    </div>
+  </div>
+
+  <p>
+    Questo non è un trucco programmato: emerge spontaneamente dall'addestramento. Ed è
+    fortissimo, perché ti dice che <strong>le regolarità del linguaggio diventano regolarità
+    geometriche nello spazio degli embedding</strong>. Il modello non "ragiona" sulle parole
+    come fa un umano: opera su vettori e sfrutta queste regolarità geometriche per produrre
+    output coerenti.
+  </p>
+
+  <div class="callout callout-amber">
+    <h4>Una nota di realismo</h4>
+    <p>
+      Negli LLM moderni (Claude, GPT-4), gli embedding sono molto più sofisticati di quelli
+      di Word2Vec, e queste analogie pulite si trovano meno facilmente in forma "diretta",
+      perché le rappresentazioni sono più contestuali (vedi prossima sezione). Ma il
+      principio resta valido: lo spazio è strutturato, e la struttura riflette il significato.
+      Le regolarità linguistiche sono codificate come direzioni geometriche, anche se in
+      forma più complessa.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 6 — STATIC VS CONTEXTUAL -->
+<section>
+  <div class="section-num">06 — IL SALTO QUALITATIVO</div>
+  <h2>Embedding statici vs contestuali</h2>
+  <p>
+    Adesso devo chiarire una cosa importante che cambia tutto, e che è la differenza tra
+    i vecchi modelli (anni 2013-2017) e gli LLM moderni. Senza capire questo passaggio, la
+    nostra mappa mentale degli embedding è incompleta.
+  </p>
+
+  <h3>Embedding statici (vecchi modelli)</h3>
+  <p>
+    Nei vecchi modelli, ogni token ha <em>un</em> embedding fisso. La parola "banca" ha
+    sempre lo stesso vettore, sia che si parli di banca finanziaria sia che si parli di
+    banca del fiume. Il modello non distingue: vede sempre lo stesso vettore.
+  </p>
+
+  <h3>Embedding contestuali (LLM moderni)</h3>
+  <p>
+    Negli LLM moderni, ogni token ha un embedding <strong>base</strong> (quello che abbiamo
+    descritto finora), ma questo è solo il punto di partenza. Mentre il prompt attraversa
+    il modello, <strong>il vettore del token viene modificato</strong> in base ai token che
+    lo circondano. Alla fine, "banca" in "ho aperto un conto in banca" ha un vettore diverso
+    da "banca" in "mi sono seduto sulla banca del fiume".
+  </p>
+
+  <div class="static-vs-contextual">
+    <div class="svc-row">
+      <div class="svc-cell svc-static">
+        <div class="svc-header">Embedding statici (vecchi modelli)</div>
+        <div class="svc-text">
+          "Ho aperto un conto in <strong>banca</strong>"
+        </div>
+        <div class="svc-vector-mini">vettore("banca") = [0.234, -0.891, ...]</div>
+      </div>
+      <div class="svc-cell svc-contextual">
+        <div class="svc-header">Embedding contestuali (LLM moderni)</div>
+        <div class="svc-text">
+          "Ho aperto un conto in <strong>banca</strong>"
+        </div>
+        <div class="svc-vector-mini">vettore("banca" | finanza) = [0.612, -0.423, ...]</div>
+      </div>
+    </div>
+    <div class="svc-row">
+      <div class="svc-cell svc-static">
+        <div class="svc-text">
+          "Mi sono seduto sulla <strong>banca</strong> del fiume"
+        </div>
+        <div class="svc-vector-mini">vettore("banca") = [0.234, -0.891, ...]</div>
+        <div class="svc-meta" style="margin-top: 8px;">
+          <em>Stesso vettore. Il modello non distingue i due significati.</em>
+        </div>
+      </div>
+      <div class="svc-cell svc-contextual">
+        <div class="svc-text">
+          "Mi sono seduto sulla <strong>banca</strong> del fiume"
+        </div>
+        <div class="svc-vector-mini">vettore("banca" | natura) = [-0.156, 0.789, ...]</div>
+        <div class="svc-meta" style="margin-top: 8px;">
+          <em>Vettore diverso. Il modello distingue dal contesto.</em>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    Questo è il salto qualitativo che ha reso gli LLM moderni così potenti. Gli embedding
+    di partenza non sono la rappresentazione finale: sono il punto di partenza che viene
+    poi raffinato dal contesto.
+  </p>
+
+  <h3>Come avviene questo raffinamento</h3>
+  <p>
+    Il raffinamento avviene attraverso il <strong>meccanismo di attenzione</strong>, che è
+    il punto 4 del nostro percorso. L'attenzione è proprio il meccanismo che permette ai
+    token di "guardarsi a vicenda" e modificare i propri embedding in base ai vicini.
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Riassunto in una frase</h4>
+    <p>
+      <strong>Gli embedding partono da una rappresentazione semantica generica, e
+      l'attenzione li trasforma in una rappresentazione semantica specifica del contesto.</strong>
+      È questo che permette al modello di disambiguare i significati, e che lo distingue
+      dalle vecchie tecnologie di word embedding.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 7 — Q&A -->
+<section>
+  <div class="section-num">07 — DOMANDE EMERSE</div>
+  <h2>Approfondimenti dal dialogo</h2>
+  <p>
+    Due domande emerse durante la discussione hanno illuminato aspetti importanti che vale
+    la pena consolidare qui in forma esplicita. Particolarmente la seconda, che merita una
+    trattazione dedicata nel prossimo punto del percorso.
+  </p>
+
+  <div class="qa-block">
+    <div class="qa-question">
+      <p>Le specifiche dimensioni su cui due token sono simili determinano il tipo di relazione che li lega?</p>
+    </div>
+    <div class="qa-answer">
+      <p>
+        L'intuizione è <strong>sostanzialmente corretta</strong>, ed è il modo giusto di
+        pensare lo spazio degli embedding. Ma c'è un'avvertenza tecnica importante che vale
+        la pena chiarire perché altrimenti la mappa mentale rischia di essere troppo pulita
+        rispetto a quello che succede davvero.
+      </p>
+
+      <h4>Quello che è corretto</h4>
+      <p>
+        Sì, è proprio così: lo spazio degli embedding è organizzato in modo che diverse
+        "direzioni" codifichino diversi tipi di relazioni, e il fatto che due token siano
+        simili <em>su certe dimensioni</em> riflette il tipo di relazione che li lega. Quindi:
+      </p>
+      <ul>
+        <li>È vero che pasta e pizza saranno simili su un certo insieme di dimensioni che codificano "essere un cibo italiano a base di farina"</li>
+        <li>È vero che riso e zuppa saranno simili su un insieme parzialmente sovrapposto di dimensioni (quelle che codificano "essere un cibo")</li>
+        <li>È vero che auto e moto saranno simili su dimensioni <em>diverse</em> (quelle che codificano "essere un veicolo a motore"), e queste dimensioni saranno <em>diverse</em> da quelle su cui sono simili pasta e pizza</li>
+      </ul>
+      <p>
+        Questo è il principio fondamentale, e averlo afferrato significa avere il modello
+        mentale giusto.
+      </p>
+
+      <h4>L'avvertenza importante: non c'è una "dimensione cibo"</h4>
+      <p>
+        Adesso la sfumatura. Quando si pensa "le dimensioni su cui pasta e pizza sono simili
+        sono quelle che codificano 'essere un cibo'", si potrebbe immaginare che esista una
+        dimensione specifica del vettore — diciamo la dimensione 1247 — che è "la dimensione
+        del cibo", e che pasta e pizza abbiano valori alti su quella dimensione mentre auto
+        e moto abbiano valori bassi.
+      </p>
+
+      <p>
+        <strong>Non funziona così.</strong> Il sistema è più sottile e più interessante. La
+        proprietà "essere un cibo" non vive in una singola dimensione: è codificata come
+        una <strong>direzione</strong> nello spazio, che attraversa molte dimensioni
+        contemporaneamente. Detto in altre parole: per stabilire se due vettori sono simili
+        "in quanto cibi", non si guarda una singola coordinata, si guarda se i due vettori
+        puntano in una direzione simile lungo un certo "asse" che è una combinazione di
+        molte coordinate.
+      </p>
+
+      <div class="metaphor">
+        <div class="metaphor-label">Metafora del colore RGB</div>
+        <p>
+          Pensa al colore. I colori vivono in uno spazio tridimensionale (rosso, verde,
+          blu, in formato RGB). La proprietà "essere caldo" (rossiccio/aranciato vs
+          azzurrato) non corrisponde al solo asse rosso: è una combinazione delle tre
+          coordinate. Sapendo solo "rosso = 200" non sai se il colore è caldo, perché
+          dipende anche dagli altri due valori.
+        </p>
+        <p>
+          Similmente, sapendo solo che un token ha "dimensione 1247 = 0.8" non sai se è un
+          cibo: la "cibosità" emerge dal pattern complessivo del vettore, non da un singolo
+          numero.
+        </p>
+      </div>
+
+      <h4>Come funziona davvero</h4>
+      <p>
+        Quello che succede è che, durante l'addestramento, il modello impara a disporre i
+        vettori in modo che le proprietà semantiche emergano come <strong>direzioni</strong>
+        (combinazioni di dimensioni). La direzione "essere un cibo" è una linea immaginaria
+        che attraversa lo spazio: i token che sono cibi tendono ad allinearsi con quella
+        linea, i token che non lo sono no.
+      </p>
+
+      <p>
+        E la cosa elegante: queste direzioni sono <strong>infinite e sovrapposte</strong>.
+        Una stessa dimensione contribuisce a molte proprietà semantiche diverse. Una stessa
+        proprietà semantica è codificata da molte dimensioni. È un sistema <em>distribuito</em>,
+        ed è questa distribuzione che lo rende potente e robusto.
+      </p>
+
+      <h4>Una conferma intuitiva: il caso "cane"</h4>
+      <p>
+        Per darti una verifica concreta: una stessa parola può essere simile ad altre parole
+        secondo <em>diverse</em> direzioni contemporaneamente. La parola "cane" è simile a:
+      </p>
+      <ul>
+        <li>"gatto" lungo la direzione 'animale domestico'</li>
+        <li>"lupo" lungo la direzione 'canide'</li>
+        <li>"fedele" lungo la direzione 'qualità associate al cane'</li>
+        <li>"abbaiare" lungo la direzione 'soggetto del verbo'</li>
+      </ul>
+      <p>
+        Ognuna di queste similitudini coinvolge dimensioni e direzioni diverse. Se tutto
+        fosse codificato in singole dimensioni, "cane" non potrebbe essere simile a tutte
+        queste parole contemporaneamente nel modo giusto. È proprio la natura distribuita
+        degli embedding che permette al modello di rappresentare significati ricchi e
+        sfaccettati.
+      </p>
+
+      <h4>Riformulazione precisa</h4>
+      <p>
+        Quindi, riformulando l'intuizione iniziale in modo più preciso:
+      </p>
+      <ul>
+        <li>Pasta e pizza non hanno "punteggi simili su alcune dimensioni": hanno <strong>vettori che si proiettano in modo simile lungo la direzione 'cibo'</strong> (e lungo altre direzioni come 'italianità', 'farina', 'piatto principale')</li>
+        <li>Riso e zuppa si proietteranno in modo simile lungo la direzione 'cibo', ma diversamente lungo altre direzioni (riso si proietta come 'cereale', zuppa come 'piatto liquido')</li>
+        <li>Auto e moto si proietteranno in modo simile lungo la direzione 'veicolo' e 'motore', che sono direzioni diverse da 'cibo'</li>
+      </ul>
+      <p>
+        Dal punto di vista pratico, per il prompting, questa sfumatura cambia poco: il
+        modello mentale "parole simili stanno vicine, parole diverse stanno lontane, e
+        diverse 'similitudini' producono vicinanze in 'direzioni' diverse" è perfetto.
+      </p>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <div class="qa-question">
+      <p>Come si concilia la "vicinanza semantica" con la "predizione del prossimo token"? Sembrano due cose diverse.</p>
+    </div>
+    <div class="qa-answer">
+      <p>
+        Questa è la domanda più importante per capire davvero come funzionano gli LLM,
+        perché tocca esattamente il punto in cui le due immagini degli LLM sembrano scollegate.
+        Da una parte gli embedding e lo spazio semantico (sembrano un sistema "comprensivo");
+        dall'altra la macchina che predice il token successivo (sembra un sistema meccanico).
+        Come si conciliano?
+      </p>
+
+      <p>
+        La risposta richiede di capire una cosa che forse fino ad ora non era chiara:
+        <strong>gli embedding non sono il punto di arrivo del modello, sono il punto di
+        partenza</strong>. E tutto quello che il modello fa, dall'inizio alla fine, è
+        finalizzato a una sola cosa: predire il prossimo token.
+      </p>
+
+      <h4>Il modello è una macchina predittiva</h4>
+      <p>
+        Un LLM, anche il più sofisticato, fa esattamente una cosa: dato un contesto (una
+        sequenza di token), produce una probabilità per ogni possibile token successivo nel
+        suo vocabolario. Non comprende, non ragiona nel senso umano, non sa che cosa sta
+        dicendo. <strong>Calcola probabilità.</strong>
+      </p>
+
+      <p>
+        Se il prompt è "Il gatto beve il", l'output del modello è una distribuzione di
+        probabilità su tutto il vocabolario:
+      </p>
+
+      <ul>
+        <li>"latte" → 42%</li>
+        <li>"tè" → 8%</li>
+        <li>"caffè" → 5%</li>
+        <li>"computer" → ~0%</li>
+      </ul>
+
+      <p>
+        ...e così via per tutti gli altri 100.000+ token del vocabolario. Il token più
+        probabile (o uno scelto con un po' di casualità) viene aggiunto al testo, e il
+        processo ricomincia.
+      </p>
+
+      <h4>Dove entrano gli embedding</h4>
+      <p>
+        Qui sta il punto chiave: <strong>gli embedding sono lo strumento attraverso cui il
+        modello calcola queste probabilità in modo intelligente</strong>.
+      </p>
+
+      <p>
+        Se il modello dovesse calcolare la probabilità del token successivo guardando solo
+        gli ID numerici dei token precedenti, sarebbe un disastro. L'ID 2347 (gatto) e l'ID
+        2348 (qualunque altra parola) sono numericamente vicini ma semanticamente non hanno
+        relazione. Il modello non potrebbe sfruttare nessuna regolarità linguistica.
+      </p>
+
+      <p>
+        Invece, lavorando sugli embedding, il modello sfrutta il fatto che <strong>parole
+        con significato simile producono predizioni simili</strong>.
+      </p>
+
+      <h4>L'esempio della generalizzazione</h4>
+      <p>
+        Immagina che il modello, durante l'addestramento, abbia visto miliardi di volte
+        frasi come "Il gatto beve il latte". Ha imparato che dopo "gatto beve il" la parola
+        più probabile è "latte". Ora arriva un prompt nuovo: "Il felino beve il". Il modello
+        non ha mai visto esattamente questa frase, ma sa due cose:
+      </p>
+
+      <p>
+        <strong>Primo</strong>, il vettore embedding di "felino" è molto vicino a quello di
+        "gatto" (sono sinonimi). <strong>Secondo</strong>, il calcolo di probabilità che fa
+        per "felino beve il" produrrà risultati molto simili a quelli per "gatto beve il".
+      </p>
+
+      <p>
+        Il modello quindi predice "latte" anche dopo "felino beve il", anche se non l'ha
+        mai visto. <strong>La vicinanza semantica nello spazio degli embedding diventa
+        generalizzazione delle predizioni.</strong> È qui che si saldano i due concetti.
+      </p>
+
+      <h4>La frase di sintesi</h4>
+      <p>
+        <strong>Predire il prossimo token = trovare il punto nello spazio degli embedding
+        che meglio "completa" il contesto, e cercare il token più vicino a quel punto.</strong>
+      </p>
+
+      <p>
+        La "vicinanza semantica" è esattamente lo strumento che rende possibile questa
+        predizione. Se nello spazio degli embedding "latte" è vicino a "ciò che i gatti
+        bevono", allora dopo aver letto "il gatto beve il", il modello arriva in una regione
+        dello spazio che è vicina a "latte", e predice "latte".
+      </p>
+
+      <p>
+        Ed ecco l'osservazione fondamentale: <strong>gli LLM non sono macchine che capiscono
+        il linguaggio, sono macchine che hanno imparato la geometria del linguaggio</strong>.
+        Ogni regolarità del linguaggio (grammaticale, semantica, pragmatica) è diventata una
+        regolarità geometrica nello spazio degli embedding. Predire il prossimo token è
+        navigare quella geometria.
+      </p>
+
+      <div class="callout callout-orange" style="margin-top: 18px;">
+        <h4>Trattazione dedicata nel prossimo punto</h4>
+        <p>
+          Questo passaggio merita di essere svolto in modo completo, con il flusso dettagliato
+          dal prompt al token e l'introduzione dei concetti di temperatura e sampling. Tutto
+          il punto 3 del nostro percorso è dedicato a questo argomento.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEZIONE 8 — IMPLICAZIONI -->
+<section>
+  <div class="section-num">08 — IMPLICAZIONI PER IL PROMPTING</div>
+  <h2>Come la geometria degli embedding cambia il modo di scrivere prompt</h2>
+  <p>
+    Adesso veniamo al "perché ti interessa". Capire gli embedding cambia il modo di pensare
+    il prompting in tre direzioni precise.
+  </p>
+
+  <div class="implication-grid">
+    <div class="implication-card">
+      <div class="implication-num">01 / SCELTA DELLE PAROLE</div>
+      <h4>Ogni parola porta con sé un vettore semantico</h4>
+      <p>
+        Quando scrivi "analizza" invece di "guarda", invece di "esamina", invece di "valuta",
+        stai inserendo nel prompt vettori diversi, ognuno con sue connotazioni semantiche
+        apprese dai miliardi di contesti in cui sono comparsi.
+      </p>
+      <p>
+        "Analizza" porta con sé tonalità di sistematicità e profondità; "guarda" è più
+        informale e superficiale; "valuta" implica giudizio. Il modello reagisce a queste
+        differenze, perché le sue previsioni dipendono dai vettori in input.
+      </p>
+    </div>
+    <div class="implication-card">
+      <div class="implication-num">02 / INQUADRAMENTO</div>
+      <h4>Il contesto sposta i vettori dei token successivi</h4>
+      <p>
+        Quando aggiungi contesto a un prompt ("nel campo della finanza, ..."), non stai solo
+        "informando" il modello: stai letteralmente spostando i vettori dei token successivi
+        verso una regione dello spazio degli embedding che codifica il dominio finanziario.
+      </p>
+      <p>
+        È come dire al modello "leggi tutto quello che segue sotto questa lente". Per questo
+        i prompt che iniziano con un inquadramento del contesto tendono a funzionare meglio:
+        rendono espliciti gli "assi" di interpretazione.
+      </p>
+    </div>
+    <div class="implication-card">
+      <div class="implication-num">03 / SINONIMI</div>
+      <h4>Sinonimi non sono identici</h4>
+      <p>
+        Anche se due parole sono sinonimi nel dizionario, i loro vettori embedding sono
+        diversi (vicini ma non identici), perché sono state usate in contesti leggermente
+        diversi.
+      </p>
+      <p>
+        "Veloce", "rapido" e "celere" hanno significati simili ma non identici, e il modello
+        reagirà a ognuno con sfumature diverse. Se hai una preferenza precisa, vale la pena
+        scegliere bene; se non ti importa, qualsiasi sinonimo funzionerà.
+      </p>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num">~10K</div>
+      <div class="stat-label">Numero tipico di dimensioni di un embedding moderno</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Distribuito: ogni proprietà semantica si spalma su molte dimensioni</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2013</div>
+      <div class="stat-label">Anno della scoperta delle proprietà aritmetiche (Word2Vec)</div>
+    </div>
+  </div>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Cinque cose da portarsi via dal punto 2</h3>
+    <ol class="takeaway-list">
+      <li>
+        L'ID di un token è un'etichetta arbitraria, come un CAP o un numero di matricola.
+        Il significato sta nel <em>vettore embedding</em> associato — un vettore di migliaia
+        di numeri appreso durante l'addestramento, non programmato.
+      </li>
+      <li>
+        Lo spazio degli embedding è strutturato: token con significato simile finiscono in
+        regioni vicine, token con significato diverso finiscono lontani. Vicinanza numerica
+        = vicinanza semantica. Ed è questa struttura che permette al modello di generalizzare
+        dai casi visti a casi simili mai visti.
+      </li>
+      <li>
+        Le proprietà semantiche sono codificate come <em>direzioni</em> nello spazio
+        (combinazioni di molte dimensioni), non come singole dimensioni. La rappresentazione
+        è distribuita: ogni proprietà si spalma su molte coordinate, ogni coordinata
+        contribuisce a molte proprietà.
+      </li>
+      <li>
+        Le relazioni semantiche diventano operazioni aritmetiche sui vettori (re − uomo +
+        donna ≈ regina, Parigi − Francia + Italia ≈ Roma). Le regolarità del linguaggio
+        sono regolarità geometriche emergenti dall'addestramento.
+      </li>
+      <li>
+        Negli LLM moderni gli embedding sono <em>contestuali</em>: il vettore di partenza
+        viene modificato dal contesto attraverso il meccanismo di attenzione. È questo che
+        permette al modello di disambiguare significati come "banca finanziaria" vs "banca
+        del fiume", e che lo distingue dai vecchi modelli di word embedding.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- BRIDGE -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="bridge">
+    <div class="bridge-label">Prossimo punto</div>
+    <h3>Dalla geometria semantica alla predizione del token</h3>
+    <p>
+      Abbiamo visto come ogni token diventa una posizione nello spazio degli embedding. Ma
+      manca un pezzo cruciale: cosa fa il modello con questi vettori? Come si arriva, alla
+      fine, a generare testo? Il prossimo punto è dedicato esattamente a questo passaggio,
+      che è il cuore di come funzionano gli LLM. Vedremo perché un modello può essere
+      contemporaneamente "una macchina che predice il prossimo token" e "una macchina che
+      ragiona sulla geometria del significato": le due descrizioni sono la stessa cosa,
+      vista da angolazioni diverse.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Punto 2 di 6 — Percorso di approfondimento su LLM e prompting</p>
+  <p>Embedding & spazio semantico</p>
+</footer>
+
+</body>
+</html>

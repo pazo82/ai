@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tema 2 — Il Transformer come architettura completa</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--indigo);
+    padding: 88px 48px 96px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 580px; height: 580px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-stack {
+    position: absolute;
+    top: 50%; right: 8%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 60px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 20px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 48px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--indigo);
+    margin: 28px 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  .callout p { font-size: 15.5px; line-height: 1.7; margin-bottom: 12px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-orange {
+    background: var(--orange-faint);
+    border-left-color: var(--orange);
+  }
+  .callout-orange h4 { color: var(--orange); }
+
+  .callout-indigo {
+    background: var(--indigo-faint);
+    border-left-color: var(--indigo);
+  }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout-teal {
+    background: var(--teal-faint);
+    border-left-color: var(--teal);
+  }
+  .callout-teal h4 { color: var(--teal); }
+
+  .callout-amber {
+    background: var(--amber-faint);
+    border-left-color: var(--amber);
+  }
+  .callout-amber h4 { color: var(--amber); }
+
+  .callout-purple {
+    background: var(--purple-faint);
+    border-left-color: var(--purple);
+  }
+  .callout-purple h4 { color: var(--purple); }
+
+  /* ── METAPHOR BOX ── */
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--purple);
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .metaphor p { margin-bottom: 12px; font-size: 15.5px; line-height: 1.72; }
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  /* ── INSIGHT ── */
+  .insight {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+
+  .insight em { color: var(--orange-light); font-style: italic; }
+  .insight strong { color: var(--white); }
+  .insight code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── DIAGRAM ── */
+  .diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  .diagram-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .diagram-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .diagram-caption {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--ink-light);
+    text-align: center;
+    margin-top: 18px;
+    padding: 0 16px;
+    line-height: 1.6;
+  }
+
+  /* ── COMPARISON TABLE (attenzione vs FFN) ── */
+  .comparison {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 32px 0;
+    overflow: hidden;
+  }
+
+  .comparison-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--indigo);
+    color: var(--white);
+  }
+
+  .comparison-header > div {
+    padding: 18px 24px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .comparison-header > div:first-child {
+    border-right: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .comparison-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .comparison-row:last-child { border-bottom: none; }
+
+  .comparison-row > div {
+    padding: 20px 24px;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+  }
+
+  .comparison-row > div:first-child {
+    border-right: 1px solid var(--border2);
+  }
+
+  .comparison-row .cmp-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  /* ── PARAM DISTRIBUTION ── */
+  .param-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 30px;
+    margin: 28px 0;
+  }
+
+  .param-bar-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .param-bar-track {
+    display: flex;
+    height: 38px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .param-segment {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .param-ffn {
+    background: var(--orange);
+    width: 62%;
+  }
+
+  .param-attn {
+    background: var(--indigo);
+    width: 33%;
+  }
+
+  .param-norm {
+    background: var(--teal);
+    width: 5%;
+  }
+
+  .param-legend {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .param-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--ink-mid);
+  }
+
+  .param-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── STAGES ── */
+  .stages {
+    margin: 32px 0;
+    counter-reset: stage-counter;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 22px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border2);
+    align-items: start;
+  }
+
+  .stage:last-child { border-bottom: none; }
+
+  .stage-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    color: var(--orange);
+    line-height: 1;
+    counter-increment: stage-counter;
+  }
+
+  .stage-num::before { content: counter(stage-counter, decimal-leading-zero); }
+
+  .stage h4 {
+    font-family: var(--sans);
+    font-size: 17px;
+    color: var(--indigo);
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+
+  .stage p {
+    font-size: 15.5px;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(13,122,110,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .takeaway-list em { color: var(--orange-light); font-style: italic; }
+  .takeaway-list strong { color: var(--white); font-weight: 600; }
+  .takeaway-list code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── BRIDGE ── */
+  .bridge {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 48px;
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .bridge h3 {
+    margin: 0 0 16px;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--indigo);
+    font-weight: 500;
+  }
+
+  .bridge p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 38px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .insight { padding: 28px 24px; }
+    .takeaways { padding: 40px 28px; }
+    .bridge { padding: 32px 24px; }
+    .diagram { padding: 22px 16px; }
+    .stage { grid-template-columns: 50px 1fr; gap: 14px; }
+    .comparison-header, .comparison-row { grid-template-columns: 1fr; }
+    .comparison-header > div:first-child,
+    .comparison-row > div:first-child {
+      border-right: none;
+      border-bottom: 1px solid var(--border2);
+    }
+    .param-legend { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <svg class="hero-bg-stack" width="180" height="280" viewBox="0 0 180 280" xmlns="http://www.w3.org/2000/svg">
+    <!-- Pila di strati stilizzata -->
+    <rect x="20" y="10" width="140" height="22" rx="3" fill="white" opacity="0.9"/>
+    <rect x="20" y="40" width="140" height="22" rx="3" fill="white" opacity="0.75"/>
+    <rect x="20" y="70" width="140" height="22" rx="3" fill="white" opacity="0.6"/>
+    <rect x="20" y="100" width="140" height="22" rx="3" fill="white" opacity="0.45"/>
+    <rect x="20" y="130" width="140" height="22" rx="3" fill="white" opacity="0.35"/>
+    <rect x="20" y="160" width="140" height="22" rx="3" fill="white" opacity="0.45"/>
+    <rect x="20" y="190" width="140" height="22" rx="3" fill="white" opacity="0.6"/>
+    <rect x="20" y="220" width="140" height="22" rx="3" fill="white" opacity="0.75"/>
+    <rect x="20" y="250" width="140" height="22" rx="3" fill="white" opacity="0.9"/>
+    <!-- Freccia laterale che indica il flusso -->
+    <line x1="0" y1="20" x2="0" y2="262" stroke="#f07040" stroke-width="2" stroke-dasharray="4,4"/>
+    <polygon points="0,268 -5,258 5,258" fill="#f07040"/>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-label">Tema 2 — Approfondimento</div>
+    <h1>Il Transformer come <em>architettura</em> completa</h1>
+    <p class="hero-sub">
+      Dal microscopio sull'attenzione alla vista panoramica del modello. Cosa c'è dentro
+      uno strato oltre all'attenzione, perché serve, e come gli strati si compongono
+      nell'architettura intera che dall'embedding di input arriva alla predizione del
+      prossimo token.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">FFN, residual, layer norm, macro-flusso</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Tema del percorso</div>
+        <div class="meta-value">2 di 4</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Prerequisiti</div>
+        <div class="meta-value">Tema 1, punti 4A del percorso precedente</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 — DOMANDA APRENTE -->
+<section>
+  <div class="section-num">01 — UNA DOMANDA CHE APRE TUTTO</div>
+  <h2>Cosa manca all'attenzione per spiegare cosa fanno gli LLM?</h2>
+  <p class="lead">
+    Adesso che abbiamo chiuso l'anello dall'attenzione alla predizione, è il momento di
+    fare zoom-out e guardare il Transformer come oggetto intero. Ma per capirlo bene non
+    parto da un elenco dei suoi componenti. Parto da una domanda che fa emergere il
+    bisogno di ognuno di essi: <em>se il Transformer fosse fatto solo di strati di
+    attenzione, cosa potrebbe — e non potrebbe — fare il modello?</em>
+  </p>
+
+  <p>
+    Pensiamoci con calma. L'attenzione, ridotta all'osso, è un'operazione di
+    <strong>mescolamento</strong>. Ogni token prende combinazioni pesate dei vettori
+    degli altri token. Da un punto di vista matematico, questo significa che il vettore
+    di ogni token, dopo l'attenzione, è una somma pesata di altri vettori della stessa
+    sequenza. Una media intelligente, se vuoi: pesata in base alla rilevanza, con teste
+    multiple in parallelo, ma sempre una combinazione di cose che <em>ci sono già</em>
+    nella sequenza.
+  </p>
+
+  <p>
+    Adesso domandiamoci: <strong>basta mescolare informazioni esistenti per "comprendere"
+    il linguaggio?</strong>
+  </p>
+
+  <p>
+    Pensiamoci con un esempio. Il modello vede il token "banca" e i suoi vicini "fiume",
+    "seduto", "sulla". L'attenzione mescola questi vettori e produce un nuovo vettore di
+    "banca" che ha incorporato i contributi dei vicini. Ma il significato che vogliamo
+    che emerga — "banca come argine, oggetto di legno, parte del paesaggio fluviale" — non
+    è linearmente presente nei vettori di partenza. È una <em>configurazione semantica
+    nuova</em> che richiede di trasformare l'informazione, non solo di mescolarla.
+  </p>
+
+  <p>
+    Detto in modo più matematico ma di un solo passaggio: una combinazione lineare di
+    vettori è, per definizione, ancora nella stessa "regione" geometrica dei vettori di
+    partenza. Se il modello avesse a disposizione solo operazioni di mescolamento,
+    potrebbe navigare lo spazio degli embedding spostandosi tra punti già rappresentabili
+    come combinazioni di altri punti. Ma non potrebbe <em>creare</em> configurazioni
+    qualitativamente nuove. Gli mancherebbe la capacità di fare riconoscimento di pattern
+    complessi, di applicare regole di inferenza, di trasformare un'informazione in
+    qualcosa di strutturalmente diverso.
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>Il bisogno che apre il bisogno</h4>
+    <p>
+      L'attenzione, da sola, è troppo "lineare" per spiegare quello che gli LLM fanno.
+      Serve qualcosa che spezzi questa linearità — qualcosa che possa prendere le
+      informazioni mescolate dall'attenzione e <em>trasformarle</em> in modo non banale.
+      Serve, a ogni strato, una fase di <strong>elaborazione</strong> che si aggiunge
+      alla fase di <strong>mescolamento</strong>. Quel "qualcosa" è la rete feed-forward.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 2 — LA FFN -->
+<section>
+  <div class="section-num">02 — DOVE AVVIENE L'ELABORAZIONE</div>
+  <h2>La rete feed-forward: trasformare quello che si ha in mano</h2>
+  <p>
+    Ogni strato di un Transformer ha <strong>due</strong> sotto-componenti, non uno. Il
+    primo è il blocco di attenzione, di cui abbiamo già parlato a fondo nel punto 4A e
+    nel Tema 1. Il secondo si chiama <strong>rete feed-forward</strong> (in inglese
+    <em>feed-forward network</em>, abbreviato FFN, o anche <em>MLP</em> — multi-layer
+    perceptron), ed è una piccola rete neurale tradizionale che viene applicata a ogni
+    vettore della sequenza, <strong>indipendentemente uno dall'altro</strong>.
+  </p>
+
+  <p>
+    Fermati un attimo su quel "indipendentemente uno dall'altro", perché è la differenza
+    chiave rispetto all'attenzione. L'attenzione fa interagire i token tra loro: è
+    un'operazione di <em>comunicazione</em>. La rete feed-forward, invece, prende un
+    vettore alla volta e lo trasforma per conto suo, senza guardare gli altri: è
+    un'operazione di <em>elaborazione locale</em>.
+  </p>
+
+  <h3>Cosa significa "elaborazione" in pratica</h3>
+  <p>
+    Internamente la FFN è semplice nella sua struttura. Prende il vettore in input (di,
+    diciamo, 12.000 dimensioni), lo proietta in uno spazio molto più grande (tipicamente
+    4 volte tanto, quindi 48.000 dimensioni), gli applica una funzione <strong>non
+    lineare</strong> (tipicamente una ReLU o varianti come GELU — sono dettagli ma si
+    riducono a "fai passare l'informazione attraverso una soglia, scartando i contributi
+    negativi"), e poi riproietta il risultato nello spazio originale di 12.000 dimensioni.
+    Espandi, applica una soglia, comprimi.
+  </p>
+
+  <p>
+    Il punto chiave è la <strong>non linearità</strong>. Quella funzione che applichi
+    nello spazio espanso è ciò che spezza la "linearità" dell'attenzione. È quella che
+    permette al modello di fare cose che non sono esprimibili come somme pesate:
+    riconoscere pattern, applicare trasformazioni condizionali (<em>"se il vettore ha
+    questa proprietà, trasformalo così; altrimenti cosà"</em>), creare configurazioni
+    semantiche qualitativamente nuove a partire da quelle esistenti. Senza la non
+    linearità, 32 strati di Transformer collasserebbero matematicamente in un singolo
+    strato lineare equivalente, e il modello non sarebbe in grado di apprendere niente
+    di interessante.
+  </p>
+
+  <h3>L'esempio concreto: la parola "opera"</h3>
+  <p>
+    Per rendere la differenza tra attenzione e FFN davvero pratica, prendiamo un esempio
+    e lo seguiamo passo per passo. La frase è: <em>"Il pittore osservò la sua opera,
+    soddisfatto."</em> Concentriamoci sul vettore della parola <strong>"opera"</strong>,
+    perché è la parte interessante.
+  </p>
+
+  <p>
+    Quando il modello riceve "opera" <em>prima</em> di qualsiasi elaborazione, ha in
+    mano il vettore di embedding statico di quella parola: il punto fisso nello spazio
+    semantico che corrisponde a tutte le possibili "opere" del mondo. Letterarie,
+    musicali, pittoriche, teatrali, idrauliche. Quel vettore, da solo, è ambiguo. Per
+    fare bene il suo lavoro — predire i token successivi, capire il senso della frase —
+    il modello deve trasformarlo in un vettore che dica "opera <strong>pittorica</strong>,
+    prodotta da un pittore, oggetto di osservazione e fonte di soddisfazione".
+  </p>
+
+  <h4>Cosa fa l'attenzione su "opera"</h4>
+  <p>
+    L'attenzione fa una cosa precisa. Il vettore di "opera" emette una query che dice
+    qualcosa come <em>"sto cercando informazioni sul soggetto agente di questa frase,
+    perché potrebbero servirmi a disambiguare il mio significato"</em>. Le key di tutti
+    gli altri token vengono confrontate con questa query. Il vettore di "pittore" risulta
+    avere una key molto rilevante. Il suo value viene allora <em>travasato</em> nel
+    vettore di "opera", con un peso elevato. Anche altri token contribuiscono in misura
+    minore: "osservò" porta un'informazione di tipo "soggetto di un atto di osservazione",
+    "soddisfatto" porta una sfumatura emotiva.
+  </p>
+
+  <p>
+    Cosa è cambiato, dopo l'attenzione? Il vettore di "opera" prima conteneva solo
+    "opera". Adesso contiene "opera + pittore + atto di osservazione + soddisfazione".
+    Sono <em>informazioni che prima erano altrove</em>, e che ora sono <em>anche qui</em>.
+    L'attenzione le ha portate. Non le ha inventate, non le ha trasformate in qualcosa
+    di qualitativamente diverso: le ha <strong>spostate</strong>. Le ha rese accessibili
+    a un vettore che prima non le aveva.
+  </p>
+
+  <h4>Cosa fa la FFN su "opera"</h4>
+  <p>
+    Adesso il vettore di "opera" entra nella rete feed-forward. Quel vettore, appena
+    uscito dal blocco di attenzione, contiene una somma di informazioni: "opera (generica)
+    + segnale-pittore + segnale-osservazione + segnale-soddisfazione". È un vettore
+    <em>ricco</em> ma <em>grezzo</em>. Niente, in quel vettore, ha ancora "ragionato"
+    sul significato della combinazione.
+  </p>
+
+  <p>
+    La FFN prende il vettore — uno per volta, senza guardare gli altri vettori della
+    sequenza — e gli applica una trasformazione che chiede sostanzialmente: <em>"Date
+    queste informazioni che hai in pancia, in che regione dello spazio semantico dovresti
+    vivere adesso?"</em>. E muove il vettore in quella regione. La FFN che riceve il
+    vettore di "opera" arricchito di tutti quei contributi può "riconoscere" il pattern
+    <em>opera + agente=pittore</em> e produrre come output un vettore che si è spostato
+    verso la regione dei dipinti, dei quadri, della pittura figurativa. Non perché ha
+    guardato gli altri token (non li sta guardando), ma perché la combinazione di
+    informazioni che ha <em>dentro</em> il vettore già contiene il pattern, e la FFN è
+    stata addestrata a riconoscere che quel pattern corrisponde a un certo spostamento
+    nello spazio.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora del detective</div>
+    <p>
+      Pensa a un detective al lavoro su un caso. Il blocco di <strong>attenzione</strong>
+      è la fase in cui il detective gira per la scena del crimine e prende note: <em>qui
+      c'è un'impronta, qui c'è un capello, qui c'è una traccia di fango</em>. Riempie il
+      taccuino raccogliendo materiale che era distribuito altrove. Quando torna in
+      ufficio, il dossier non è più vuoto: contiene una sintesi grezza degli indizi
+      raccolti.
+    </p>
+    <p>
+      La <strong>rete feed-forward</strong> è il momento in cui il detective si siede in
+      ufficio con il dossier pieno e tira le conclusioni: <em>date queste tracce,
+      l'assassino era una persona alta, magra, di passaggio in giardino</em>. La
+      conclusione è un'informazione <em>nuova</em>, non era in nessuno dei pezzi di
+      carta presi singolarmente. È nata dalla rielaborazione, applicando schemi
+      riconosciuti mille volte in addestramento.
+    </p>
+    <p>
+      Le due fasi non sono intercambiabili. Non puoi tirare conclusioni senza prima
+      raccogliere indizi (la FFN non funziona se l'attenzione non le ha portato i pezzi
+      giusti). Ma non puoi nemmeno chiamare "lavoro detective" la sola raccolta di indizi
+      (l'attenzione, da sola, non produce comprensione).
+    </p>
+  </div>
+
+  <h3>Una sottigliezza importante: entrambi modificano il vettore</h3>
+  <p>
+    C'è un punto che vale la pena fissare con precisione, perché è dove due descrizioni
+    diverse — entrambe vere — sembrano dirsi cose opposte. Sia l'attenzione sia la FFN
+    <strong>modificano i vettori dei token</strong>. La differenza non è che una li tocca
+    e l'altra no. La differenza è <strong>da dove viene il materiale con cui li
+    modificano</strong>.
+  </p>
+
+  <div class="comparison">
+    <div class="comparison-header">
+      <div>Blocco di attenzione</div>
+      <div>Rete feed-forward (FFN)</div>
+    </div>
+    <div class="comparison-row">
+      <div>
+        <div class="cmp-label">Cosa fa</div>
+        Costruisce il nuovo vettore <strong>a partire da altri vettori della sequenza</strong>.
+        Mescola le posizioni tra loro.
+      </div>
+      <div>
+        <div class="cmp-label">Cosa fa</div>
+        Costruisce il nuovo vettore <strong>a partire dal vettore stesso</strong>,
+        applicando una rielaborazione non lineare.
+      </div>
+    </div>
+    <div class="comparison-row">
+      <div>
+        <div class="cmp-label">Direzione</div>
+        Operazione <strong>orizzontale</strong>: pesca da posizioni diverse della sequenza
+        e combina.
+      </div>
+      <div>
+        <div class="cmp-label">Direzione</div>
+        Operazione <strong>verticale</strong>: lavora su un singolo vettore e lo trasforma
+        usando ciò che il modello ha imparato.
+      </div>
+    </div>
+    <div class="comparison-row">
+      <div>
+        <div class="cmp-label">Vede</div>
+        Tutta la sequenza (rispettando la causalità). È intrinsecamente <em>sociale</em>.
+      </div>
+      <div>
+        <div class="cmp-label">Vede</div>
+        Solo il vettore stesso, in completo isolamento dagli altri. È <em>solitaria</em>.
+      </div>
+    </div>
+    <div class="comparison-row">
+      <div>
+        <div class="cmp-label">Funzione</div>
+        <strong>Comunicazione</strong> tra posizioni. Routing dell'informazione.
+      </div>
+      <div>
+        <div class="cmp-label">Funzione</div>
+        <strong>Trasformazione</strong> di una posizione. Inferenza non lineare.
+      </div>
+    </div>
+    <div class="comparison-row">
+      <div>
+        <div class="cmp-label">Limite se da sola</div>
+        Vettori contestualmente arricchiti, ma senza capacità di trarre inferenze. Sistema
+        di smistamento postale dove il destinatario non sa leggere.
+      </div>
+      <div>
+        <div class="cmp-label">Limite se da sola</div>
+        Inferenze potenti ma cieche al contesto. 500 elaboratori che lavorano in parallelo
+        senza mai parlarsi.
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-indigo">
+    <h4>La formulazione da portarsi via</h4>
+    <p>
+      L'attenzione aggiunge <strong>contesto</strong>: trasforma una sequenza di vettori
+      indipendenti in una sequenza di vettori contestualmente connessi. La FFN aggiunge
+      <strong>inferenza</strong>: trasforma un vettore "ricco di indizi" in un vettore
+      "che sa cosa quegli indizi significano". Entrambe modificano i vettori. Ma il
+      <em>tipo</em> di modifica è categorialmente diverso, ed entrambi i tipi sono
+      necessari, in alternanza, perché il modello faccia il suo lavoro.
+    </p>
+  </div>
+
+  <h3>L'alternanza che costruisce astrazione</h3>
+  <p>
+    La cosa magnifica — la ragione per cui l'architettura funziona così bene — è che le
+    due operazioni si <strong>alimentano</strong> a vicenda strato dopo strato.
+  </p>
+
+  <p>
+    <strong>Strato 1:</strong> l'attenzione raccoglie indizi locali (parole vicine), la
+    FFN ne ricava conclusioni di basso livello (riconoscere parti del discorso, accordi
+    grammaticali). <strong>Strato 2:</strong> l'attenzione lavora ora su vettori che
+    hanno già conclusioni grammaticali dentro, e raccoglie indizi più astratti (ruoli
+    sintattici, dipendenze a media distanza); la FFN ne ricava conclusioni di livello
+    superiore (struttura della frase). <strong>Strato 3:</strong> l'attenzione raccoglie
+    indizi a livello di significato (relazioni semantiche), la FFN inferisce concetti
+    compositivi. E così via, salendo di astrazione, fino agli ultimi strati che operano
+    su rappresentazioni quasi puramente concettuali.
+  </p>
+
+  <p>
+    Dopo 32 cicli di "raccolta di indizi + inferenza", il vettore di "opera" non è più
+    semplicemente "opera + pittore travasato dentro". È un vettore che vive in una
+    regione dello spazio semantico estremamente specifica: <em>dipinto contemplato dal
+    suo autore con soddisfazione</em>. Una configurazione semantica che richiede sia la
+    presenza dei contributi giusti (l'attenzione li ha portati) sia l'inferenza che li
+    trasforma in un significato coerente (la FFN l'ha eseguita, livello dopo livello).
+  </p>
+</section>
+
+<!-- SEZIONE 3 — RESIDUAL -->
+<section>
+  <div class="section-num">03 — IL FLUSSO CHE NON SI PERDE</div>
+  <h2>Le residual connections: una scorciatoia che cambia tutto</h2>
+  <p>
+    Adesso facciamo emergere il bisogno del prossimo componente. Sappiamo che ogni strato
+    fa due cose: attenzione e FFN. Sappiamo anche che gli strati sono molti — 32, 64,
+    anche 96 nei modelli più grandi. Stiamo parlando, quindi, di sequenze molto lunghe
+    di operazioni applicate sullo stesso vettore. Domanda: <em>cosa succede a un vettore
+    quando lo fai passare attraverso 96 trasformazioni una dopo l'altra?</em>
+  </p>
+
+  <p>
+    In linea di principio, dovrebbe migliorare a ogni passaggio: ogni strato aggiunge
+    un livello di astrazione, contestualizzazione, raffinamento. In pratica, succede una
+    cosa che chi addestra reti neurali profonde conosce bene: <strong>l'informazione
+    tende a "esplodere" o a "svanire" durante il passaggio attraverso molti
+    strati</strong>.
+  </p>
+
+  <p>
+    Quando passi un vettore attraverso una trasformazione, il risultato dipende dai pesi
+    della trasformazione. Se i pesi sono leggermente "troppo grandi", il vettore di
+    uscita è leggermente più grande di quello di entrata. Ripeti l'operazione 96 volte
+    e il vettore esplode in numeri astronomici. Se i pesi sono leggermente "troppo
+    piccoli", il vettore si rimpicciolisce a ogni passaggio, e dopo 96 strati è
+    praticamente zero — l'informazione si è dissolta nel rumore numerico.
+  </p>
+
+  <p>
+    Inoltre c'è un secondo problema, meno ovvio. Anche supponendo che il vettore mantenga
+    magnitudini ragionevoli, dopo 96 strati di trasformazioni il vettore di uscita
+    potrebbe non avere quasi più traccia del vettore di partenza. Ogni strato ha
+    rielaborato. Ogni rielaborazione ha rimosso qualcosa e aggiunto qualcosa. Dopo 96
+    rielaborazioni, il vettore originale (l'embedding del token "gatto", diciamo) si è
+    dissolto in qualcosa di completamente diverso, e il modello ha perso la
+    <em>connessione con il significato di partenza</em>.
+  </p>
+
+  <h3>L'idea: aggiungere invece di sostituire</h3>
+  <p>
+    Questo non è un problema teorico, è un problema pratico che ha bloccato il progresso
+    delle reti profonde per anni. La soluzione, semplicissima ma rivoluzionaria, si
+    chiama <strong>residual connection</strong> (connessione residua), ed è stata
+    introdotta nel 2015 da una famosa architettura di visione, ResNet. Il Transformer
+    la eredita pari pari.
+  </p>
+
+  <p>
+    L'idea è quasi banale. A ogni strato, invece di sostituire il vettore in entrata
+    con il vettore in uscita della trasformazione, <strong>aggiungi</strong> il risultato
+    della trasformazione al vettore di entrata. In formula spicciola: se prima era
+    <code>output = trasformazione(input)</code>, adesso è
+    <code>output = input + trasformazione(input)</code>.
+  </p>
+
+  <p>
+    Cosa fa questo, in pratica. Lo strato non <em>sostituisce</em> il vettore, lo
+    <em>modifica</em>. Il vettore originale viene preservato, e quello che lo strato fa
+    è aggiungere un <strong>aggiornamento</strong> — un piccolo emendamento che riflette
+    il lavoro di attenzione e FFN. Se la trasformazione produce qualcosa di utile,
+    l'aggiornamento si somma e il vettore migliora. Se la trasformazione produce qualcosa
+    di poco rilevante, l'aggiornamento è piccolo e il vettore rimane sostanzialmente
+    quello che era. In ogni caso, <strong>il vettore originale non si perde</strong>.
+  </p>
+
+  <p>
+    Il risultato è straordinario. Anche dopo 96 strati, il vettore mantiene una
+    connessione diretta con il suo punto di partenza, perché ogni strato ha solo
+    <em>aggiunto</em> contributi, mai <em>sostituito</em>. Le residual connections
+    trasformano ogni strato da "sostituto del vettore" in "raffinatore del vettore". E
+    sbloccano la possibilità di costruire reti profonde davvero efficaci.
+  </p>
+
+  <h3>Il residual stream</h3>
+  <p>
+    C'è un nome bellissimo, usato in mechanistic interpretability, per descrivere come
+    si comporta il vettore quando attraversa una rete con residual connections: si chiama
+    <strong>residual stream</strong>. Pensa al vettore come a un flusso d'acqua che
+    scorre attraverso gli strati. A ogni strato, l'attenzione e la FFN aggiungono
+    qualcosa al flusso — una goccia di un colore diverso, un nutriente, un piccolo
+    modificatore. Ma il flusso continua, sempre lo stesso flusso, che raccoglie
+    contributi mentre attraversa la rete. Dopo 96 strati, il flusso è denso,
+    contestualizzato, ricchissimo, ma è ancora <em>lui</em>, e chi guarda all'uscita può
+    ancora vedere — se sa cercarli — i colori del flusso d'acqua originale.
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>Il legame con il vettore <code>h</code> del Tema 1</h4>
+    <p>
+      Questa metafora illumina anche il significato del vettore <code>h</code> di cui
+      abbiamo parlato nel Tema 1. Quel vettore, all'uscita dell'ultimo strato, è il punto
+      finale del residual stream dell'ultima posizione del prompt: un flusso che è
+      partito come embedding di "il" (l'ultimo token del prompt), e che strato dopo strato
+      ha raccolto contributi dall'attenzione (informazioni dai vicini) e dalla FFN
+      (rielaborazioni locali), arrivando alla fine come una direzione densa e
+      contestualizzata che indica "ecco dove cade la continuazione".
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 4 — LAYER NORM -->
+<section>
+  <div class="section-num">04 — L'IGIENE NUMERICA</div>
+  <h2>Layer normalization: il componente meno glamour, ma indispensabile</h2>
+  <p>
+    Manca un ultimo componente, ed è quello concettualmente meno glamour ma operativamente
+    cruciale. Se le residual connections risolvono il problema dell'esplosione e della
+    dissolvenza dell'informazione, c'è un problema più sottile che rimane: <strong>la
+    stabilità numerica delle attivazioni</strong>.
+  </p>
+
+  <p>
+    In una rete profonda, anche con residual connections, il vettore tende ad accumulare
+    contributi a ogni strato. Se i contributi sono mediamente positivi, il vettore cresce.
+    Se sono mediamente in una certa direzione, il vettore deriva in quella direzione.
+    Dopo molti strati, il vettore può diventare numericamente instabile — non per
+    esplosione, ma per <em>deriva</em>. Le sue componenti possono diventare molto grandi
+    in alcune dimensioni e molto piccole in altre, rendendo difficili sia il calcolo
+    (problemi di precisione numerica) sia l'apprendimento.
+  </p>
+
+  <h3>Il principio: tenere il vettore "centrato"</h3>
+  <p>
+    La soluzione si chiama <strong>layer normalization</strong> (o varianti come RMSNorm,
+    ma il principio è lo stesso). È un'operazione applicata a ogni vettore, prima o dopo
+    (a seconda della variante architetturale) i blocchi di attenzione e feed-forward. Il
+    principio è semplicissimo: prendi il vettore, calcola la sua "scala media" (quanto
+    sono grandi le sue componenti, in media), e ridimensiona il vettore in modo che
+    questa scala sia standard. È come tenere il vettore "centrato": indipendentemente da
+    quanto sono cresciuti i contributi accumulati nei residual stream, prima di entrare
+    nello strato successivo il vettore viene riportato a magnitudini normalizzate.
+  </p>
+
+  <p>
+    L'effetto pratico è che il modello diventa addestrabile in modo stabile, anche con
+    decine o centinaia di strati. Il calcolo numerico rimane sensato, i gradienti durante
+    l'addestramento rimangono informativi, l'ottimizzatore riesce a convergere. Senza
+    layer normalization, addestrare un Transformer profondo sarebbe un incubo di
+    instabilità numerica.
+  </p>
+
+  <div class="callout callout-amber">
+    <h4>Una scelta ingegneristica, non concettuale</h4>
+    <p>
+      Da un punto di vista concettuale, la layer normalization è il componente meno
+      "interessante" dei tre che abbiamo visto: non aggiunge capacità espressiva (a
+      differenza delle FFN), non risolve problemi di flusso dell'informazione (a differenza
+      delle residual). È un componente di <strong>igiene numerica</strong>. Ma senza di
+      lei, niente di tutto il resto funzionerebbe in pratica. È una di quelle scelte
+      ingegneristiche che non emergono dalla teoria ma dalla cura pratica, e che si
+      rivelano indispensabili.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 5 — RICOMPOSIZIONE STRATO -->
+<section>
+  <div class="section-num">05 — UNO STRATO, RICOMPOSTO</div>
+  <h2>Mettiamo insieme: la struttura completa di uno strato del Transformer</h2>
+  <p>
+    Adesso abbiamo tutti i pezzi. Vediamo cosa fa, in ordine, un singolo strato del
+    Transformer su un vettore in arrivo dal residual stream.
+  </p>
+
+  <p>
+    Lo strato riceve in input il vettore <code>x</code> (è il residual stream proveniente
+    dallo strato precedente). Prima cosa, gli applica una <strong>layer normalization</strong>,
+    ottenendo <code>x'</code> (il vettore con magnitudini standardizzate). Poi gli applica
+    il <strong>blocco di attenzione</strong>, che produce un aggiornamento — chiamiamolo
+    <code>Δa</code> — basato sull'interazione con gli altri token. Questo aggiornamento
+    viene <strong>sommato</strong> al vettore originale <code>x</code> via residual
+    connection, ottenendo <code>x + Δa</code>. A questo punto si applica una
+    <strong>seconda layer normalization</strong> al risultato, e poi la <strong>rete
+    feed-forward</strong>, che produce un secondo aggiornamento <code>Δf</code> basato
+    sull'elaborazione locale del vettore. Anche questo secondo aggiornamento viene
+    sommato via residual: il risultato finale dello strato è <code>x + Δa + Δf</code>.
+  </p>
+
+  <div class="diagram">
+    <div class="diagram-label">Lo schema di un singolo strato del Transformer</div>
+    <svg class="diagram-svg" viewBox="0 0 700 460" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#c94a1a"/>
+        </marker>
+        <marker id="arrThin" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L7,3 z" fill="#0d7a6e"/>
+        </marker>
+      </defs>
+
+      <!-- Input -->
+      <text x="350" y="22" font-family="JetBrains Mono" font-size="11" fill="#6b7280" text-anchor="middle" letter-spacing="1.2">RESIDUAL STREAM IN ENTRATA</text>
+      <text x="350" y="44" font-family="Lora" font-size="14" fill="#1e2a5e" text-anchor="middle" font-style="italic">x</text>
+      <line x1="350" y1="50" x2="350" y2="80" stroke="#c94a1a" stroke-width="2" marker-end="url(#arr)"/>
+
+      <!-- Layer Norm 1 -->
+      <rect x="270" y="82" width="160" height="34" rx="4" fill="#0d7a6e" opacity="0.85"/>
+      <text x="350" y="103" font-family="Outfit" font-size="13" fill="white" text-anchor="middle" font-weight="600">Layer Norm</text>
+      <line x1="350" y1="116" x2="350" y2="136" stroke="#c94a1a" stroke-width="2" marker-end="url(#arr)"/>
+
+      <!-- Attention block -->
+      <rect x="220" y="138" width="260" height="48" rx="4" fill="#1e2a5e"/>
+      <text x="350" y="160" font-family="Outfit" font-size="14" fill="white" text-anchor="middle" font-weight="600">Blocco di Attenzione</text>
+      <text x="350" y="178" font-family="Lora" font-size="11" fill="rgba(255,255,255,0.75)" text-anchor="middle" font-style="italic">comunicazione tra posizioni → Δa</text>
+      <line x1="350" y1="186" x2="350" y2="210" stroke="#c94a1a" stroke-width="2" marker-end="url(#arr)"/>
+
+      <!-- Residual sum 1 -->
+      <circle cx="350" cy="222" r="14" fill="white" stroke="#c94a1a" stroke-width="2"/>
+      <text x="350" y="227" font-family="JetBrains Mono" font-size="14" fill="#c94a1a" text-anchor="middle" font-weight="700">+</text>
+
+      <!-- Residual arrow 1 (lateral) -->
+      <path d="M 350 50 Q 580 50 580 222 Q 580 222 364 222" fill="none" stroke="#0d7a6e" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrThin)"/>
+      <text x="608" y="142" font-family="JetBrains Mono" font-size="10" fill="#0d7a6e" font-weight="600" letter-spacing="0.8" transform="rotate(90 608 142)">RESIDUAL</text>
+
+      <line x1="350" y1="236" x2="350" y2="256" stroke="#c94a1a" stroke-width="2" marker-end="url(#arr)"/>
+      <text x="430" y="252" font-family="Lora" font-size="11" fill="#1e2a5e" font-style="italic">x + Δa</text>
+
+      <!-- Layer Norm 2 -->
+      <rect x="270" y="258" width="160" height="34" rx="4" fill="#0d7a6e" opacity="0.85"/>
+      <text x="350" y="279" font-family="Outfit" font-size="13" fill="white" text-anchor="middle" font-weight="600">Layer Norm</text>
+      <line x1="350" y1="292" x2="350" y2="312" stroke="#c94a1a" stroke-width="2" marker-end="url(#arr)"/>
+
+      <!-- FFN -->
+      <rect x="220" y="314" width="260" height="48" rx="4" fill="#c94a1a"/>
+      <text x="350" y="336" font-family="Outfit" font-size="14" fill="white" text-anchor="middle" font-weight="600">Rete Feed-Forward</text>
+      <text x="350" y="354" font-family="Lora" font-size="11" fill="rgba(255,255,255,0.85)" text-anchor="middle" font-style="italic">elaborazione locale → Δf</text>
+      <line x1="350" y1="362" x2="350" y2="386" stroke="#c94a1a" stroke-width="2" marker-end="url(#arr)"/>
+
+      <!-- Residual sum 2 -->
+      <circle cx="350" cy="398" r="14" fill="white" stroke="#c94a1a" stroke-width="2"/>
+      <text x="350" y="403" font-family="JetBrains Mono" font-size="14" fill="#c94a1a" text-anchor="middle" font-weight="700">+</text>
+
+      <!-- Residual arrow 2 (lateral) -->
+      <path d="M 350 240 Q 120 240 120 398 Q 120 398 336 398" fill="none" stroke="#0d7a6e" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrThin)"/>
+      <text x="92" y="318" font-family="JetBrains Mono" font-size="10" fill="#0d7a6e" font-weight="600" letter-spacing="0.8" transform="rotate(-90 92 318)">RESIDUAL</text>
+
+      <line x1="350" y1="412" x2="350" y2="432" stroke="#c94a1a" stroke-width="2" marker-end="url(#arr)"/>
+      <text x="350" y="450" font-family="JetBrains Mono" font-size="11" fill="#6b7280" text-anchor="middle" letter-spacing="1.2">RESIDUAL STREAM IN USCITA → STRATO SUCCESSIVO</text>
+    </svg>
+    <div class="diagram-caption">
+      Uno strato del Transformer è composto da due sotto-blocchi simmetrici: prima
+      attenzione (in indigo, comunicazione tra posizioni), poi rete feed-forward (in
+      arancione, elaborazione locale). Ognuno è preceduto da una layer norm e seguito
+      da una residual connection (in teal). Il flusso entra come <code>x</code> ed esce
+      come <code>x + Δa + Δf</code>.
+    </div>
+  </div>
+
+  <p>
+    Ti rendi conto della struttura. Ogni strato è composto da <strong>due sotto-blocchi
+    simmetrici</strong>: prima un blocco di attenzione (preceduto da norm e seguito da
+    residual), poi un blocco feed-forward (preceduto da norm e seguito da residual). Due
+    fasi: comunicazione e poi elaborazione, entrambe trattate come <em>aggiornamenti</em>
+    del flusso, non come sostituzioni.
+  </p>
+
+  <p>
+    E questo schema a due sotto-blocchi viene ripetuto 32, 64, 96 volte — tante quante
+    sono gli strati del modello. Il flusso entra, attraversa la pila di strati, e
+    all'uscita produce la sequenza di vettori contestualizzati che poi va alla testa di
+    output che abbiamo studiato nel Tema 1.
+  </p>
+</section>
+
+<!-- SEZIONE 6 — MACRO-FLUSSO -->
+<section>
+  <div class="section-num">06 — IL MACRO-FLUSSO</div>
+  <h2>Dall'embedding alla predizione: il viaggio completo</h2>
+  <p>
+    Adesso facciamo zoom-out al massimo. Mettiamo da parte il microscopio sul singolo
+    strato e prendiamo la vista panoramica: cosa succede, dall'inizio alla fine, quando
+    un prompt entra in un Transformer e ne esce un token predetto. Molti pezzi li
+    conosciamo già: si tratta di metterli in fila.
+  </p>
+
+  <div class="stages">
+    <div class="stage">
+      <div class="stage-num"></div>
+      <div>
+        <h4>Tokenizzazione</h4>
+        <p>
+          Il testo viene segmentato in token secondo le regole apprese dall'algoritmo BPE.
+          Diventa una sequenza di ID numerici. Da questo momento in poi, il modello non
+          vede più "lettere" o "parole", vede solo identificativi che indicizzano righe
+          di una matrice. Operazione puramente meccanica.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num"></div>
+      <div>
+        <h4>Embedding (con positional encoding)</h4>
+        <p>
+          Ogni ID viene usato per pescare la riga corrispondente nella matrice di
+          embedding <code>E</code>. Quella riga è il vettore di partenza del token: il
+          suo "embedding statico", il punto fisso dove vive nello spazio semantico
+          <em>prima</em> di qualsiasi contestualizzazione. A questi vettori viene aggiunto
+          il positional encoding, che incorpora l'informazione sulla posizione del token
+          nella sequenza.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num"></div>
+      <div>
+        <h4>La pila di strati del Transformer</h4>
+        <p>
+          La sequenza di vettori entra nel primo strato, esce trasformata, entra nel
+          secondo, esce trasformata di nuovo, e così via per tutti gli strati. Ogni strato
+          fa due cose: <strong>attenzione</strong> (comunicazione tra posizioni) e
+          <strong>FFN</strong> (elaborazione locale), alternate e protette da residual
+          connections e layer normalization. Comunicazione e poi elaborazione.
+          Trentadue volte di seguito.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num"></div>
+      <div>
+        <h4>La testa di output</h4>
+        <p>
+          All'uscita dell'ultimo strato hai una sequenza di vettori contestualizzati.
+          Prendi l'ultimo della sequenza — il vettore <code>h</code> associato all'ultima
+          posizione del prompt. Lo proietti sulla matrice di embedding, ottieni 100.000
+          logits, applichi softmax, ottieni una distribuzione di probabilità sul
+          vocabolario. Tutto il Tema 1, in posizione.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-num"></div>
+      <div>
+        <h4>Sampling e loop autoregressivo</h4>
+        <p>
+          Da quella distribuzione si sceglie un token specifico secondo la strategia
+          adottata (greedy, temperatura, top-k, top-p), il token viene aggiunto al prompt,
+          e tutto il processo ricomincia daccapo. Il prompt è cresciuto di un token,
+          l'intera pipeline gira di nuovo, esce il prossimo token. E così via, fino a
+          quando il modello produce il token speciale che indica la fine, o l'applicazione
+          decide di fermare il loop.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Una sfumatura sulla "specializzazione" degli strati</h3>
+  <p>
+    Vale la pena aggiungere una sfumatura che adesso, con il quadro degli strati in mano,
+    si capisce meglio. Quando si parla di "32 strati che fanno la stessa operazione",
+    potresti pensare che ogni strato lavori a un livello di astrazione progressivamente
+    più alto in modo programmato — strato 1 sintassi, strato 2 semantica locale, strato
+    3 frasi, eccetera. La realtà è più sfumata e più interessante.
+  </p>
+
+  <p>
+    Nessuno ha <em>programmato</em> questi livelli. Quello che si osserva, andando a
+    ispezionare i modelli addestrati, è che <strong>emerge spontaneamente</strong> una
+    specie di gerarchia: i primi strati tendono a fare più lavoro sintattico-locale, gli
+    strati intermedi fanno il lavoro semantico più ricco, gli ultimi strati lavorano su
+    rappresentazioni che servono direttamente alla predizione del prossimo token. Ma non
+    sono compartimenti stagni. È un continuo. E ogni strato fa, comunque, la stessa
+    identica operazione architetturale (attenzione + FFN); è solo che, lavorando su
+    vettori che sono già il prodotto di tutti gli strati precedenti, di fatto opera a un
+    livello di astrazione superiore.
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Il quadro intero, in una formulazione compatta</div>
+    <p>
+      Un LLM è una macchina che riceve una sequenza di vettori, li fa attraversare una
+      pila di strati ognuno dei quali alterna <em>comunicazione tra posizioni</em>
+      (attenzione) ed <em>elaborazione locale</em> (FFN), con cura nella stabilità del
+      flusso (residual e norm), e infine usa il vettore dell'ultima posizione per produrre
+      una distribuzione di probabilità sul prossimo token confrontandolo geometricamente
+      con la matrice di embedding del vocabolario.
+    </p>
+    <p>
+      <strong>Tutto quello che fa un LLM</strong> — dialogare, ragionare, scrivere codice,
+      tradurre, riassumere — è questa pipeline applicata in loop autoregressivo. Niente
+      di più, niente di meno. Quando interagisci con un LLM stai facendo girare migliaia
+      di volte questa stessa pipeline, una volta per ogni token che il modello genera
+      nella sua risposta.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 7 — DOVE VIVONO I PARAMETRI -->
+<section>
+  <div class="section-num">07 — DOVE VIVE LA POTENZA</div>
+  <h2>La distribuzione dei parametri tra i componenti</h2>
+  <p>
+    Prima di chiudere c'è un'osservazione che ricalibra l'intuizione su "dove vive
+    davvero" la potenza di calcolo del modello. Quando si parla del numero di parametri
+    di un LLM, è interessante notare come sono distribuiti tra i diversi componenti.
+  </p>
+
+  <p>
+    Le proporzioni sono indicative e dipendono dall'architettura specifica, ma in media,
+    nei modelli moderni, i pesi sono distribuiti più o meno così:
+  </p>
+
+  <div class="param-bar">
+    <div class="param-bar-label">Distribuzione tipica dei parametri in un Transformer moderno</div>
+    <div class="param-bar-track">
+      <div class="param-segment param-ffn">FFN ~62%</div>
+      <div class="param-segment param-attn">Attenzione ~33%</div>
+      <div class="param-segment param-norm">Norm ~5%</div>
+    </div>
+    <div class="param-legend">
+      <div class="param-legend-item">
+        <div class="param-legend-color" style="background: var(--orange);"></div>
+        Reti feed-forward
+      </div>
+      <div class="param-legend-item">
+        <div class="param-legend-color" style="background: var(--indigo);"></div>
+        Blocchi di attenzione (Q, K, V, output)
+      </div>
+      <div class="param-legend-item">
+        <div class="param-legend-color" style="background: var(--teal);"></div>
+        Layer normalization (parametri minori)
+      </div>
+    </div>
+  </div>
+
+  <p>
+    Pochissimi parametri vivono nei blocchi di layer normalization (sono operazioni con
+    pochissimi parametri apprendibili). Una quota minoritaria — diciamo il 30-35% — vive
+    nei blocchi di attenzione (sono i pesi che definiscono come si proiettano Q, K, V
+    e come si combinano le teste). E la stragrande maggioranza — il 60-65% — vive nelle
+    reti feed-forward.
+  </p>
+
+  <p>
+    È un dato che riconfigura un po' la nostra immaginazione del Transformer. Verremmo
+    tentati di pensare che "il cuore" del modello sia l'attenzione, perché è il
+    meccanismo concettualmente più nuovo e che ha cambiato il campo. Ma in termini di
+    <strong>parametri effettivi</strong>, di "peso di calcolo", il vero protagonista è
+    la rete feed-forward. L'attenzione decide <em>quale</em> informazione fluisce dove;
+    le FFN sono il volume di calcolo che effettivamente <em>trasforma</em> quell'informazione.
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Una conseguenza per la mechanistic interpretability</h4>
+    <p>
+      Questo dato spiega anche perché, in linea di ricerca recente sulla
+      <em>mechanistic interpretability</em>, si trova che le FFN sono dove si depositano
+      i fatti specifici imparati dal modello — la conoscenza enciclopedica vive lì. Le
+      FFN sono la "memoria" del modello (depositano relazioni come <em>"Parigi è la
+      capitale della Francia"</em>); l'attenzione è il "sistema di indirizzamento" che
+      decide quando e come quella memoria viene attivata.
+    </p>
+  </div>
+
+  <p>
+    Non ti chiedo di memorizzare le proporzioni esatte. Ti chiedo di portarti via l'idea
+    che, in un Transformer, l'attenzione non è "quasi tutto il modello": è un terzo del
+    modello, e gli altri due terzi sono dedicati all'elaborazione locale che permette
+    al contesto raccolto di essere rielaborato in qualcosa di significativo.
+  </p>
+</section>
+
+<!-- SEZIONE 8 — COSA NON ABBIAMO COPERTO -->
+<section>
+  <div class="section-num">08 — UNA NOTA ONESTA</div>
+  <h2>Cosa abbiamo coperto e cosa no</h2>
+  <p>
+    Il quadro è completo per il livello di profondità che ci siamo proposti, ma ci sono
+    cose che abbiamo deliberatamente lasciato fuori. Vale la pena darne la mappa, così
+    sai dove andare se in futuro vorrai approfondire.
+  </p>
+
+  <p>
+    Non abbiamo trattato come effettivamente si <strong>addestra</strong> un Transformer
+    — il problema di calcolare i gradienti, l'algoritmo di backpropagation, gli
+    ottimizzatori, le funzioni di loss. È un capitolo a sé, di natura diversa dal nostro
+    percorso, che riguarda <em>come</em> i pesi nei vari componenti vengono trovati a
+    partire dai dati. Te ne ho dato un assaggio nel Tema 1 quando abbiamo nominato che
+    durante l'addestramento i logits vengono calcolati per <em>tutte</em> le posizioni
+    del prompt: quel cenno è la chiave per capire come funziona il training.
+  </p>
+
+  <p>
+    Non abbiamo approfondito le <strong>varianti architetturali</strong> moderne — i
+    mixture of experts, le diverse formulazioni dell'attenzione (multi-query,
+    grouped-query, sliding window), le scelte di normalizzazione (pre-norm vs post-norm,
+    RMSNorm). Sono ottimizzazioni e specializzazioni dell'architettura di base che
+    abbiamo descritto, e capire la base è il prerequisito per capire le varianti.
+  </p>
+
+  <p>
+    Non abbiamo discusso il <strong>fine-tuning</strong> e l'<strong>RLHF</strong>
+    (reinforcement learning from human feedback), che sono i passaggi che trasformano
+    un modello pre-addestrato (che ha visto trilioni di token internet) in un assistente
+    conversazionale. Sono fasi successive all'addestramento di base, e cambiano
+    profondamente <em>come</em> il modello usa la sua architettura, anche se non ne
+    cambiano la struttura fondamentale.
+  </p>
+
+  <p>
+    Tutte queste cose si capiscono più facilmente avendo in mano il quadro che abbiamo
+    costruito. E tutte non ci servono per i temi 3 e 4 che abbiamo davanti.
+  </p>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Sette cose da portarsi via dal Tema 2</h3>
+    <ol class="takeaway-list">
+      <li>
+        Ogni strato del Transformer ha <strong>due sotto-componenti</strong>, non uno:
+        un blocco di attenzione e una rete feed-forward (FFN). L'attenzione fa
+        <em>comunicazione</em> tra posizioni; la FFN fa <em>elaborazione</em> locale di
+        ogni vettore preso a sé.
+      </li>
+      <li>
+        Entrambi modificano i vettori, ma in modi categorialmente diversi: l'attenzione
+        li modifica <strong>mescolando vettori di altre posizioni</strong> (orizzontale);
+        la FFN li modifica <strong>rielaborando il vettore stesso</strong> con una
+        trasformazione non lineare (verticale). Senza la non linearità della FFN, il
+        modello collasserebbe a un sistema lineare incapace di apprendere.
+      </li>
+      <li>
+        Le <strong>residual connections</strong> trasformano ogni strato da "sostituto
+        del vettore" in "raffinatore del vettore": ogni strato <em>aggiunge</em> un
+        contributo invece di sostituire l'input. Da qui nasce il concetto di
+        <strong>residual stream</strong>: un flusso d'acqua che attraversa la rete
+        raccogliendo contributi senza perdere la connessione con il punto di partenza.
+      </li>
+      <li>
+        La <strong>layer normalization</strong> non aggiunge capacità espressiva: è
+        igiene numerica. Tiene il vettore "centrato" prima di ogni sotto-blocco, in modo
+        che il calcolo numerico e l'addestramento restino stabili anche con decine o
+        centinaia di strati.
+      </li>
+      <li>
+        Uno strato completo si articola in <strong>due sotto-blocchi simmetrici</strong>:
+        norm → attenzione → residual, poi norm → FFN → residual. Il flusso entra come
+        <code>x</code> ed esce come <code>x + Δa + Δf</code>. Lo stesso schema si ripete
+        32, 64, 96 volte.
+      </li>
+      <li>
+        Il <strong>macro-flusso</strong> di un LLM: tokenizzazione → embedding +
+        positional encoding → pila di strati → testa di output (proiezione su <code>E</code>
+        + softmax) → sampling → loop autoregressivo. Tutto quello che fa un LLM è questa
+        pipeline ripetuta, una volta per ogni token generato.
+      </li>
+      <li>
+        La <strong>distribuzione dei parametri</strong> ricalibra l'intuizione: solo un
+        terzo circa dei parametri vive nell'attenzione; circa due terzi vivono nelle FFN.
+        L'attenzione decide <em>cosa fluisce dove</em>; le FFN sono il volume di calcolo
+        che <em>trasforma</em> l'informazione e dove si depositano i fatti specifici
+        imparati dal modello.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- BRIDGE -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="bridge">
+    <div class="bridge-label">Prossimo tema</div>
+    <h3>Cosa significa, davvero, che un LLM "ragioni"</h3>
+    <p>
+      A questo punto abbiamo l'architettura intera in mano. Sappiamo cosa entra e cosa
+      esce, abbiamo nominato ogni componente che lavora dentro, e abbiamo capito come
+      l'intera pipeline si compone in un'unica operazione coerente: predire il prossimo
+      token, in loop. Niente è rimasto in penombra.
+    </p>
+    <p>
+      Adesso possiamo permetterci la domanda che fino a qui sarebbe stata prematura:
+      <strong>cosa significa che questa cosa "ragioni"?</strong> Quando un LLM risolve
+      un problema di matematica passo per passo, sta deducendo, sta imitando, sta
+      facendo qualcos'altro? Quali sono i limiti? In quali condizioni il "ragionamento"
+      di un LLM produce risultati corretti, e in quali invece produce risultati
+      <em>persuasivi ma sbagliati</em>? È il <strong>Tema 3</strong>, il salto
+      interpretativo del percorso. La macchina la conosciamo. Adesso parliamo di cosa
+      la macchina, di fatto, fa quando fa quello che chiamiamo "ragionare".
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Tema 2 di 4 — Percorso di approfondimento su LLM e prompting (seconda chat)</p>
+  <p>Il Transformer come architettura completa</p>
+</footer>
+
+</body>
+</html>

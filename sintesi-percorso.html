@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sintesi del percorso — Come un LLM interpreta un prompt</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: var(--indigo);
+    padding: 88px 48px 96px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 580px; height: 580px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-grid {
+    position: absolute;
+    top: 35%; right: 8%;
+    width: 280px; height: 200px;
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-overline {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 60px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 20px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 48px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--indigo-border);
+  }
+
+  /* ── INSIGHT BOX ── */
+  .insight {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 38px 44px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(240,112,64,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 19px;
+    line-height: 1.6;
+    margin: 0;
+    position: relative;
+    font-family: var(--serif);
+    font-style: italic;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    padding: 22px 26px;
+    border-radius: 6px;
+    margin: 24px 0;
+    border-left: 4px solid;
+  }
+
+  .callout-orange { background: var(--orange-faint); border-color: var(--orange); }
+  .callout-teal { background: var(--teal-faint); border-color: var(--teal); }
+  .callout-purple { background: var(--purple-faint); border-color: var(--purple); }
+  .callout-indigo { background: var(--indigo-faint); border-color: var(--indigo-light); }
+
+  .callout h4 { margin-top: 0; margin-bottom: 8px; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; }
+  .callout-orange h4 { color: var(--orange); }
+  .callout-teal h4 { color: var(--teal); }
+  .callout-purple h4 { color: var(--purple); }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout p { font-size: 15.5px; margin-bottom: 10px; line-height: 1.7; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ── REFERENCE LINK ── */
+  .ref-link {
+    background: var(--bg2);
+    border-left: 3px solid var(--orange);
+    padding: 12px 18px;
+    margin: 18px 0 24px;
+    font-size: 13px;
+    color: var(--ink-light);
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+  }
+
+  .ref-link strong { color: var(--orange); font-style: normal; }
+
+  /* ── SECTION HEADER OVERLAY ── */
+  .section-arc {
+    background: var(--bg2);
+    border-radius: 8px;
+    padding: 28px 36px;
+    margin-bottom: 32px;
+    border-left: 4px solid var(--indigo-light);
+  }
+
+  .section-arc-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .section-arc p {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--indigo);
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  /* ── METAPHOR BOX ── */
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--purple);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin: 28px 0;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .metaphor p { margin-bottom: 12px; font-size: 15.5px; line-height: 1.7; }
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 48px 36px;
+    margin: 48px 0;
+    position: relative;
+  }
+
+  .flow-diagram-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    font-weight: 600;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .flow-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .flow-caption {
+    margin-top: 28px;
+    font-size: 14px;
+    color: var(--ink-light);
+    text-align: center;
+    font-style: italic;
+    line-height: 1.6;
+    padding: 0 32px;
+  }
+
+  /* ── KEY TAKEAWAYS GRID (chiusura) ── */
+  .closing-block {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 64px 56px;
+    border-radius: 12px;
+    margin: 56px 0 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .closing-block::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(240,112,64,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .closing-block::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -80px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .closing-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 18px;
+    position: relative;
+  }
+
+  .closing-block h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 36px;
+    margin: 0 0 24px;
+    line-height: 1.2;
+    position: relative;
+    font-weight: 500;
+  }
+
+  .closing-block p {
+    color: rgba(255,255,255,0.92);
+    font-size: 17px;
+    line-height: 1.75;
+    margin-bottom: 18px;
+    position: relative;
+    max-width: 800px;
+  }
+
+  .closing-block p:last-child { margin-bottom: 0; }
+
+  .closing-block em {
+    font-style: italic;
+    color: var(--orange-light);
+  }
+
+  .closing-block strong {
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  /* ── INDEX ── */
+  .index-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 36px;
+    margin: 32px 0;
+  }
+
+  .index-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .index-row {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 18px;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--border2);
+    align-items: center;
+  }
+
+  .index-row:last-child { border-bottom: none; }
+
+  .index-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--orange);
+    letter-spacing: 0.5px;
+  }
+
+  .index-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15.5px;
+    color: var(--indigo);
+    line-height: 1.4;
+  }
+
+  footer {
+    background: var(--bg3);
+    padding: 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 38px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .insight { padding: 28px 24px; }
+    .closing-block { padding: 40px 28px; }
+    .closing-block h3 { font-size: 26px; }
+    .flow-diagram { padding: 28px 18px; }
+    .flow-caption { padding: 0 8px; }
+    .section-arc { padding: 20px 22px; }
+    .index-row { grid-template-columns: 50px 1fr; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <svg class="hero-bg-grid" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+    <line x1="20" y1="100" x2="100" y2="60" stroke="white" stroke-width="1.2"/>
+    <line x1="20" y1="100" x2="100" y2="100" stroke="white" stroke-width="1.2"/>
+    <line x1="20" y1="100" x2="100" y2="140" stroke="white" stroke-width="1.2"/>
+    <line x1="100" y1="60" x2="180" y2="60" stroke="white" stroke-width="1.2"/>
+    <line x1="100" y1="60" x2="180" y2="100" stroke="white" stroke-width="1.2"/>
+    <line x1="100" y1="100" x2="180" y2="60" stroke="white" stroke-width="1.2"/>
+    <line x1="100" y1="100" x2="180" y2="100" stroke="white" stroke-width="1.2"/>
+    <line x1="100" y1="100" x2="180" y2="140" stroke="white" stroke-width="1.2"/>
+    <line x1="100" y1="140" x2="180" y2="100" stroke="white" stroke-width="1.2"/>
+    <line x1="100" y1="140" x2="180" y2="140" stroke="white" stroke-width="1.2"/>
+    <line x1="180" y1="60" x2="260" y2="100" stroke="white" stroke-width="1.2"/>
+    <line x1="180" y1="100" x2="260" y2="100" stroke="white" stroke-width="1.2"/>
+    <line x1="180" y1="140" x2="260" y2="100" stroke="white" stroke-width="1.2"/>
+    <circle cx="20" cy="100" r="6" fill="white"/>
+    <circle cx="100" cy="60" r="6" fill="white"/>
+    <circle cx="100" cy="100" r="6" fill="white"/>
+    <circle cx="100" cy="140" r="6" fill="white"/>
+    <circle cx="180" cy="60" r="6" fill="white"/>
+    <circle cx="180" cy="100" r="6" fill="white"/>
+    <circle cx="180" cy="140" r="6" fill="white"/>
+    <circle cx="260" cy="100" r="6" fill="white"/>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-overline">Sintesi del percorso · Documento panoramico</div>
+    <h1>Come un LLM <em>interpreta</em> un prompt</h1>
+    <p class="hero-sub">
+      Una narrazione condensata che lega i sette punti del percorso, organizzata intorno
+      alla domanda centrale: cosa succede dentro un modello quando riceve un prompt? Dal
+      testo ai numeri, dai numeri alla geometria, dalla geometria alla predizione.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Natura</div>
+        <div class="meta-value">Sintesi e ricapitolazione</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Documenti coperti</div>
+        <div class="meta-value">7 punti del percorso</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Focus</div>
+        <div class="meta-value">Il meccanismo di interpretazione</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- APERTURA -->
+<section>
+  <div class="section-num">Apertura</div>
+  <h2>La domanda che organizza il documento</h2>
+  <p class="lead">
+    Il percorso che abbiamo fatto ha attraversato sette punti, dalla tokenizzazione alle
+    tecniche pratiche di prompting. Ogni punto era un mondo a sé, con la sua densità e i
+    suoi approfondimenti. Adesso ne facciamo una sintesi diversa: non sette riassunti
+    affiancati, ma un'unica narrazione organizzata intorno a una domanda centrale.
+  </p>
+
+  <p>
+    La domanda è questa: <strong>come fa un LLM a interpretare un prompt?</strong> Da
+    questa domanda discende tutto il resto. Il tuo prompt è un testo. Il modello produce
+    una risposta. Tra l'una cosa e l'altra c'è un processo articolato che converte parole
+    in vettori, vettori in geometria, geometria in probabilità, probabilità in nuove
+    parole. Capire quel processo è la chiave per capire <em>tutto</em> sugli LLM, e in
+    particolare per capire perché certe pratiche di prompting funzionano e altre no.
+  </p>
+
+  <p>
+    Questa sintesi è quindi un viaggio dall'esterno all'interno: si parte dal prompt come
+    testo che tu scrivi, e si arriva al vettore di contesto finale che produce la
+    predizione. Lungo il viaggio si incontrano tutti i meccanismi che abbiamo studiato
+    nei vari punti.
+  </p>
+
+  <div class="index-block">
+    <div class="index-label">L'arco completo del percorso, in indice</div>
+    <div class="index-row">
+      <div class="index-num">Punto 1</div>
+      <div class="index-title">Tokenizzazione: dal testo agli ID numerici</div>
+    </div>
+    <div class="index-row">
+      <div class="index-num">Punto 2</div>
+      <div class="index-title">Embedding: come il token acquisisce significato</div>
+    </div>
+    <div class="index-row">
+      <div class="index-num">Punto 3</div>
+      <div class="index-title">Dalla geometria semantica alla predizione del token</div>
+    </div>
+    <div class="index-row">
+      <div class="index-num">Punto 4A</div>
+      <div class="index-title">Attenzione e contesto dinamico: il meccanismo</div>
+    </div>
+    <div class="index-row">
+      <div class="index-num">Punto 4B</div>
+      <div class="index-title">Context window e implicazioni per il prompting</div>
+    </div>
+    <div class="index-row">
+      <div class="index-num">Punto 5</div>
+      <div class="index-title">Cosa "vede" effettivamente il modello come input</div>
+    </div>
+    <div class="index-row">
+      <div class="index-num">Punto 6</div>
+      <div class="index-title">Principi pratici di scrittura del prompt</div>
+    </div>
+  </div>
+
+  <p>
+    La sintesi che segue è organizzata in cinque sezioni narrative. Le prime quattro
+    seguono il flusso di interpretazione del prompt — testo → numeri → geometria →
+    contestualizzazione → predizione — e occupano la maggior parte del documento. La
+    quinta è una raccolta condensata dei vincoli e delle implicazioni operative che
+    discendono dal meccanismo. Una chiusura finale lega tutto in un'osservazione di
+    sintesi.
+  </p>
+</section>
+
+<!-- SEZIONE 1 — DAL TESTO AI NUMERI -->
+<section>
+  <div class="section-num">Sezione 1 — Dal testo ai numeri</div>
+  <h2>Tokenizzazione e spazio semantico</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Come il prompt, da sequenza di caratteri umanamente leggibile, diventa una sequenza di vettori in uno spazio matematico. È il primo grande passaggio di codifica del significato, e introduce l'oggetto su cui opererà tutto il resto del modello.</p>
+  </div>
+
+  <p>
+    Il primo fatto da fissare è che un modello di linguaggio non lavora su parole. Lavora
+    su <strong>token</strong>: unità di testo prodotte da un algoritmo di segmentazione
+    chiamato tokenizer. Un token può essere una parola intera ("gatto"), una parte di
+    parola ("biblio" + "teca"), un singolo carattere, o anche uno spazio combinato con
+    quello che lo segue. La regola di segmentazione non è la stessa che useresti tu —
+    parole frequenti restano intere, parole rare vengono spezzate, e questa scelta è il
+    risultato di un algoritmo (tipicamente Byte-Pair Encoding) che ha imparato sui dati
+    di addestramento quali combinazioni di caratteri ricorrono spesso abbastanza da
+    meritare un'unità propria.
+  </p>
+
+  <p>
+    Una volta segmentato in token, il prompt viene convertito in una <strong>sequenza di
+    ID numerici</strong>. "Il gatto dorme" diventa qualcosa come <code>[2347, 8912, 15673]</code>,
+    dove ogni numero è la posizione di quel token nel vocabolario del modello (tipicamente
+    100.000+ token). Ma questi ID, presi da soli, non hanno alcuna proprietà utile: sono
+    etichette arbitrarie. L'ID 2347 non è "più vicino" a 2348 che a 99999 in alcun senso
+    significativo. Per fare ragionamenti sul significato, servirebbe una rappresentazione
+    diversa.
+  </p>
+
+  <p>
+    Questa rappresentazione esiste, ed è il secondo grande passaggio: ogni ID viene
+    convertito in un <strong>vettore embedding</strong> — una lista ordinata di migliaia
+    di numeri (tipicamente 4.000-12.000) che rappresenta quel token in uno spazio
+    matematico ad altissima dimensione. La proprietà chiave di questo spazio è che
+    <strong>la vicinanza numerica corrisponde alla vicinanza semantica</strong>: i vettori
+    di "gatto" e "felino" sono vicini, i vettori di "gatto" e "automobile" sono lontani,
+    e tra loro c'è una geometria strutturata che riflette le relazioni di significato.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">Una mappa per orientarsi</div>
+    <p>
+      Pensa allo spazio degli embedding come a una mappa multidimensionale dove ogni
+      parola è un punto. Animali domestici in un quartiere, mezzi di trasporto in un
+      altro, cibi in un terzo. La vicinanza tra punti riflette la vicinanza tra
+      significati. Le proprietà semantiche — "essere un cibo", "essere un veicolo",
+      "essere maschile/femminile", "essere formale/informale" — sono <em>direzioni</em>
+      attraverso questo spazio: combinazioni di molte coordinate, non singole dimensioni.
+    </p>
+    <p>
+      Tutto questo non è stato programmato. È <strong>emerso spontaneamente</strong>
+      durante l'addestramento, da un'osservazione semplice: parole che compaiono in
+      contesti simili tendono ad avere significati simili, e il modello, per predire bene
+      il prossimo token, ha bisogno di rappresentarle in modo simile. La geometria del
+      significato è un effetto collaterale della predizione.
+    </p>
+  </div>
+
+  <p>
+    Una sottigliezza importante che vale la pena fissare: gli embedding "di partenza" —
+    quelli che escono dalla tabella di lookup all'inizio dell'elaborazione — sono uguali
+    per ogni occorrenza dello stesso token. Il vettore di "banca" è lo stesso in "ho
+    aperto un conto in banca" e in "mi sono seduto sulla banca del fiume". Ma il
+    significato è diverso. Lo stesso vale per pronomi che cambiano referente, per parole
+    che si sfumano in contesti diversi, per mille altre situazioni in cui il significato
+    locale dipende da quello che c'è intorno.
+  </p>
+
+  <p>
+    Questa è la limitazione che apre il bisogno della sezione successiva. Gli embedding
+    statici, da soli, non bastano a catturare il significato contestuale. Serve un
+    meccanismo che li trasformi, che li renda <em>contestuali</em>. Quel meccanismo è
+    l'attenzione.
+  </p>
+
+  <div class="ref-link">
+    <strong>Approfondisci nei punti dedicati →</strong> Punto 1 (tokenizzazione) per
+    BPE, granularità, vocabolari multilingue. Punto 2 (embedding) per le proprietà
+    aritmetiche dello spazio, l'apprendimento dell'embedding, le direzioni semantiche
+    distribuite.
+  </div>
+</section>
+
+<!-- SEZIONE 2 — LA CONTESTUALIZZAZIONE -->
+<section>
+  <div class="section-num">Sezione 2 — La contestualizzazione</div>
+  <h2>L'attenzione: come i token si "guardano" tra loro</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Il cuore concettuale del documento. È qui che il prompt viene davvero "interpretato": ogni token modifica il proprio vettore in base ai vicini rilevanti, costruendo una rappresentazione che riflette il significato locale. Tre meccanismi sovrapposti — Q-K-V, multi-head, stratificazione — più una scelta architetturale (il positional encoding) rendono possibile tutto questo.</p>
+  </div>
+
+  <p>
+    Il problema della contestualizzazione è il problema centrale del linguaggio: il
+    significato di una parola dipende dalle parole intorno. La soluzione che gli LLM
+    moderni utilizzano si chiama <strong>meccanismo di attenzione</strong>, ed è il
+    componente che ha reso possibile l'esplosione di capacità che vediamo dal 2018 in
+    poi.
+  </p>
+
+  <h3>L'idea di base: pesare selettivamente i vicini</h3>
+  <p>
+    L'intuizione è semplice. Per ogni token nella sequenza, l'attenzione fa una cosa:
+    calcola quanto sono <em>rilevanti</em> tutti gli altri token (compreso il token
+    stesso), e poi costruisce un nuovo vettore per quel token che è una <strong>combinazione
+    pesata</strong> dei vettori dei vicini, dove i pesi riflettono la rilevanza calcolata.
+    Token molto rilevanti contribuiscono molto, token poco rilevanti contribuiscono poco.
+    Il risultato è un vettore "arricchito": ha incorporato le informazioni utili dai
+    vicini.
+  </p>
+
+  <p>
+    La parte tecnica di come la rilevanza viene calcolata si chiama meccanismo
+    <strong>Q-K-V</strong> (query, key, value). Ogni token, da sé stesso, deriva tre
+    versioni: una <em>query</em> (cosa sto cercando?), una <em>key</em> (cosa offro a chi
+    mi sta cercando?), un <em>value</em> (cosa effettivamente fornisco se vengo selezionato?).
+    Il token che cerca confronta la sua query con le key di tutti gli altri token; i punteggi
+    di confronto, normalizzati, diventano i pesi; e poi i value dei token più rilevanti
+    vengono mescolati nel nuovo vettore.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora della biblioteca</div>
+    <p>
+      Quando entri in biblioteca con una domanda in testa (la tua <em>query</em>), guardi
+      le etichette sui dorsi dei libri (le <em>key</em>) per capire quali rispondono alla
+      tua domanda, e poi apri il libro selezionato e leggi il contenuto (il <em>value</em>).
+      Ogni token, in pratica, è simultaneamente lettore (con una query) e libro sullo
+      scaffale (con key e value). Tutti cercano informazioni e tutti le offrono, in
+      parallelo, e il risultato è una rete di interrogazioni reciproche.
+    </p>
+  </div>
+
+  <h3>Multi-head: molti tipi di rilevanza in parallelo</h3>
+  <p>
+    Un solo "tipo" di rilevanza non basta a catturare tutta la ricchezza delle relazioni
+    tra token. La frase "Marco ha visto Luca al parco. Lui era stanco." richiede di
+    capire chi è "Lui" — e per farlo servono diversi assi di rilevanza contemporaneamente:
+    sintattica (è un pronome maschile, cerca antecedenti maschili), semantica (chi è
+    plausibile sia stanco?), posizionale (quale antecedente è più recente?). Il modello
+    risolve il problema calcolando <strong>molte attenzioni in parallelo</strong>,
+    ognuna su un asse diverso. Si chiama <em>multi-head attention</em>: tipicamente
+    8-128 "teste" che lavorano simultaneamente sullo stesso input.
+  </p>
+
+  <p>
+    Il fatto interessante è che, durante l'addestramento, le diverse teste si
+    <strong>specializzano spontaneamente</strong>. Nessuno gliel'ha detto. Quando si va a
+    guardare cosa fanno le teste in un modello finito, si scoprono pattern ricorrenti:
+    alcune teste si occupano di rilevanza posizionale (guardano sempre il token
+    precedente o il token a due posizioni di distanza); altre risolvono pronomi (attivano
+    forte attenzione sui sostantivi candidati come antecedenti); altre catturano
+    dipendenze a lunga distanza (collegano soggetto e verbo anche con materiale in
+    mezzo); altre ancora si occupano di concordanza grammaticale, di relazioni semantiche,
+    di pattern stilistici. Ognuna è un "punto di vista" diverso sullo stesso input, e i
+    loro contributi vengono fusi nel vettore finale contestualizzato del token.
+  </p>
+
+  <h3>Stratificazione: la profondità che costruisce astrazione</h3>
+  <p>
+    Quello che abbiamo descritto fin qui — Q-K-V con multi-head — succede in un singolo
+    <strong>strato</strong> del modello. Ma un Transformer moderno non ne ha uno solo: ne
+    ha decine impilati, uno sopra l'altro. Ogni strato lavora sull'output del precedente.
+    Al primo strato le teste catturano relazioni locali (sintassi di prossimità). Al
+    secondo, lavorando su vettori già parzialmente contestualizzati, possono cogliere
+    relazioni più astratte (struttura della frase). Al terzo, il significato della frase
+    intera. Al quarto, le relazioni tra frasi del paragrafo. E così via.
+  </p>
+
+  <p>
+    Quando un token come "banca" attraversa un Transformer profondo, alla fine ha
+    incorporato — attraverso la combinazione di multi-head e stratificazione — tutti i
+    livelli di contesto: sintassi locale, struttura della frase, significato del
+    paragrafo, discorso intero. Il vettore che esce dall'ultimo strato è una
+    rappresentazione <em>profondamente</em> contestuale, frutto di centinaia di operazioni
+    di attenzione combinate.
+  </p>
+
+  <h3>Una sottigliezza architetturale: il positional encoding</h3>
+  <p>
+    C'è un dettaglio tecnico che vale la pena nominare per completezza, perché illumina
+    qualcosa di profondo. Il meccanismo di attenzione, per come è definito, è
+    <strong>cieco all'ordine</strong>: se rimescolassi i token di una frase mantenendo gli
+    stessi token, l'attenzione produrrebbe gli stessi pesi e gli stessi vettori. Ma
+    l'ordine conta — "il cane morde l'uomo" e "l'uomo morde il cane" hanno significati
+    opposti. La soluzione si chiama <strong>positional encoding</strong>: prima di entrare
+    nell'attenzione, ogni embedding viene modificato in modo che incorpori anche
+    l'informazione sulla sua posizione nella sequenza. Il vettore di "cane in posizione 2"
+    è leggermente diverso da quello di "cane in posizione 5".
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>Una lezione architetturale</h4>
+    <p>
+      Le proprietà che sembrano "naturali" del linguaggio — l'ordine, la grammatica, la
+      coerenza — non sono naturali per il modello: sono iniettate da scelte architetturali
+      specifiche. Il modello "sa" che le parole hanno un ordine non perché il linguaggio
+      glielo dice, ma perché qualcuno ha deciso di sommare un vettore di posizione ai suoi
+      embedding. Cambiare quella decisione cambia profondamente come il modello si comporta.
+    </p>
+  </div>
+
+  <h3>Cosa significa tutto questo per l'interpretazione del prompt</h3>
+  <p>
+    Mettendo insieme i pezzi, possiamo dare una risposta più precisa alla domanda
+    iniziale. Quando il modello "interpreta" un prompt, sta facendo questo: prende ogni
+    token, e lo trasforma in un vettore che riflette non solo il suo significato isolato,
+    ma tutte le relazioni rilevanti con gli altri token del contesto. Lo fa attraverso
+    molte teste in parallelo (ognuna che cattura un tipo diverso di rilevanza) e
+    attraverso molti strati in sequenza (ognuno che costruisce un livello di astrazione
+    superiore al precedente).
+  </p>
+
+  <p>
+    Alla fine di tutto questo processo, il modello ha costruito una rappresentazione
+    profondamente contestuale dell'intero prompt — una sequenza di vettori, uno per ogni
+    token, dove ogni vettore "sa" cosa c'è intorno a lui e come si rapporta. Ma la cosa
+    più importante è il vettore finale di questa sequenza, perché è quello da cui parte
+    la predizione. Lo vedremo nella sezione 4.
+  </p>
+
+  <div class="ref-link">
+    <strong>Approfondisci nei punti dedicati →</strong> Punto 4A per la trattazione
+    completa del meccanismo Q-K-V, dell'esempio dei pronomi, del multi-head con la
+    specializzazione delle teste, e dell'approfondimento sul positional encoding (RoPE
+    e varianti).
+  </div>
+</section>
+
+
+<!-- SEZIONE 3 — STRUTTURA DELL'INPUT -->
+<section>
+  <div class="section-num">Sezione 3 — Cosa entra davvero nel processo</div>
+  <h2>L'input non è solo il tuo messaggio</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Una correzione importante a quanto detto fin qui. Quando abbiamo parlato di "il prompt che il modello interpreta", abbiamo lavorato su un'astrazione: il testo che scrivi tu. Ma il modello in realtà riceve un input più ricco e strutturato. Capire questa struttura cambia cosa stiamo davvero analizzando con i meccanismi delle sezioni 1 e 2.</p>
+  </div>
+
+  <p>
+    Quello che fino ad ora abbiamo chiamato "il prompt" — il testo che il modello tokenizza,
+    converte in embedding e contestualizza con l'attenzione — non è semplicemente il
+    messaggio che scrivi tu nella chat. È un costrutto più articolato, costruito da una
+    orchestrazione esterna al modello, che include almeno tre componenti.
+  </p>
+
+  <p>
+    La <strong>prima componente</strong> è il <em>system prompt</em>: un blocco di
+    istruzioni inserito dall'azienda che gestisce il modello, prima del tuo messaggio.
+    Può essere lungo migliaia di token e contiene l'identità del modello, le linee guida
+    di comportamento, le politiche di sicurezza, le capacità e gli strumenti disponibili,
+    le indicazioni di stile. Tu non lo vedi, ma il modello lo legge per primo, e tutto
+    il resto viene letto attraverso quella lente.
+  </p>
+
+  <p>
+    La <strong>seconda componente</strong> è la <em>struttura di ruoli</em>. Ogni
+    messaggio nel prompt è etichettato con un marcatore — system, user, assistant — e il
+    modello è stato addestrato a riconoscere questi marcatori e a dar loro <strong>autorità
+    diversa</strong>. Le istruzioni etichettate come "system" pesano di più di quelle
+    etichettate come "user". Se le due si contraddicono, normalmente vince il system. È
+    una gerarchia codificata nei pesi del modello, non una scelta presa sul momento.
+  </p>
+
+  <p>
+    La <strong>terza componente</strong> è la <em>cronologia della conversazione</em>: in
+    una chat multi-turno, tutti i messaggi e le risposte precedenti vengono re-inviati al
+    modello insieme al messaggio nuovo. Il modello non ha memoria persistente tra un
+    turno e l'altro; "ricorda" perché tutto gli viene riproposto da capo, ogni volta. Per
+    lui, ogni turno è la prima e l'ultima volta: parte da zero, legge tutto, e produce un
+    output.
+  </p>
+
+  <div class="callout callout-indigo">
+    <h4>Una conseguenza per il quadro che stiamo costruendo</h4>
+    <p>
+      Quando nelle sezioni 1 e 2 abbiamo parlato di "tokenizzazione del prompt" e
+      "contestualizzazione attraverso l'attenzione", quei meccanismi non lavorano sulle
+      poche righe che hai scritto tu, ma su <strong>l'intero costrutto</strong>: system
+      prompt più cronologia più tuo messaggio, etichettato con marcatori di ruolo. Tutto
+      questo è materiale di input che viene tokenizzato, embedding-izzato, processato
+      dall'attenzione. Il "tuo prompt" è solo una piccola parte di quello che il modello
+      effettivamente interpreta.
+    </p>
+  </div>
+
+  <p>
+    Una conseguenza meno ovvia: il modello, dal suo punto di vista, <strong>non sta
+    avendo una conversazione</strong>. Sta completando un documento. Quel documento ha
+    una struttura interna (con ruoli e turni), ma resta un singolo input testuale che il
+    meccanismo di attenzione elabora come un unico flusso. Le sue risposte precedenti, in
+    una chat multi-turno, vengono lette come parte del contesto e influenzano la
+    generazione del nuovo turno esattamente come ogni altro pezzo di testo. Per il
+    modello non c'è una distinzione strutturale tra "quello che ho scritto io" e "quello
+    che ha scritto l'utente": tutto è materiale da tokenizzare e contestualizzare.
+  </p>
+
+  <div class="ref-link">
+    <strong>Approfondisci nel punto dedicato →</strong> Punto 5 per la trattazione
+    completa: l'esempio del prompt che il modello effettivamente riceve, le sette
+    categorie tipiche di un system prompt moderno, il problema della prompt injection
+    (diretta e indiretta), il rapporto modello/prodotto/API, e la dinamica delle
+    conversazioni multi-turno con le tecniche per gestirle.
+  </div>
+</section>
+
+<!-- SEZIONE 4 — LA PREDIZIONE -->
+<section>
+  <div class="section-num">Sezione 4 — La predizione</div>
+  <h2>Dal vettore di contesto al prossimo token</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>L'ultimo passo del meccanismo: come dal vettore di contesto finale, costruito attraverso tutto il processo descritto nelle sezioni precedenti, nasce una distribuzione di probabilità sul prossimo token, e poi il token effettivamente generato. È qui che si chiude il cerchio tra geometria semantica e probabilità.</p>
+  </div>
+
+  <p>
+    Riprendiamo il filo. Alla fine della pipeline di contestualizzazione, il modello ha
+    prodotto, per ogni token del prompt, un vettore profondamente contestualizzato. Ma la
+    sua missione non è etichettare i token esistenti: è <strong>predire il prossimo
+    token</strong>. Da dove arriva la predizione?
+  </p>
+
+  <p>
+    Il modello prende il vettore associato all'ultima posizione del prompt — quello che
+    incorpora, attraverso tutti gli strati di attenzione, una rappresentazione di "tutto
+    il prompt elaborato" — e lo confronta con i vettori di tutti i token del vocabolario.
+    Il confronto avviene tramite prodotto scalare: più il vettore di contesto è "puntato"
+    nella stessa direzione di un token candidato, più alto sarà il suo punteggio. I
+    punteggi vengono poi normalizzati con una funzione softmax in modo da diventare
+    probabilità che sommano a 1.
+  </p>
+
+  <p>
+    Il risultato è una <strong>distribuzione di probabilità su tutto il vocabolario</strong>.
+    Per il prompt "Il gatto beve il", il modello potrebbe produrre probabilità del tipo:
+    "latte" 42%, "tè" 8%, "caffè" 5%, "computer" praticamente 0%, e così via per tutti
+    gli oltre 100.000 token. Da questa distribuzione viene scelto un token (con criteri
+    che vedremo tra poco), che viene aggiunto al testo. E il processo ricomincia: il
+    nuovo prompt — quello originale più il token appena generato — diventa l'input per
+    la prossima iterazione, che produrrà il token successivo. Si chiama <em>generazione
+    autoregressiva</em>: ogni nuovo token è generato condizionatamente a tutto quello che
+    è venuto prima.
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">La saldatura concettuale</div>
+    <p>
+      Predire il prossimo token = trovare il punto nello spazio degli embedding che meglio
+      completa il contesto, e cercare il token reale che sta più vicino a quel punto. La
+      "vicinanza semantica" e la "predizione probabilistica" non sono due cose diverse:
+      sono la stessa operazione vista da due angolazioni.
+    </p>
+  </div>
+
+  <h3>La scelta del token: temperatura e sampling</h3>
+  <p>
+    La distribuzione di probabilità è solo una distribuzione. Il modello deve effettivamente
+    scegliere un token specifico. Ci sono due strategie. La prima, <em>greedy decoding</em>,
+    sceglie sempre il token con la probabilità più alta — semplice, deterministico, ma
+    produce testi ripetitivi. La seconda, il <em>sampling</em>, sceglie a caso rispettando
+    la distribuzione: il token più probabile ha alta probabilità di vincere, ma ogni
+    tanto vince un token meno probabile, e questo dà varietà all'output.
+  </p>
+
+  <p>
+    Il parametro <strong>temperatura</strong> controlla quanto il sampling è "audace".
+    Bassa temperatura rende le probabilità alte ancora più alte e quelle basse ancora più
+    basse (scelta conservativa); alta temperatura appiattisce la distribuzione (token meno
+    probabili diventano più competitivi, output più creativo). Una conseguenza importante
+    di questo meccanismo è che <strong>lo stesso prompt può produrre risposte diverse
+    ogni volta</strong>: il modello non è una funzione deterministica dal prompt alla
+    risposta. Il prompt non comanda: <em>inclina</em> la distribuzione verso le risposte
+    più probabili, ma il modello pesca da quella distribuzione.
+  </p>
+
+  <h3>Una conseguenza: il Chain-of-Thought</h3>
+  <p>
+    La natura autoregressiva ha una conseguenza che vale la pena nominare perché illumina
+    un aspetto importante. Ogni token è il risultato di una passata attraverso tutta
+    l'architettura del modello — decine di strati di attenzione e reti neurali. Il modello
+    ha quindi una <strong>quantità fissa di calcolo</strong> disponibile per ogni token
+    che genera. Una risposta lunga 100 token ha avuto a disposizione 100 passate del
+    modello; una risposta lunga 5 token ne ha avute solo 5.
+  </p>
+
+  <p>
+    Da qui il <em>Chain-of-Thought</em>: chiedere al modello di ragionare passo per passo
+    prima di rispondere converte la lunghezza del testo in profondità computazionale
+    aggiuntiva. Invece di chiedere al modello di fare un "salto" enorme dal problema alla
+    risposta in pochi token, gli si dà spazio per costruire una sequenza di passi più
+    brevi, ognuno dei quali è un'operazione semplice. È una tecnica che funziona su
+    problemi multi-step (matematica, ragionamento logico, decisioni complesse) e che è
+    ormai così integrata da essere parte dell'architettura dei modelli più recenti, non
+    solo una tecnica di prompting.
+  </p>
+
+  <!-- ── LO SCHEMA VISIVO DI SINTESI ── -->
+  <div class="flow-diagram">
+    <div class="flow-diagram-label">Lo schema visivo di sintesi del processo</div>
+
+    <svg class="flow-svg" viewBox="0 0 1000 580" xmlns="http://www.w3.org/2000/svg">
+      <!-- Definizioni -->
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L9,3 z" fill="#c94a1a"/>
+        </marker>
+        <linearGradient id="gradStage" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#1e2a5e" stop-opacity="0.06"/>
+          <stop offset="100%" stop-color="#1e2a5e" stop-opacity="0.02"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Riga superiore: input strutturato -->
+      <g>
+        <rect x="40" y="20" width="920" height="80" fill="url(#gradStage)" stroke="#1e2a5e" stroke-width="1" stroke-dasharray="4,4" rx="6"/>
+        <text x="60" y="44" font-family="JetBrains Mono" font-size="10" fill="#6b7280" letter-spacing="1.5" font-weight="600">PUNTO 5 — IL PROMPT VISTO DAL MODELLO (INPUT EFFETTIVO)</text>
+        <rect x="60" y="55" width="180" height="34" fill="#5e2a7a" rx="4"/>
+        <text x="150" y="76" font-family="Outfit" font-size="13" fill="white" text-anchor="middle" font-weight="600">SYSTEM PROMPT</text>
+        <rect x="260" y="55" width="240" height="34" fill="#0d7a6e" rx="4"/>
+        <text x="380" y="76" font-family="Outfit" font-size="13" fill="white" text-anchor="middle" font-weight="600">CRONOLOGIA CONVERSAZIONE</text>
+        <rect x="520" y="55" width="180" height="34" fill="#c94a1a" rx="4"/>
+        <text x="610" y="76" font-family="Outfit" font-size="13" fill="white" text-anchor="middle" font-weight="600">MESSAGGIO UTENTE</text>
+        <text x="780" y="76" font-family="Lora" font-size="13" fill="#374151" font-style="italic">tutto un unico documento</text>
+      </g>
+
+      <!-- Freccia 1: input → tokenizzazione -->
+      <line x1="500" y1="105" x2="500" y2="135" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <!-- Stage 1: Tokenizzazione -->
+      <g>
+        <rect x="180" y="140" width="640" height="56" fill="white" stroke="#1e2a5e" stroke-width="1.5" rx="6"/>
+        <text x="200" y="160" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" letter-spacing="1.5" font-weight="600">PUNTO 1</text>
+        <text x="500" y="160" font-family="Outfit" font-size="14" fill="#1e2a5e" text-anchor="middle" font-weight="600">TOKENIZZAZIONE</text>
+        <text x="500" y="182" font-family="Lora" font-size="13" fill="#374151" text-anchor="middle" font-style="italic">testo → sequenza di ID numerici dei token</text>
+      </g>
+
+      <!-- Freccia 2 -->
+      <line x1="500" y1="200" x2="500" y2="225" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <!-- Stage 2: Embedding -->
+      <g>
+        <rect x="180" y="230" width="640" height="56" fill="white" stroke="#1e2a5e" stroke-width="1.5" rx="6"/>
+        <text x="200" y="250" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" letter-spacing="1.5" font-weight="600">PUNTO 2</text>
+        <text x="500" y="250" font-family="Outfit" font-size="14" fill="#1e2a5e" text-anchor="middle" font-weight="600">EMBEDDING</text>
+        <text x="500" y="272" font-family="Lora" font-size="13" fill="#374151" text-anchor="middle" font-style="italic">ID → vettori in uno spazio semantico (~10K dimensioni)</text>
+      </g>
+
+      <!-- Freccia 3 -->
+      <line x1="500" y1="290" x2="500" y2="315" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <!-- Stage 3: Contestualizzazione (più alto, è il cuore) -->
+      <g>
+        <rect x="120" y="320" width="760" height="98" fill="#1e2a5e" rx="6"/>
+        <text x="140" y="342" font-family="JetBrains Mono" font-size="10" fill="#f07040" letter-spacing="1.5" font-weight="600">PUNTO 4A — IL CUORE DEL MECCANISMO</text>
+        <text x="500" y="362" font-family="Outfit" font-size="15" fill="white" text-anchor="middle" font-weight="600">CONTESTUALIZZAZIONE — ATTENZIONE</text>
+        <text x="500" y="384" font-family="Lora" font-size="13" fill="rgba(255,255,255,0.85)" text-anchor="middle" font-style="italic">multi-head attention × N strati impilati</text>
+        <text x="500" y="404" font-family="Lora" font-size="12" fill="rgba(255,255,255,0.7)" text-anchor="middle" font-style="italic">ogni token "guarda" gli altri e modifica il proprio vettore in base al contesto rilevante</text>
+      </g>
+
+      <!-- Freccia 4 -->
+      <line x1="500" y1="422" x2="500" y2="447" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <!-- Stage 4: Vettore di contesto finale -->
+      <g>
+        <rect x="220" y="452" width="560" height="48" fill="white" stroke="#c94a1a" stroke-width="2" rx="6"/>
+        <text x="500" y="472" font-family="Outfit" font-size="14" fill="#c94a1a" text-anchor="middle" font-weight="600">VETTORE DI CONTESTO FINALE</text>
+        <text x="500" y="490" font-family="Lora" font-size="12" fill="#374151" text-anchor="middle" font-style="italic">una singola posizione nello spazio: "dove dovrebbe cadere semanticamente la continuazione"</text>
+      </g>
+
+      <!-- Freccia 5 -->
+      <line x1="500" y1="504" x2="500" y2="529" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <!-- Stage 5: Distribuzione + token -->
+      <g>
+        <rect x="60" y="534" width="880" height="40" fill="white" stroke="#1e2a5e" stroke-width="1.5" rx="6"/>
+        <text x="80" y="552" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" letter-spacing="1.5" font-weight="600">PUNTO 3</text>
+        <text x="380" y="558" font-family="Outfit" font-size="13" fill="#1e2a5e" text-anchor="middle" font-weight="600">DISTRIBUZIONE DI PROBABILITÀ</text>
+        <text x="540" y="558" font-family="Outfit" font-size="14" fill="#0d7a6e" text-anchor="middle" font-weight="600">→</text>
+        <text x="700" y="558" font-family="Outfit" font-size="13" fill="#1e2a5e" text-anchor="middle" font-weight="600">SAMPLING</text>
+        <text x="850" y="558" font-family="Outfit" font-size="14" fill="#0d7a6e" text-anchor="middle" font-weight="600">→</text>
+        <text x="900" y="558" font-family="Outfit" font-size="13" fill="#c94a1a" text-anchor="middle" font-weight="600">TOKEN</text>
+      </g>
+
+      <!-- Loop autoregressivo -->
+      <path d="M 940 554 Q 980 554 980 80 Q 980 30 940 30 L 800 30" fill="none" stroke="#c94a1a" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arrow)"/>
+      <text x="985" y="290" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" letter-spacing="1px" font-weight="600" transform="rotate(90 985 290)">LOOP AUTOREGRESSIVO</text>
+    </svg>
+
+    <div class="flow-caption">
+      Lo schema rappresenta il flusso completo dall'input al token generato. Il loop
+      tratteggiato in basso indica che il token appena generato torna a far parte del
+      prompt per la generazione del prossimo token, e il ciclo riparte. Il riquadro più
+      grande (e l'unico colorato) è la contestualizzazione: è il cuore concettuale del
+      processo, dove viene "interpretato" il prompt.
+    </div>
+  </div>
+
+  <div class="ref-link">
+    <strong>Approfondisci nei punti dedicati →</strong> Punto 3 per la trattazione
+    completa della predizione (distribuzione di probabilità, generazione autoregressiva,
+    temperatura e sampling, Chain-of-Thought con la geometria del CoT e le sue varianti).
+  </div>
+</section>
+
+<!-- SEZIONE 5 — VINCOLI E IMPLICAZIONI -->
+<section>
+  <div class="section-num">Sezione 5 — Vincoli e implicazioni operative</div>
+  <h2>Cosa discende dal meccanismo, sul piano pratico</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Una raccolta condensata dei vincoli architetturali che il meccanismo descritto fin qui produce, e dei principi pratici di prompting che ne discendono. Non è una trattazione esaustiva — gli approfondimenti sono nei punti 4B e 6 — ma una sintesi delle implicazioni che chiudono il cerchio tra teoria e pratica.</p>
+  </div>
+
+  <h3>Il vincolo della context window</h3>
+  <p>
+    Il meccanismo di attenzione, per come è costruito, ha un costo computazionale che
+    cresce con il <strong>quadrato</strong> della lunghezza del contesto: ogni token
+    guarda tutti gli altri, quindi N token producono N² confronti. Da questa proprietà
+    nasce il vincolo della <strong>context window</strong>: ogni LLM ha un numero massimo
+    di token che può tenere in considerazione simultaneamente. Oggi siamo nell'ordine di
+    100.000-200.000 token per i modelli standard, fino al milione per i modelli frontiera.
+    Oltre quella soglia, il testo viene troncato — non riassunto, sparisce.
+  </p>
+
+  <p>
+    Da questo discende anche il fenomeno chiamato <em>lost in the middle</em>: il modello
+    presta più attenzione ai token vicini all'inizio e alla fine del contesto, e meno a
+    quelli in mezzo. Le ragioni sono ancora oggetto di ricerca, ma il fenomeno è ben
+    documentato e ha una conseguenza pratica chiara: <strong>dove metti l'informazione
+    nel prompt conta</strong>. Le istruzioni cruciali vanno in posizioni privilegiate —
+    inizio o fine — non sepolte nel mezzo.
+  </p>
+
+  <h3>I principi pratici, in forma compatta</h3>
+  <p>
+    Da tutto quello che abbiamo visto discendono alcuni principi operativi per scrivere
+    prompt efficaci. Li raccolgo qui in forma compatta — la trattazione estesa è nel
+    punto 6, organizzata in quattro livelli (principi base, tecniche specifiche, prompt
+    come architettura, iterazione).
+  </p>
+
+  <p>
+    <strong>Chiarezza prima di concisione.</strong> Un prompt ambiguo è sempre peggiore
+    di un prompt esplicito, anche se il secondo è più lungo. La domanda diagnostica:
+    "Capirebbe questo prompt un essere umano competente che non ha contesto?" Se no, non
+    è abbastanza chiaro nemmeno per il modello.
+  </p>
+
+  <p>
+    <strong>Specificare il formato di output.</strong> Forse il principio che produce il
+    salto più immediato di qualità. Lasciato libero, il modello segue i suoi default
+    (impostati dal system prompt o dalle statistiche di addestramento), che spesso non
+    coincidono con quello che vuoi. Specificare lunghezza, struttura, livello di
+    formalità, lingua, costa zero e migliora molto.
+  </p>
+
+  <p>
+    <strong>Pensare il prompt come un'architettura, non come un testo.</strong> Per task
+    complessi, un prompt efficace ha cinque parti in posizioni precise: framing all'inizio
+    (ruolo, regole generali); esempi subito dopo se ne usi (few-shot); contesto materiale
+    in mezzo (con delimitatori chiari per delimitarlo); ricapitolo verso la fine se il
+    prompt è lungo; richiesta esplicita per ultima, in posizione fresca.
+  </p>
+
+  <p>
+    <strong>Sfruttare le tecniche che inclinano la geometria.</strong> Assegnare un ruolo
+    al modello sposta il vettore di contesto verso regioni dello spazio più adatte al
+    compito. Few-shot prompting ancora il pattern desiderato. Chain-of-Thought converte
+    lunghezza in profondità computazionale per problemi multi-step. Sono tutte tecniche
+    che funzionano per ragioni geometriche legate a quanto abbiamo visto.
+  </p>
+
+  <p>
+    <strong>Iterare.</strong> Il primo prompt non è quasi mai quello giusto. Il prompting
+    professionale è un processo iterativo, non un esercizio di abilità linguistica. Tre o
+    quattro iterazioni veloci portano da un risultato mediocre a uno eccellente, e quasi
+    sempre la vera competenza non è scrivere il prompt perfetto al primo colpo, ma
+    iterare in modo intelligente.
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>Il filo conduttore di tutti i principi</h4>
+    <p>
+      Tutti questi principi non sono ricette arbitrarie: sono <strong>conseguenze dirette</strong>
+      del meccanismo che abbiamo descritto nelle sezioni precedenti. La struttura del
+      prompt conta perché esiste il <em>lost in the middle</em>. Il formato di output va
+      specificato perché il modello segue probabilità inclinate dal system prompt. Il
+      ruolo funziona perché sposta il vettore di contesto. Il CoT funziona perché aggiunge
+      profondità computazionale. Capire il "perché" rende ogni principio adattabile invece
+      che una regola da memorizzare.
+    </p>
+  </div>
+
+  <div class="ref-link">
+    <strong>Approfondisci nei punti dedicati →</strong> Punto 4B per il costo quadratico,
+    la context window, il lost in the middle, e l'approfondimento sulla strutturazione
+    del prompt. Punto 6 per il quadro completo dei principi pratici, organizzato in
+    quattro livelli con tecniche specifiche, errori comuni, e meta-prompting.
+  </div>
+</section>
+
+<!-- CHIUSURA — UNA NARRAZIONE FINALE -->
+<section style="border-bottom: none;">
+  <div class="section-num">Chiusura</div>
+  <h2>Una narrazione finale che lega tutto</h2>
+
+  <p>
+    Abbiamo attraversato i sette punti del percorso. Voglio chiudere con una narrazione
+    finale che, in poche righe, mette tutto insieme.
+  </p>
+
+  <p>
+    Quando tu scrivi un prompt e premi invio, la cosa che arriva al modello non è quel
+    testo. È un costrutto più ampio: il system prompt invisibile, la cronologia della
+    conversazione, i marcatori di ruolo, e infine il tuo messaggio. Tutto questo viene
+    trattato come un unico documento da elaborare.
+  </p>
+
+  <p>
+    Il documento viene tokenizzato — segmentato in unità lessicali secondo regole apprese
+    dall'algoritmo BPE — e ogni token viene convertito in un vettore di migliaia di
+    dimensioni che lo posiziona in uno spazio semantico costruito durante l'addestramento.
+    In quello spazio, la vicinanza geometrica corrisponde alla vicinanza di significato,
+    e le proprietà semantiche (essere un nome, un verbo, un cibo, un sentimento) sono
+    direzioni distribuite su molte coordinate.
+  </p>
+
+  <p>
+    I vettori entrano nell'architettura del modello, dove decine di strati di attenzione
+    li trasformano. Ogni strato fa la stessa operazione su scala progressivamente più
+    astratta: ogni token "guarda" gli altri token del contesto, calcola pesi di rilevanza
+    attraverso il meccanismo Q-K-V, e mescola i value dei vicini più rilevanti nel proprio
+    nuovo vettore. Molte teste lavorano in parallelo, ognuna specializzata in un tipo
+    diverso di rilevanza — sintassi, coreferenza, dipendenze a lunga distanza, concordanza,
+    semantica. Strato dopo strato, i vettori incorporano relazioni sempre più profonde,
+    fino a costituire una rappresentazione completamente contestualizzata dell'intero
+    prompt.
+  </p>
+
+  <p>
+    Alla fine di questo processo, il vettore associato all'ultima posizione del prompt è
+    un punto nello spazio degli embedding che dice "ecco dove dovrebbe cadere
+    semanticamente la continuazione". Quel punto viene confrontato, attraverso il prodotto
+    scalare, con i vettori di tutti i 100.000+ token del vocabolario. I confronti vengono
+    normalizzati in una distribuzione di probabilità, da cui un token viene selezionato.
+    Quel token viene aggiunto al testo, e il processo ricomincia: il nuovo testo è il
+    nuovo input, e il modello produce il token successivo.
+  </p>
+
+  <div class="closing-block">
+    <div class="closing-label">L'osservazione che chiude tutto</div>
+    <h3>Gli LLM hanno imparato la geometria del linguaggio</h3>
+    <p>
+      Tutto quello che abbiamo descritto in questo percorso converge in una frase: <em>gli
+      LLM non sono macchine che capiscono il linguaggio, sono macchine che hanno imparato
+      la geometria del linguaggio</em>. Ogni regolarità del linguaggio — grammaticale,
+      semantica, pragmatica, stilistica — è diventata, durante l'addestramento, una
+      regolarità geometrica nello spazio degli embedding. Le frasi grammaticalmente
+      corrette occupano regioni "buone"; quelle sgrammaticate cadono in regioni "vuote".
+      I ragionamenti corretti seguono traiettorie fluide; quelli sbagliati zigzagano.
+    </p>
+    <p>
+      Predire il prossimo token è <strong>navigare quella geometria</strong>. Non è
+      "capire" nel senso umano: è seguire le linee di forza di uno spazio matematico in
+      cui le buone risposte sono rappresentate come direzioni preferenziali. E scrivere
+      un buon prompt significa esattamente <strong>modellare la traiettoria che il modello
+      farà in quello spazio</strong>, in modo che le predizioni più probabili coincidano
+      con quello che vuoi tu.
+    </p>
+    <p>
+      Ogni tecnica di prompting che abbiamo visto — assegnare un ruolo, specificare il
+      formato, mostrare esempi, chiedere il ragionamento passo per passo, strutturare il
+      prompt secondo le posizioni privilegiate — è un modo diverso di inclinare quella
+      traiettoria. Capire che funzionano per <em>ragioni geometriche</em>, non per ragioni
+      linguistiche o psicologiche, è il salto di consapevolezza che il percorso vorrebbe
+      aver prodotto.
+    </p>
+    <p style="margin-top: 32px; font-size: 18px; font-style: italic; color: var(--orange-light);">
+      Il prompt più potente è scritto da chi ha un buon modello mentale del modello.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Sintesi del percorso — Documento panoramico (8 di 6+1+1)</p>
+  <p>Come un LLM interpreta un prompt — narrazione condensata dei sette punti</p>
+</footer>
+
+</body>
+</html>

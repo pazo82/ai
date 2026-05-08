@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Punto 3 — Dalla geometria semantica alla predizione del token</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --red: #9a2020;
+    --red-faint: rgba(154,32,32,0.07);
+    --red-border: rgba(154,32,32,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: var(--indigo);
+    padding: 72px 48px 88px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 540px; height: 540px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(13,122,110,0.28) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -100px; left: 10%;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-grid {
+    position: absolute;
+    top: 30%; right: 4%;
+    width: 240px; height: 240px;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 54px;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 19px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 760px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 40px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 36px 0 14px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.3;
+    color: var(--indigo-mid);
+    margin: 24px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 16px;
+    line-height: 1.75;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--indigo-border);
+  }
+
+  .insight {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 32px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(13,122,110,0.28) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 18px;
+    line-height: 1.6;
+    margin: 0;
+    position: relative;
+    font-family: var(--serif);
+    font-style: italic;
+  }
+
+  .callout {
+    padding: 22px 26px;
+    border-radius: 6px;
+    margin: 24px 0;
+    border-left: 4px solid;
+  }
+
+  .callout-orange { background: var(--orange-faint); border-color: var(--orange); }
+  .callout-teal { background: var(--teal-faint); border-color: var(--teal); }
+  .callout-amber { background: var(--amber-faint); border-color: var(--amber); }
+  .callout-purple { background: var(--purple-faint); border-color: var(--purple); }
+  .callout-indigo { background: var(--indigo-faint); border-color: var(--indigo-light); }
+
+  .callout h4 { margin-top: 0; margin-bottom: 8px; font-size: 11px; }
+  .callout-orange h4 { color: var(--orange); }
+  .callout-teal h4 { color: var(--teal); }
+  .callout-amber h4 { color: var(--amber); }
+  .callout-purple h4 { color: var(--purple); }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout p { font-size: 15.5px; margin-bottom: 10px; line-height: 1.7; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ── PROBABILITY VIZ ── */
+  .prob-viz {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    margin: 28px 0;
+  }
+
+  .prob-viz-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .prob-viz-context {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-style: italic;
+    color: var(--indigo);
+    margin-bottom: 24px;
+  }
+
+  .prob-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border2);
+  }
+
+  .prob-row:last-child { border-bottom: none; }
+
+  .prob-token {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--ink);
+    min-width: 100px;
+    font-style: italic;
+  }
+
+  .prob-bar-container {
+    flex: 1;
+    height: 18px;
+    background: var(--bg2);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .prob-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+
+  .prob-bar-high { background: var(--orange); }
+  .prob-bar-mid { background: var(--orange-light); }
+  .prob-bar-low { background: var(--teal); }
+  .prob-bar-tiny { background: var(--ink-light); opacity: 0.4; }
+
+  .prob-value {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-mid);
+    min-width: 50px;
+    text-align: right;
+    font-weight: 600;
+  }
+
+  /* ── PIPELINE ── */
+  .pipeline {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px 32px;
+    margin: 32px 0;
+  }
+
+  .pipeline-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  .pipeline-step {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: 20px;
+    padding: 18px 0;
+    border-bottom: 1px dashed var(--border2);
+  }
+
+  .pipeline-step:last-child { border-bottom: none; }
+
+  .pipeline-step.highlighted {
+    background: var(--orange-faint);
+    margin: 12px -20px;
+    padding: 18px 20px;
+    border: 1px solid var(--orange-border);
+    border-bottom: 1px solid var(--orange-border);
+    border-radius: 6px;
+  }
+
+  .step-num {
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--orange);
+    font-weight: 500;
+    line-height: 1;
+    font-style: italic;
+  }
+
+  .pipeline-step.highlighted .step-num { color: var(--orange); }
+
+  .step-content h5 {
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .step-content p {
+    font-size: 14.5px;
+    line-height: 1.65;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  .step-detail {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--indigo);
+    background: var(--indigo-faint2);
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-top: 8px;
+    display: inline-block;
+    border: 1px solid var(--indigo-border);
+  }
+
+  /* ── SYNTHESIS BOX ── */
+  .synthesis {
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-mid) 100%);
+    color: var(--white);
+    padding: 44px 48px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .synthesis::before {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -80px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .synthesis-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    font-weight: 600;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .synthesis-text {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--white);
+    font-weight: 400;
+    position: relative;
+  }
+
+  .synthesis-text strong { color: var(--white); font-weight: 600; }
+
+  /* ── TEMPERATURE TABLE ── */
+  .temp-table {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 28px 0;
+  }
+
+  .temp-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 220px;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border2);
+    gap: 20px;
+  }
+
+  .temp-row:last-child { border-bottom: none; }
+
+  .temp-row.header {
+    background: var(--bg2);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink-light);
+  }
+
+  .temp-value {
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--indigo);
+    font-size: 14px;
+  }
+
+  .temp-desc {
+    font-size: 14.5px;
+    color: var(--ink-mid);
+    line-height: 1.55;
+  }
+
+  .temp-use {
+    font-size: 13px;
+    color: var(--ink-light);
+    font-style: italic;
+  }
+
+  /* ── COT COMPARISON ── */
+  .cot-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 28px 0;
+  }
+
+  .cot-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .cot-card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border2);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .cot-direct .cot-card-header { background: var(--red-faint); color: var(--red); }
+  .cot-cot .cot-card-header { background: var(--teal-faint); color: var(--teal); }
+
+  .cot-card-body { padding: 20px; }
+
+  .cot-prompt {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--bg2);
+    padding: 12px 14px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  .cot-output {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--ink-mid);
+    line-height: 1.65;
+    padding: 12px 14px;
+    border-left: 3px solid;
+    background: var(--white);
+  }
+
+  .cot-direct .cot-output { border-color: var(--red); }
+  .cot-cot .cot-output { border-color: var(--teal); }
+
+  .cot-output strong { color: var(--ink); }
+
+  /* ── COT MECHANICS ── */
+  .cot-mechanics {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    margin: 28px 0;
+  }
+
+  .cot-mech-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .cot-mech-side {
+    background: var(--white);
+    padding: 20px 22px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  .cot-mech-side h5 {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .cot-mech-side.no-cot { border-top: 3px solid var(--red); }
+  .cot-mech-side.no-cot h5 { color: var(--red); }
+  .cot-mech-side.with-cot { border-top: 3px solid var(--teal); }
+  .cot-mech-side.with-cot h5 { color: var(--teal); }
+
+  .cot-jump {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.9;
+    padding: 12px 0;
+    text-align: center;
+  }
+
+  .cot-jump .arrow-big {
+    font-size: 28px;
+    color: var(--red);
+    display: block;
+    margin: 8px 0;
+  }
+
+  .cot-steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .cot-steps-list li {
+    padding: 8px 0 8px 28px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-mid);
+    position: relative;
+    border-bottom: 1px dashed var(--border2);
+  }
+
+  .cot-steps-list li:last-child { border-bottom: none; }
+
+  .cot-steps-list li::before {
+    content: counter(step-counter);
+    counter-increment: step-counter;
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 18px;
+    height: 18px;
+    background: var(--teal);
+    color: var(--white);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 18px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: var(--sans);
+  }
+
+  .cot-steps-list { counter-reset: step-counter; }
+
+  /* ── COT VARIANTS ── */
+  .cot-variants {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 28px 0;
+  }
+
+  .cot-variant {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 22px;
+    border-left: 3px solid var(--purple);
+  }
+
+  .cot-variant h5 {
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .cot-variant .variant-prompt {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--purple);
+    background: var(--purple-faint);
+    padding: 6px 10px;
+    border-radius: 3px;
+    margin: 8px 0;
+    line-height: 1.5;
+  }
+
+  .cot-variant p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  /* ── Q&A ── */
+  .qa-block {
+    margin: 32px 0;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .qa-question {
+    background: var(--bg2);
+    padding: 20px 28px 20px 56px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .qa-question::before {
+    content: 'Q';
+    position: absolute;
+    left: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 24px;
+    color: var(--orange);
+    font-weight: 500;
+  }
+
+  .qa-question p {
+    margin: 0;
+    font-size: 16px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .qa-answer { padding: 28px 32px; }
+  .qa-answer p { margin-bottom: 14px; }
+  .qa-answer p:last-child { margin-bottom: 0; }
+
+  /* ── IMPLICATIONS ── */
+  .implication-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 32px 0;
+  }
+
+  .implication-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 26px;
+    border-top: 3px solid;
+  }
+
+  .implication-card:nth-child(1) { border-top-color: var(--orange); }
+  .implication-card:nth-child(2) { border-top-color: var(--teal); }
+  .implication-card:nth-child(3) { border-top-color: var(--purple); }
+
+  .implication-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--ink-light);
+    margin-bottom: 10px;
+  }
+
+  .implication-card h4 {
+    margin: 0 0 14px;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 18px;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+
+  .implication-card p {
+    font-size: 14.5px;
+    line-height: 1.65;
+    margin: 0 0 10px;
+  }
+
+  .implication-card p:last-child { margin: 0; }
+
+  /* ── STATS ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 28px 0;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 24px 22px;
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: var(--serif);
+    font-size: 38px;
+    color: var(--orange);
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--ink-light);
+    line-height: 1.4;
+  }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(13,122,110,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  /* ── BRIDGE ── */
+  .bridge {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 48px;
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .bridge h3 {
+    margin: 0 0 16px;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--indigo);
+    font-weight: 500;
+  }
+
+  .bridge p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+  }
+
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 48px 24px 60px; }
+    .hero h1 { font-size: 36px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .implication-grid { grid-template-columns: 1fr; }
+    .stat-row { grid-template-columns: 1fr; }
+    .cot-compare { grid-template-columns: 1fr; }
+    .cot-mech-row { grid-template-columns: 1fr; }
+    .cot-variants { grid-template-columns: 1fr; }
+    .takeaways { padding: 40px 28px; }
+    .bridge { padding: 32px 24px; }
+    .temp-row { grid-template-columns: 1fr; gap: 6px; }
+    .pipeline-step { grid-template-columns: 40px 1fr; gap: 14px; }
+    .synthesis { padding: 32px 28px; }
+    .synthesis-text { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <div class="hero-bg-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-label">Punto 3 — Fondamenti del prompting</div>
+    <h1>Dalla geometria semantica alla <em>predizione</em> del token</h1>
+    <p class="hero-sub">
+      Le due descrizioni di un LLM — "macchina che predice il prossimo token" e
+      "macchina che ragiona sulla geometria del significato" — sono la stessa cosa
+      vista da angolazioni diverse. Capirlo è la chiave per tutto il resto del prompting.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">Predizione & Chain-of-Thought</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Punto del percorso</div>
+        <div class="meta-value">3 di 6</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Prerequisito per</div>
+        <div class="meta-value">Attenzione, Prompting</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 -->
+<section>
+  <div class="section-num">01 — IL PUNTO DI PARTENZA</div>
+  <h2>Un LLM è una macchina predittiva, fino in fondo</h2>
+  <p class="lead">
+    Prima di tutto, dobbiamo accettare una cosa che può sembrare riduttiva ma è la verità
+    fondamentale: un LLM, anche il più sofisticato, fa esattamente una cosa. Dato un
+    contesto (una sequenza di token), produce una probabilità per ogni possibile token
+    successivo nel suo vocabolario.
+  </p>
+
+  <p>
+    Non comprende, non ragiona nel senso umano, non "sa" cosa sta dicendo. <strong>Calcola
+    probabilità.</strong> Tutto il resto — la conversazione fluida, le risposte articolate,
+    la sensazione di parlare con un'intelligenza — emerge da questa singola operazione
+    ripetuta migliaia di volte.
+  </p>
+
+  <p>
+    Vediamolo concretamente. Se il prompt è "Il gatto beve il", l'output del modello non è
+    direttamente una parola, ma una <strong>distribuzione di probabilità</strong> su tutto
+    il vocabolario:
+  </p>
+
+  <div class="prob-viz">
+    <div class="prob-viz-label">Distribuzione di probabilità sul prossimo token</div>
+    <div class="prob-viz-context">"Il gatto beve il ___"</div>
+    <div class="prob-row">
+      <div class="prob-token">latte</div>
+      <div class="prob-bar-container"><div class="prob-bar prob-bar-high" style="width: 84%;"></div></div>
+      <div class="prob-value">42%</div>
+    </div>
+    <div class="prob-row">
+      <div class="prob-token">tè</div>
+      <div class="prob-bar-container"><div class="prob-bar prob-bar-mid" style="width: 16%;"></div></div>
+      <div class="prob-value">8%</div>
+    </div>
+    <div class="prob-row">
+      <div class="prob-token">caffè</div>
+      <div class="prob-bar-container"><div class="prob-bar prob-bar-mid" style="width: 10%;"></div></div>
+      <div class="prob-value">5%</div>
+    </div>
+    <div class="prob-row">
+      <div class="prob-token">brodo</div>
+      <div class="prob-bar-container"><div class="prob-bar prob-bar-low" style="width: 8%;"></div></div>
+      <div class="prob-value">4%</div>
+    </div>
+    <div class="prob-row">
+      <div class="prob-token">sangue</div>
+      <div class="prob-bar-container"><div class="prob-bar prob-bar-tiny" style="width: 1.6%;"></div></div>
+      <div class="prob-value">0.8%</div>
+    </div>
+    <div class="prob-row">
+      <div class="prob-token">computer</div>
+      <div class="prob-bar-container"><div class="prob-bar prob-bar-tiny" style="width: 0.2%;"></div></div>
+      <div class="prob-value">~0%</div>
+    </div>
+    <div class="prob-row">
+      <div class="prob-token" style="color: var(--ink-light);">altri 100K+ token</div>
+      <div class="prob-bar-container"><div class="prob-bar prob-bar-tiny" style="width: 80%;"></div></div>
+      <div class="prob-value">~40%</div>
+    </div>
+  </div>
+
+  <p>
+    Quello che vedi è la distribuzione di probabilità per il prossimo token. "Latte" è il
+    candidato più probabile al 42%, ma non è certo: ci sono molte alternative plausibili
+    che si dividono il resto della probabilità. "Computer" è teoricamente possibile ma con
+    probabilità essenzialmente nulla, perché non si adatta al contesto. Il modello assegna
+    una probabilità a <em>ogni</em> token del vocabolario (circa 100.000+ token), anche a
+    quelli che non hanno senso. La somma di tutte le probabilità fa 100%.
+  </p>
+
+  <h3>Generazione autoregressiva</h3>
+  <p>
+    Una volta ottenuta questa distribuzione, il modello sceglie un token (in modo che
+    vedremo nella sezione sulla temperatura) e lo aggiunge al testo. Poi <strong>il
+    processo ricomincia da capo</strong>: il nuovo testo (prompt + token appena generato)
+    diventa il nuovo input, e si calcola una nuova distribuzione di probabilità per il
+    token successivo.
+  </p>
+
+  <p>
+    Si chiama <strong>generazione autoregressiva</strong>: ogni nuovo token è generato
+    condizionatamente a tutto quello che è venuto prima, incluso quello che il modello
+    stesso ha appena scritto. Una risposta lunga 200 parole non viene "pensata" tutta
+    insieme: viene costruita un token alla volta, ogni passo basato su tutta la storia
+    fino a quel momento.
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Idea chiave</div>
+    <p>
+      Quando un LLM scrive una risposta articolata, non la sta pensando tutta intera prima
+      di iniziare a scrivere: la sta producendo un token alla volta, e ogni nuovo token
+      viene scelto solo dopo aver visto tutti i precedenti. Il modello non ha un piano
+      mentale che poi mette in parole — il "piano" emerge dalla sequenza stessa.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 2 -->
+<section>
+  <div class="section-num">02 — LA SALDATURA</div>
+  <h2>Dove entrano gli embedding</h2>
+  <p>
+    A questo punto sorge la domanda: come fa il modello a calcolare queste probabilità in
+    modo intelligente? Se dovesse calcolarle guardando solo gli ID numerici dei token (i
+    numeri prodotti dalla tokenizzazione), sarebbe un disastro. L'ID 2347 (gatto) e l'ID
+    2348 (qualunque altra parola) sono numericamente vicini ma semanticamente non hanno
+    alcuna relazione. Il modello non potrebbe sfruttare nessuna regolarità linguistica.
+  </p>
+
+  <p>
+    Qui sta la saldatura tra punto 2 e punto 3: <strong>gli embedding sono lo strumento
+    attraverso cui il modello calcola queste probabilità in modo intelligente</strong>.
+    Lavorando sui vettori embedding invece che sugli ID, il modello sfrutta il fatto che
+    parole con significato simile producono predizioni simili.
+  </p>
+
+  <h3>L'esempio della generalizzazione</h3>
+  <p>
+    Immagina che il modello, durante l'addestramento, abbia visto miliardi di volte frasi
+    come "Il gatto beve il latte". Ha imparato che dopo "gatto beve il" la parola più
+    probabile è "latte". Adesso arriva un prompt nuovo: "Il felino beve il". Il modello
+    non ha mai visto esattamente questa frase, ma sa due cose:
+  </p>
+
+  <p>
+    <strong>Primo</strong>, il vettore embedding di "felino" è molto vicino a quello di
+    "gatto" (sono sinonimi, e dopo l'addestramento occupano regioni vicine nello spazio
+    semantico). <strong>Secondo</strong>, il calcolo di probabilità che il modello fa per
+    "felino beve il" produrrà risultati molto simili a quelli per "gatto beve il", perché
+    i vettori di input sono simili e quindi le predizioni di output saranno simili.
+  </p>
+
+  <p>
+    Il modello quindi predice "latte" anche dopo "felino beve il", anche se non l'ha mai
+    visto. <strong>La vicinanza semantica nello spazio degli embedding diventa
+    generalizzazione delle predizioni.</strong>
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Il punto di saldatura</h4>
+    <p>
+      Un LLM senza embedding sarebbe solo una memoria di sequenze esatte: potrebbe
+      predire bene quello che ha già visto, ma sarebbe cieco a qualsiasi variazione. Gli
+      embedding sono ciò che gli permette di <em>generalizzare</em>: di rispondere bene a
+      input mai visti, sfruttando la loro vicinanza semantica con input visti durante
+      l'addestramento.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 3 -->
+<section>
+  <div class="section-num">03 — IL FLUSSO COMPLETO</div>
+  <h2>Dal prompt al token, passo per passo</h2>
+  <p>
+    Adesso possiamo guardare il processo completo. Quando scrivi un prompt e premi invio,
+    questo è quello che succede dentro il modello, in sequenza, per generare il primo
+    token della risposta:
+  </p>
+
+  <div class="pipeline">
+    <div class="pipeline-label">Il flusso completo della predizione</div>
+
+    <div class="pipeline-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h5>Tokenizzazione</h5>
+        <p>Il prompt viene spezzato in token. Per esempio, "Il gatto beve il" diventa una sequenza di ID numerici.</p>
+        <div class="step-detail">"Il gatto beve il" → [2347, 8912, 15673, 4421]</div>
+      </div>
+    </div>
+
+    <div class="pipeline-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h5>Conversione in embedding</h5>
+        <p>Ogni ID viene mappato al suo vettore embedding (migliaia di numeri). Adesso non abbiamo più 4 numeri, ma 4 vettori, ognuno con migliaia di componenti, che codificano il significato.</p>
+      </div>
+    </div>
+
+    <div class="pipeline-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h5>Elaborazione attraverso strati</h5>
+        <p>I vettori passano attraverso decine di strati di elaborazione (attenzione + reti neurali, vedremo l'attenzione nel punto 4). Ogni strato modifica i vettori in base al contesto, raffinandoli progressivamente.</p>
+      </div>
+    </div>
+
+    <div class="pipeline-step highlighted">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h5>Vettore di contesto finale</h5>
+        <p>Alla fine dell'elaborazione, il modello produce un singolo vettore che rappresenta "tutto il prompt elaborato". Questo vettore è una posizione nello spazio degli embedding, e sostanzialmente dice: "ecco dove dovrebbe cadere semanticamente la continuazione".</p>
+      </div>
+    </div>
+
+    <div class="pipeline-step highlighted">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h5>Confronto con il vocabolario</h5>
+        <p>Questo vettore di contesto viene confrontato con i vettori di tutti i token del vocabolario. Il confronto avviene tramite un'operazione matematica chiamata <em>prodotto scalare</em>, che misura quanto due vettori sono allineati. Più due vettori sono "puntati nella stessa direzione", più alto sarà il loro prodotto scalare.</p>
+      </div>
+    </div>
+
+    <div class="pipeline-step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h5>Probabilità e scelta</h5>
+        <p>I valori dei prodotti scalari vengono trasformati in probabilità (tramite una funzione chiamata <em>softmax</em>, che li normalizza tra 0 e 1 facendoli sommare a 100%). Il token con la probabilità più alta — o uno scelto con un po' di casualità — viene selezionato e aggiunto al testo.</p>
+      </div>
+    </div>
+
+    <div class="pipeline-step">
+      <div class="step-num">7</div>
+      <div class="step-content">
+        <h5>Ricomincia il ciclo</h5>
+        <p>Il nuovo testo (prompt + token appena generato) diventa il nuovo input. Si torna al punto 1 e il processo ricomincia per generare il token successivo. Tutto quello che leggi in una risposta dell'LLM è il risultato di centinaia di iterazioni di questo ciclo.</p>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    I passi 4 e 5 sono il cuore di tutto. Sono quelli evidenziati in arancione perché lì
+    succede la magia: il modello prende tutto il prompt elaborato e lo riduce a una
+    posizione nello spazio. Poi cerca, nel vocabolario, il token che vive più vicino a
+    quella posizione. <em>Quella vicinanza geometrica diventa probabilità di predizione.</em>
+  </p>
+</section>
+
+
+<!-- SEZIONE 4 -->
+<section>
+  <div class="section-num">04 — LA SINTESI</div>
+  <h2>Le due descrizioni sono la stessa cosa</h2>
+  <p>
+    Adesso siamo nella posizione di rispondere alla domanda lasciata aperta nel punto 2:
+    come si conciliano "vicinanza semantica" e "predizione del prossimo token"? La risposta
+    è che <strong>non sono due cose diverse, ma la stessa operazione vista da due angolazioni</strong>.
+  </p>
+
+  <div class="synthesis">
+    <div class="synthesis-label">La frase chiave</div>
+    <div class="synthesis-text">
+      <strong>Predire il prossimo token</strong> = trovare il punto nello spazio degli
+      embedding che meglio completa il contesto, e cercare il token reale che sta più
+      vicino a quel punto.
+    </div>
+  </div>
+
+  <p>
+    Sono due descrizioni dello stesso fenomeno. Visto dall'esterno (dall'output): il modello
+    produce probabilità per ogni token. Visto dall'interno (dal funzionamento): il modello
+    naviga uno spazio geometrico, trovando il punto migliore e cercando il token più vicino
+    a quel punto. La probabilità di un token è alta perché il suo vettore è vicino al
+    vettore di contesto finale. La vicinanza geometrica <em>è</em> la probabilità.
+  </p>
+
+  <h3>Cosa significa, in fondo</h3>
+  <p>
+    Ed ecco l'osservazione fondamentale, quella che cambia il modo in cui pensi agli LLM
+    una volta capita: <strong>gli LLM non sono macchine che capiscono il linguaggio, sono
+    macchine che hanno imparato la geometria del linguaggio</strong>.
+  </p>
+
+  <p>
+    Ogni regolarità del linguaggio — grammaticale, semantica, pragmatica, stilistica — è
+    diventata, durante l'addestramento, una regolarità geometrica nello spazio degli
+    embedding. Le frasi grammaticalmente corrette occupano regioni "buone"; quelle
+    sgrammaticate cadono in regioni "vuote". I ragionamenti corretti seguono traiettorie
+    fluide; quelli sbagliati zigzagano. Lo stile formale e quello informale vivono in
+    quartieri diversi della città semantica.
+  </p>
+
+  <p>
+    Predire il prossimo token è navigare quella geometria. Non è "capire" nel senso umano:
+    è seguire le linee di forza di uno spazio matematico in cui le buone risposte sono
+    rappresentate come direzioni preferenziali.
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>Una conseguenza filosofica</h4>
+    <p>
+      Questo spiega perché gli LLM possono fare cose sorprendentemente "intelligenti" pur
+      essendo, tecnicamente, solo macchine predittive: la geometria del linguaggio
+      <em>è</em> sostanzialmente la geometria del pensiero strutturato. Apprendendo a
+      navigarla bene, il modello apprende — di riflesso — a fare cose che <em>sembrano</em>
+      ragionamento. Se la traiettoria è abbastanza buona, l'output è indistinguibile da un
+      ragionamento ben fatto. Non lo è, ma il risultato sì.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 5 -->
+<section>
+  <div class="section-num">05 — LA SCELTA DEL TOKEN</div>
+  <h2>Temperature e sampling: come il modello sceglie</h2>
+  <p>
+    Una volta che il modello ha calcolato la distribuzione di probabilità sui token (latte
+    42%, tè 8%, caffè 5%, ...), come sceglie quale token effettivamente usare? Ci sono due
+    strategie principali.
+  </p>
+
+  <h3>Greedy decoding (decodifica avida)</h3>
+  <p>
+    La prima strategia è la più semplice: scegli sempre il token con la probabilità più
+    alta. Si chiama <em>greedy decoding</em> o decodifica avida. Sembra la cosa più
+    sensata, no? Però ha un problema serio: produce testi <strong>ripetitivi e prevedibili</strong>,
+    e tende a entrare in loop.
+  </p>
+
+  <p>
+    Pensa a cosa succede se scegli sempre la parola statisticamente più probabile in ogni
+    posto: ottieni il "centro statistico" del linguaggio, che è in genere piatto, banale,
+    privo di personalità. Inoltre, una volta che il modello ha imboccato una certa
+    direzione, tenderà a confermarla sempre più, perché ogni parola "centrale" porta a
+    contesti che richiedono altre parole "centrali", e così via. Il risultato è spesso un
+    testo che ripete le stesse strutture o le stesse frasi.
+  </p>
+
+  <h3>Sampling (campionamento)</h3>
+  <p>
+    La seconda strategia, quella usata in pratica nella maggior parte dei casi, è il
+    <em>sampling</em>: si sceglie un token <strong>a caso</strong>, ma rispettando la
+    distribuzione di probabilità. Quindi il token più probabile ha alta probabilità di
+    essere scelto, ma non è certo: ogni tanto vince un token con probabilità inferiore.
+  </p>
+
+  <p>
+    È qui che entra in gioco il parametro <strong>temperatura</strong>, che controlla
+    quanto la scelta è "audace". È un parametro che modifica la distribuzione prima del
+    campionamento: bassa temperatura rende le probabilità alte ancora più alte e quelle
+    basse ancora più basse (la scelta diventa più conservativa); alta temperatura appiattisce
+    la distribuzione (token meno probabili diventano più competitivi).
+  </p>
+
+  <div class="temp-table">
+    <div class="temp-row header">
+      <div>Temperatura</div>
+      <div>Effetto</div>
+      <div>Quando si usa</div>
+    </div>
+    <div class="temp-row">
+      <div class="temp-value">0 (greedy)</div>
+      <div class="temp-desc">Sceglie sempre il token più probabile. Output deterministico.</div>
+      <div class="temp-use">Test, riproducibilità</div>
+    </div>
+    <div class="temp-row">
+      <div class="temp-value">0.2</div>
+      <div class="temp-desc">Quasi deterministico, sceglie quasi sempre il top, raramente il secondo.</div>
+      <div class="temp-use">Codice, fatti, classificazioni</div>
+    </div>
+    <div class="temp-row">
+      <div class="temp-value">0.7 — 1.0</div>
+      <div class="temp-desc">Bilanciato. Variazione naturale ma coerente. È il default tipico.</div>
+      <div class="temp-use">Conversazione, scrittura generale</div>
+    </div>
+    <div class="temp-row">
+      <div class="temp-value">1.5+</div>
+      <div class="temp-desc">Molto creativo. Il modello prende strade meno battute. Rischio di incoerenze.</div>
+      <div class="temp-use">Brainstorming, poesia, scrittura creativa</div>
+    </div>
+  </div>
+
+  <h3>L'implicazione che spesso sfugge</h3>
+  <p>
+    C'è una conseguenza importantissima di questo meccanismo, che spesso non è ovvia: lo
+    stesso prompt, con sampling attivo, può produrre risposte diverse ogni volta. Non è un
+    bug, è il funzionamento normale. <strong>Il modello non è una funzione deterministica
+    dal prompt alla risposta.</strong>
+  </p>
+
+  <p>
+    Questo cambia il modo in cui si valuta un prompt: non basta provarlo una volta. Se hai
+    un prompt importante (per esempio in produzione), conviene testarlo più volte e vedere
+    la varianza delle risposte. Una risposta brillante una volta non garantisce risposte
+    brillanti tutte le volte.
+  </p>
+
+  <div class="callout callout-amber">
+    <h4>Un'osservazione sottile sul controllo del prompt</h4>
+    <p>
+      Il prompt non controlla deterministicamente la risposta: la <em>inclina</em>. Imposta
+      la distribuzione di probabilità, ma il modello pesca da quella distribuzione. Questo
+      ha una conseguenza pratica: un buon prompt non è quello che "ti dà la risposta giusta",
+      ma quello che <strong>sposta la distribuzione verso risposte buone</strong>, in modo
+      che anche pescando casualmente, è probabile pescare bene.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 6 -->
+<section>
+  <div class="section-num">06 — IMPLICAZIONI PER IL PROMPTING</div>
+  <h2>Tre conseguenze pratiche</h2>
+  <p>
+    Capire che gli LLM sono macchine predittive che lavorano sulla geometria degli
+    embedding ha tre conseguenze concrete per il modo in cui scrivi i prompt. Le riprenderemo
+    in modo sistematico nel punto 6, ma è utile averle in mente da adesso.
+  </p>
+
+  <div class="implication-grid">
+    <div class="implication-card">
+      <div class="implication-num">01 / SENSIBILITÀ</div>
+      <h4>Ogni token cambia il vettore di contesto finale</h4>
+      <p>Se scrivi "analizza" invece di "guarda", invece di "esamina", invece di "valuta", produci vettori di contesto leggermente diversi, e quindi distribuzioni di probabilità diverse sui prossimi token.</p>
+      <p>Le risposte saranno diverse. La differenza può essere piccola o grande, ma c'è sempre. Non esistono prompt "equivalenti": ogni variazione produce un percorso diverso nello spazio.</p>
+    </div>
+    <div class="implication-card">
+      <div class="implication-num">02 / CONTINUITÀ</div>
+      <h4>Il modello non distingue "input dell'utente" da "testo generato da sé"</h4>
+      <p>Una volta che il modello ha generato il primo token della risposta, quel token entra nel contesto come qualsiasi altro. Per i token successivi, il modello sta continuando una sequenza in cui parte è il prompt e parte è l'inizio della risposta.</p>
+      <p>Da qui due osservazioni utili: se il modello inizia bene una risposta, è probabile che continui bene. Se inizia male, l'errore diventa contesto e tende a propagarsi.</p>
+    </div>
+    <div class="implication-card">
+      <div class="implication-num">03 / FRAMING</div>
+      <h4>I prompt che funzionano spostano in regioni di qualità</h4>
+      <p>I prompt che producono risposte migliori sono spesso quelli che "forzano" il modello in regioni dello spazio dove le risposte di qualità sono più probabili. "Rispondi come un esperto di X" o "ragiona passo passo" funzionano per questo motivo.</p>
+      <p>Spostano il vettore di contesto verso regioni dove le continuazioni più probabili sono effettivamente di migliore qualità. Non è magia: è geometria.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- SEZIONE 7 — CHAIN-OF-THOUGHT -->
+<section>
+  <div class="section-num">07 — APPROFONDIMENTO</div>
+  <h2>Chain-of-Thought: la tecnica che sfrutta la natura predittiva</h2>
+  <p class="lead">
+    Adesso che abbiamo capito cosa fa un LLM — predizione del token sfruttando la geometria
+    degli embedding — possiamo capire perché una tecnica di prompting in particolare
+    funziona così bene: il <strong>Chain-of-Thought</strong> (CoT, "catena di pensiero").
+    È la tecnica più studiata negli ultimi anni e merita una sezione dedicata, perché
+    illustra meglio di qualsiasi altra come la natura predittiva del modello cambia il
+    modo di scrivere prompt.
+  </p>
+
+  <h3>Cos'è, in pratica</h3>
+  <p>
+    Il Chain-of-Thought è una tecnica semplicissima da descrivere: invece di chiedere al
+    modello la risposta diretta, gli chiedi di <strong>ragionare passo per passo prima di
+    rispondere</strong>. La differenza in pratica è impressionante.
+  </p>
+
+  <div class="cot-compare">
+    <div class="cot-card cot-direct">
+      <div class="cot-card-header">Prompt diretto</div>
+      <div class="cot-card-body">
+        <div class="cot-prompt">
+          Maria ha 23 mele. Ne regala 7 al fratello e poi compra 3 cassette da 12 mele
+          ciascuna. Quante mele ha alla fine?
+        </div>
+        <div class="cot-output">
+          <strong>52</strong>
+          <p style="margin-top: 8px; font-size: 13px; color: var(--ink-light); font-style: italic;">
+            (a volte corretto, a volte no — il modello tira fuori un numero in un colpo solo)
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="cot-card cot-cot">
+      <div class="cot-card-header">Prompt con CoT</div>
+      <div class="cot-card-body">
+        <div class="cot-prompt">
+          Maria ha 23 mele. Ne regala 7 al fratello e poi compra 3 cassette da 12 mele
+          ciascuna. Quante mele ha alla fine? <strong>Ragiona passo per passo.</strong>
+        </div>
+        <div class="cot-output">
+          Maria parte con 23 mele. Ne regala 7, quindi le restano 23 − 7 = 16 mele. Poi
+          compra 3 cassette da 12 mele, quindi aggiunge 3 × 12 = 36 mele. Alla fine ha
+          16 + 36 = <strong>52</strong> mele.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    A prima vista sembrano produrre lo stesso risultato. Ma la differenza è enorme nei
+    casi più complessi, dove la versione diretta sbaglia spesso e la versione CoT arriva
+    alla risposta corretta. Il caso che ho mostrato è semplice; ma se sostituisci i numeri
+    con calcoli più articolati, o sostituisci l'aritmetica con un ragionamento logico
+    complesso, la differenza nelle percentuali di risposte corrette diventa drammatica.
+  </p>
+
+  <p>
+    Il celebre studio di Wei et al. del 2022 (Google) ha dimostrato che aggiungere
+    semplicemente "ragiona passo per passo" al prompt poteva <strong>raddoppiare o
+    triplicare l'accuratezza</strong> sui problemi di matematica e ragionamento, su
+    benchmark standard come GSM8K. È stata una delle scoperte fondamentali del prompting
+    moderno, e ha aperto un'intera area di ricerca.
+  </p>
+
+  <h3>Perché funziona: la meccanica nascosta</h3>
+  <p>
+    La domanda interessante è: <em>perché</em> funziona? La risposta è bellissima e ti
+    aiuta a capire qualcosa di profondo sugli LLM. Va al cuore di cosa abbiamo costruito
+    finora in questo punto.
+  </p>
+
+  <p>
+    Ricordiamoci come funziona un LLM: predice un token alla volta. Ogni token è il risultato
+    di una passata attraverso tutta l'architettura del modello — decine di strati di
+    attenzione, decine di reti neurali. Questa "passata" è limitata: il modello ha una
+    quantità fissa di calcolo che può fare per produrre un token. Diciamo che ha 30-100
+    "strati" di profondità computazionale per ogni token.
+  </p>
+
+  <p>
+    Quando chiedi una risposta diretta a un problema complesso, stai chiedendo al modello
+    di fare tutto il ragionamento <strong>nascosto in una singola passata</strong>, e poi
+    sparare fuori il risultato. È come chiedere a una persona di fare un calcolo complesso
+    completamente a mente, senza poter scrivere nulla, e dire solo il risultato finale.
+    Anche una persona molto brava sbaglierà spesso.
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>L'idea fondamentale</h4>
+    <p>
+      Il CoT trasforma il calcolo da <strong>una singola operazione complessa in una
+      sequenza di operazioni semplici</strong>. Ogni "passo" del ragionamento occupa più
+      token, e quindi più passate del modello, e quindi più calcolo disponibile. La
+      lunghezza del testo si traduce in profondità computazionale aggiuntiva.
+    </p>
+  </div>
+
+  <h3>La geometria del CoT</h3>
+  <p>
+    C'è un altro modo di pensarlo, geometrico, che si lega bene a quello che abbiamo
+    visto. Quando il modello deve rispondere a un problema complesso senza CoT, deve fare
+    un singolo "salto" enorme nello spazio degli embedding: dalla regione del problema
+    direttamente alla regione della risposta. Questo salto è difficile, perché le due
+    regioni possono essere lontane, e la traiettoria diretta può non essere ben coperta
+    dalle regolarità apprese.
+  </p>
+
+  <p>
+    Con il CoT, invece, il modello fa una <strong>sequenza di passi più brevi</strong>:
+    dal problema all'identificazione della prima sottoquestione, da lì al primo risultato
+    intermedio, da lì alla seconda sottoquestione, e così via fino alla risposta finale.
+    Ogni passo è un saltino piccolo, e il modello ha visto molti più esempi di traiettorie
+    fatte di saltini piccoli che non di salti enormi. <strong>La traiettoria di passi brevi
+    rimane in regioni dello spazio ben coperte dall'addestramento.</strong>
+  </p>
+
+  <div class="cot-mechanics">
+    <div class="cot-mech-row">
+      <div class="cot-mech-side no-cot">
+        <h5>Senza CoT — un salto solo</h5>
+        <div class="cot-jump">
+          problema complesso
+          <span class="arrow-big">↓</span>
+          risposta
+        </div>
+        <p style="font-size: 13px; color: var(--ink-light); margin-top: 12px; line-height: 1.55;">
+          Un solo token deve "contenere" tutto il ragionamento. Profondità computazionale
+          fissa, traiettoria lunga e poco coperta.
+        </p>
+      </div>
+      <div class="cot-mech-side with-cot">
+        <h5>Con CoT — molti passi brevi</h5>
+        <ul class="cot-steps-list">
+          <li>identifica lo stato iniziale</li>
+          <li>identifica la prima operazione</li>
+          <li>calcola il risultato intermedio 1</li>
+          <li>identifica la seconda operazione</li>
+          <li>calcola il risultato finale</li>
+        </ul>
+        <p style="font-size: 13px; color: var(--ink-light); margin-top: 12px; line-height: 1.55;">
+          Ogni passo è un saltino in territorio noto. Profondità totale 5x quella di un
+          singolo token.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    Detto in termini di "calcolo disponibile": se ogni token attiva 30-100 strati di
+    profondità computazionale, una risposta di 100 token ha attivato 100 passate diverse
+    del modello. <strong>Il CoT converte la lunghezza del testo in profondità computazionale
+    aggiuntiva.</strong> È come dare al modello un "blocco per appunti" su cui può scaricare
+    risultati intermedi e poi rileggerli.
+  </p>
+
+  <p>
+    Il fenomeno è elegantemente legato anche alla natura autoregressiva: ogni token
+    intermedio del ragionamento entra nel contesto e diventa input per la generazione del
+    token successivo. È esattamente come una persona che usa carta e penna — quello che
+    scrive aiuta a generare quello che scriverà dopo.
+  </p>
+
+  <h3>Tre domande importanti sul CoT</h3>
+  <p>
+    Adesso che abbiamo l'intuizione di base, ci sono tre domande che è importante
+    affrontare per non avere un'idea idealizzata della tecnica.
+  </p>
+
+  <div class="qa-block">
+    <div class="qa-question">
+      <p>Il CoT aiuta sempre?</p>
+    </div>
+    <div class="qa-answer">
+      <p>
+        <strong>No.</strong> Il CoT aiuta soprattutto su problemi che richiedono più
+        passaggi logici. Su domande semplici (richieste fattuali, definizioni, traduzioni
+        brevi), il CoT può essere addirittura controproducente: rallenta la risposta,
+        introduce verbosità, e a volte fa "perdere il filo" al modello che si autoinganna
+        durante un ragionamento non necessario.
+      </p>
+      <p>
+        Per problemi banali, una risposta diretta è meglio. Il CoT è uno strumento da
+        attivare quando il problema lo richiede, non un mantra da applicare sempre.
+      </p>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <div class="qa-question">
+      <p>Il CoT garantisce risposte corrette?</p>
+    </div>
+    <div class="qa-answer">
+      <p>
+        <strong>Assolutamente no.</strong> Il modello può "ragionare" passo per passo e
+        arrivare a una conclusione sbagliata. Anzi: a volte il CoT rende l'errore <em>più
+        difficile da scoprire</em> perché la risposta sbagliata viene presentata con un
+        ragionamento articolato che <em>sembra</em> rigoroso.
+      </p>
+      <p>
+        È un tema su cui c'è molta ricerca. Studi recenti hanno mostrato che i modelli
+        possono produrre catene di ragionamento che sembrano logicamente coerenti ma
+        contengono errori sottili (un calcolo sbagliato in mezzo, un'inferenza non valida)
+        che si propagano fino alla conclusione, nascosti dalla forma del ragionamento.
+      </p>
+      <p>
+        Detto in modo provocatorio: il CoT ha reso i modelli più <em>persuasivi</em>, non
+        necessariamente più <em>corretti</em>. La forma del ragionamento è migliorata più
+        del contenuto. Quando un modello ti dà una risposta articolata in 8 passi,
+        l'articolazione non è garanzia di correttezza, è solo garanzia di plausibilità
+        formale.
+      </p>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <div class="qa-question">
+      <p>Il CoT è davvero "ragionamento"?</p>
+    </div>
+    <div class="qa-answer">
+      <p>
+        Questa è la domanda filosofica più interessante. La risposta onesta è <strong>no,
+        non nel senso forte del termine</strong>. Il modello non sta facendo deduzione
+        logica formale. Sta producendo testo che <em>assomiglia</em> a un ragionamento,
+        sfruttando il fatto che durante l'addestramento ha visto miliardi di esempi di
+        ragionamenti scritti da umani.
+      </p>
+      <p>
+        Quando "ragiona", sta navigando regioni dello spazio degli embedding che, durante
+        l'addestramento, sono state associate a sequenze di passi logici. Sta imitando la
+        struttura del ragionamento più che eseguirlo. È un'imitazione molto buona, e in
+        molti casi pratici la differenza non si vede. Ma rimane un'imitazione, non un
+        processo logico autentico.
+      </p>
+      <p>
+        Una volta capito questo, capisci anche perché può sbagliare in modi che sembrano
+        "stupidi" a un osservatore umano: non sta verificando la validità logica dei
+        passaggi, sta predicendo il prossimo token plausibile dato il contesto. Se il
+        contesto rende plausibile un passaggio sbagliato, lo produrrà.
+      </p>
+    </div>
+  </div>
+
+  <h3>Quando usare e quando non usare il CoT</h3>
+  <p>
+    Visto tutto questo, vale la pena sintetizzare in modo operativo:
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Quando il CoT aiuta</h4>
+    <p>
+      <strong>Problemi multi-step che richiedono calcolo o logica:</strong> matematica,
+      ragionamento causale, decisioni con vincoli multipli, debugging, analisi che richiedono
+      di considerare più dimensioni. Tutti i casi in cui esiste una sequenza di passaggi
+      che porta dalla domanda alla risposta, e ogni passaggio è semplice ma il salto
+      diretto è difficile.
+    </p>
+  </div>
+
+  <div class="callout callout-orange">
+    <h4>Quando il CoT non aiuta (o peggiora)</h4>
+    <p>
+      <strong>Compiti semplici o creativi:</strong> domande fattuali ("Quando è nato
+      Manzoni?"), traduzioni brevi, classificazioni semplici, brainstorming creativo. In
+      questi casi il CoT introduce verbosità senza beneficio. Per la scrittura creativa
+      può addirittura rendere il testo più "spiegone" e meno fluido, perché il modello
+      tende a esplicitare passaggi che dovrebbero rimanere impliciti.
+    </p>
+  </div>
+
+  <h3>Le varianti del CoT</h3>
+  <p>
+    Da quando il CoT è stato introdotto, sono nate molte varianti. Vale la pena conoscerle
+    perché ognuna risponde a un'esigenza diversa e ti dà un repertorio più ampio quando
+    progetti un prompt.
+  </p>
+
+  <div class="cot-variants">
+    <div class="cot-variant">
+      <h5>1. Standard CoT</h5>
+      <div class="variant-prompt">"Ragiona passo per passo prima di rispondere."</div>
+      <p>La versione base, da usare per la maggioranza dei problemi multi-step. È il punto di partenza.</p>
+    </div>
+    <div class="cot-variant">
+      <h5>2. Structured CoT</h5>
+      <div class="variant-prompt">"Identifica i dati. Identifica l'obiettivo. Pianifica i passaggi. Esegui. Verifica."</div>
+      <p>Forza una struttura più rigida. Utile per problemi tecnici dove ogni fase deve essere esplicita e verificabile.</p>
+    </div>
+    <div class="cot-variant">
+      <h5>3. Decomposition</h5>
+      <div class="variant-prompt">"Dividi il problema in sotto-problemi e risolvi ognuno."</div>
+      <p>Per problemi complessi che si possono spezzare in parti indipendenti. Particolarmente utile in compiti di pianificazione.</p>
+    </div>
+    <div class="cot-variant">
+      <h5>4. Plan-and-execute</h5>
+      <div class="variant-prompt">"Prima fai un piano. Poi esegui ogni punto del piano."</div>
+      <p>Separa il "cosa" dal "come". Riduce gli errori di esecuzione perché il piano fa da guida e mantiene la coerenza.</p>
+    </div>
+    <div class="cot-variant">
+      <h5>5. Self-verification</h5>
+      <div class="variant-prompt">"Risolvi. Poi verifica la risposta. Se trovi errori, correggi."</div>
+      <p>Aggiunge un passo di controllo. Aiuta a catturare errori, anche se non li elimina. Funziona meglio quando la verifica è oggettiva (es. matematica).</p>
+    </div>
+    <div class="cot-variant">
+      <h5>6. Reasoning + concise answer</h5>
+      <div class="variant-prompt">"Ragiona passo per passo. Poi dai SOLO la risposta finale in una riga."</div>
+      <p>Sfrutta il beneficio del CoT ma produce un output finale pulito. Utile in produzione dove il ragionamento intermedio non serve all'utente.</p>
+    </div>
+  </div>
+
+  <h3>Una nota sui modelli "thinking"</h3>
+  <p>
+    Una postilla che vale la pena conoscere: i modelli più recenti (come o1 di OpenAI o le
+    versioni "thinking" di Claude) integrano il CoT direttamente nell'architettura. Hanno
+    un meccanismo interno che fa il ragionamento "nascosto" prima di produrre la risposta
+    visibile, senza bisogno di chiederlo nel prompt.
+  </p>
+
+  <p>
+    In questi modelli, il CoT è sempre attivo "sotto il cofano". L'utente vede solo la
+    risposta finale (o un riassunto del ragionamento), ma il modello ha già usato profondità
+    computazionale aggiuntiva. È una conferma indiretta dell'importanza della tecnica:
+    ormai non è più qualcosa che si <em>fa fare</em> al modello tramite prompt, è qualcosa
+    che il modello <em>fa di default</em>.
+  </p>
+
+  <p>
+    Questo non significa che le tecniche di CoT esplicito siano obsolete: rimangono utili
+    per i modelli standard, e anche per i modelli thinking quando si vuole controllo fine
+    sul tipo di ragionamento (per esempio forzare una decomposizione strutturata particolare).
+    Ma è il segno che l'idea di "convertire lunghezza in profondità computazionale" è
+    diventata un principio architetturale, non solo un trucco di prompting.
+  </p>
+</section>
+
+<!-- SEZIONE 8 -->
+<section>
+  <div class="section-num">08 — STATISTICHE</div>
+  <h2>I numeri da tenere a mente</h2>
+  <p>
+    Per chiudere la parte concettuale, ecco tre numeri che danno un'idea quantitativa di
+    quello che abbiamo visto. Sono cifre che vale la pena ricordare perché aiutano a
+    calibrare le aspettative.
+  </p>
+
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num">~100K+</div>
+      <div class="stat-label">Token nel vocabolario tipico di un LLM moderno: la dimensione della distribuzione di probabilità calcolata a ogni passo</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">30—100</div>
+      <div class="stat-label">Strati di profondità computazionale per ogni singolo token: il "calcolo" disponibile in una singola passata</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2x — 3x</div>
+      <div class="stat-label">Miglioramento tipico in accuratezza con CoT su problemi di ragionamento (Wei et al. 2022, GSM8K)</div>
+    </div>
+  </div>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Sei cose da portarsi via dal punto 3</h3>
+    <ol class="takeaway-list">
+      <li>
+        Un LLM è una macchina predittiva: a ogni passo produce una distribuzione di
+        probabilità su tutto il vocabolario, sceglie un token, lo aggiunge al contesto, e
+        ricomincia. Tutto il resto — fluidità, coerenza, intelligenza apparente — emerge
+        da questa singola operazione iterata.
+      </li>
+      <li>
+        La "vicinanza semantica" (geometria degli embedding) e la "predizione del token"
+        (probabilità) sono la stessa operazione vista da angolazioni diverse. Predire =
+        trovare il punto nello spazio che meglio completa il contesto, e cercare il token
+        più vicino a quel punto.
+      </li>
+      <li>
+        Gli LLM non capiscono il linguaggio: hanno imparato la <em>geometria</em> del
+        linguaggio. Le regolarità linguistiche sono diventate regolarità geometriche, e
+        navigare quella geometria produce output che sembrano comprensione.
+      </li>
+      <li>
+        La temperatura controlla quanto "audace" è la scelta del prossimo token. Bassa
+        temperatura = output deterministico ma ripetitivo; alta temperatura = output
+        creativo ma rischioso. Lo stesso prompt può produrre risposte diverse: il modello
+        non è una funzione deterministica.
+      </li>
+      <li>
+        Il Chain-of-Thought funziona perché converte la lunghezza del testo in profondità
+        computazionale aggiuntiva. Trasforma un salto enorme nello spazio in una sequenza
+        di saltini brevi che rimangono in territorio noto. Aiuta sui problemi multi-step,
+        non aiuta (o peggiora) sui problemi semplici.
+      </li>
+      <li>
+        Il CoT non garantisce correttezza: rende le risposte più <em>persuasive</em> più
+        che <em>corrette</em>. Il modello sta imitando la struttura del ragionamento, non
+        eseguendo deduzione formale. Restare critici sull'output, anche quando è
+        articolato, è importante.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- BRIDGE -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="bridge">
+    <div class="bridge-label">Prossimo punto</div>
+    <h3>Attenzione e contesto dinamico</h3>
+    <p>
+      Abbiamo lasciato un buco importante: come fa il modello a costruire quel "vettore di
+      contesto finale" del passo 4 della pipeline? Come fa a capire quali token del prompt
+      sono rilevanti per la predizione e quali no? Come fa "banca" a diventare un vettore
+      diverso a seconda che sia preceduto da "conto" o da "fiume"? La risposta è il
+      meccanismo di <em>attenzione</em>: il cuore dell'architettura Transformer, e il
+      pezzo che rende possibile tutto quello che abbiamo visto. È il prossimo punto del
+      percorso.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Punto 3 di 6 — Percorso di approfondimento su LLM e prompting</p>
+  <p>Dalla geometria semantica alla predizione del token</p>
+</footer>
+
+</body>
+</html>

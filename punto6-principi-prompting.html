@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Punto 6 — Principi pratici di scrittura del prompt</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --red: #9a2020;
+    --red-faint: rgba(154,32,32,0.07);
+    --red-border: rgba(154,32,32,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: var(--indigo);
+    padding: 72px 48px 88px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -100px; right: -120px;
+    width: 540px; height: 540px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.30) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -80px; left: 0;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(13,122,110,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-pattern {
+    position: absolute;
+    top: 30%; right: 8%;
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  .hero-bg-line {
+    height: 4px;
+    background: white;
+    margin-bottom: 18px;
+    border-radius: 2px;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 54px;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 19px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 760px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 40px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 36px 0 14px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.3;
+    color: var(--indigo-mid);
+    margin: 24px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 16px;
+    line-height: 1.75;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--indigo-border);
+  }
+
+  .insight {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 32px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(240,112,64,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 18px;
+    line-height: 1.6;
+    margin: 0;
+    position: relative;
+    font-family: var(--serif);
+    font-style: italic;
+  }
+
+  .callout {
+    padding: 22px 26px;
+    border-radius: 6px;
+    margin: 24px 0;
+    border-left: 4px solid;
+  }
+
+  .callout-orange { background: var(--orange-faint); border-color: var(--orange); }
+  .callout-teal { background: var(--teal-faint); border-color: var(--teal); }
+  .callout-amber { background: var(--amber-faint); border-color: var(--amber); }
+  .callout-purple { background: var(--purple-faint); border-color: var(--purple); }
+  .callout-indigo { background: var(--indigo-faint); border-color: var(--indigo-light); }
+  .callout-red { background: var(--red-faint); border-color: var(--red); }
+
+  .callout h4 { margin-top: 0; margin-bottom: 8px; font-size: 11px; }
+  .callout-orange h4 { color: var(--orange); }
+  .callout-teal h4 { color: var(--teal); }
+  .callout-amber h4 { color: var(--amber); }
+  .callout-purple h4 { color: var(--purple); }
+  .callout-indigo h4 { color: var(--indigo); }
+  .callout-red h4 { color: var(--red); }
+
+  .callout p { font-size: 15.5px; margin-bottom: 10px; line-height: 1.7; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ── LEVEL HEADER ── */
+  .level-header {
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-mid) 100%);
+    color: var(--white);
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 0 0 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .level-header::before {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .level-header-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .level-header h2 {
+    color: var(--white);
+    margin: 0 0 12px;
+    font-size: 32px;
+    position: relative;
+  }
+
+  .level-header p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.6;
+    position: relative;
+  }
+
+  /* ── PRINCIPLE BLOCK ── */
+  .principle-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 22px 0;
+    border-top: 3px solid var(--indigo-light);
+  }
+
+  .principle-num {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .principle-block h4 {
+    margin: 0 0 14px;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 19px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .principle-block p {
+    font-size: 15.5px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  .principle-block p:last-child { margin-bottom: 0; }
+
+  .principle-test {
+    background: var(--indigo-faint2);
+    border-left: 3px solid var(--indigo-light);
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--ink);
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* ── EXAMPLE COMPARISON ── */
+  .example-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 18px 0;
+  }
+
+  .example-compare-side {
+    background: var(--bg2);
+    border-radius: 6px;
+    padding: 14px 18px;
+    border-left: 3px solid;
+  }
+
+  .example-compare-side.bad { border-color: var(--red); }
+  .example-compare-side.good { border-color: var(--teal); }
+
+  .example-compare-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .example-compare-side.bad .example-compare-label { color: var(--red); }
+  .example-compare-side.good .example-compare-label { color: var(--teal); }
+
+  .example-compare-side p {
+    font-family: var(--serif);
+    font-size: 14.5px;
+    margin: 0;
+    color: var(--ink);
+    font-style: italic;
+    line-height: 1.55;
+  }
+
+  /* ── TECHNIQUE BLOCK ── */
+  .technique-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 24px 0;
+    border-left: 4px solid var(--teal);
+  }
+
+  .technique-tag {
+    display: inline-block;
+    background: var(--teal-faint);
+    color: var(--teal);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .technique-block h4 {
+    margin: 0 0 12px;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 20px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .technique-block p {
+    font-size: 15.5px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  .technique-block p:last-child { margin-bottom: 0; }
+
+  /* ── ARCHITECTURE BLOCK ── */
+  .architecture {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 32px 0;
+  }
+
+  .arch-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .arch-row:last-child { border-bottom: none; }
+
+  .arch-position {
+    background: var(--bg2);
+    padding: 24px 22px;
+    border-right: 1px solid var(--border2);
+    text-align: center;
+  }
+
+  .arch-position-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .arch-position-name {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--indigo);
+    font-style: italic;
+    line-height: 1.3;
+  }
+
+  .arch-content {
+    padding: 24px 28px;
+  }
+
+  .arch-content h5 {
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .arch-content p {
+    font-size: 14.5px;
+    line-height: 1.7;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  /* ── ITERATION PRINCIPLES ── */
+  .iter-principle {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 18px 0;
+    border-left: 4px solid var(--purple);
+  }
+
+  .iter-principle-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .iter-principle h5 {
+    font-size: 17px;
+    color: var(--ink);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .iter-principle p {
+    font-size: 15px;
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* ── ERRORS LIST ── */
+  .errors-list {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 0;
+    margin: 28px 0;
+  }
+
+  .error-row {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: 18px;
+    padding: 18px 28px;
+    border-bottom: 1px dashed var(--border2);
+    align-items: start;
+  }
+
+  .error-row:last-child { border-bottom: none; }
+
+  .error-icon {
+    font-family: var(--serif);
+    font-size: 24px;
+    color: var(--red);
+    line-height: 1;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .error-content h5 {
+    font-size: 15.5px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .error-content p {
+    font-size: 14.5px;
+    line-height: 1.65;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  /* ── METAPHOR BOX ── */
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--purple);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .metaphor p { margin-bottom: 12px; font-size: 15.5px; line-height: 1.7; }
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(201,74,26,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  /* ── CLOSING ── */
+  .closing {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 56px 48px;
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .closing-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .closing h3 {
+    margin: 0 0 18px;
+    font-family: var(--serif);
+    font-size: 30px;
+    color: var(--indigo);
+    font-weight: 500;
+    font-style: italic;
+  }
+
+  .closing p {
+    font-size: 17px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    margin-bottom: 16px;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .closing p:last-child { margin-bottom: 0; }
+
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 48px 24px 60px; }
+    .hero h1 { font-size: 36px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .takeaways { padding: 40px 28px; }
+    .closing { padding: 36px 24px; }
+    .arch-row { grid-template-columns: 1fr; }
+    .arch-position { border-right: none; border-bottom: 1px solid var(--border2); }
+    .example-compare { grid-template-columns: 1fr; }
+    .level-header { padding: 28px 24px; }
+    .level-header h2 { font-size: 24px; }
+    .principle-block, .technique-block { padding: 22px 22px; }
+    .error-row { grid-template-columns: 36px 1fr; gap: 12px; padding: 14px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <div class="hero-bg-pattern">
+    <div class="hero-bg-line" style="width: 240px;"></div>
+    <div class="hero-bg-line" style="width: 200px;"></div>
+    <div class="hero-bg-line" style="width: 280px;"></div>
+    <div class="hero-bg-line" style="width: 220px;"></div>
+    <div class="hero-bg-line" style="width: 260px;"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-label">Punto 6 — Fondamenti del prompting</div>
+    <h1>Principi pratici di <em>scrittura</em> del prompt</h1>
+    <p class="hero-sub">
+      Tradurre tutto il percorso in un quadro operativo. Quattro livelli di prompting, dai
+      principi base alle architetture professionali, all'iterazione come pratica.
+      Il punto che chiude il cerchio del percorso.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">Tecniche operative di prompting</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Punto del percorso</div>
+        <div class="meta-value">6 di 6+1</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Natura</div>
+        <div class="meta-value">Sintesi e riferimento operativo</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 — IL QUADRO DI PARTENZA -->
+<section>
+  <div class="section-num">01 — IL QUADRO DI PARTENZA</div>
+  <h2>Cosa significa, davvero, "scrivere un prompt"</h2>
+  <p class="lead">
+    Il punto 6 è strutturalmente diverso dagli altri. Non introduce concetti nuovi: prende
+    quelli che abbiamo costruito nei punti 1-5 e li riorganizza in chiave applicativa.
+    Ogni principio che troverai qui poggia su qualcosa che abbiamo già discusso. È un
+    riferimento da consultare, non solo da leggere.
+  </p>
+
+  <p>
+    Tutto quello che diremo in questo punto poggia su una singola osservazione che vale
+    la pena fissare bene. Abbiamo visto che un LLM è una macchina che, dato un input
+    testuale, predice il prossimo token sfruttando la geometria di uno spazio semantico
+    costruito durante l'addestramento. Da questo discende un principio che è la chiave di
+    tutto il prompting:
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Il principio di fondo</div>
+    <p>
+      Scrivere un prompt significa modellare la traiettoria che il modello farà nello
+      spazio semantico, in modo che le predizioni più probabili coincidano con quello che
+      vuoi tu.
+    </p>
+  </div>
+
+  <p>
+    Detta così sembra astratta, ma ha conseguenze molto concrete. Non stai "comunicando"
+    con il modello nel senso umano del termine. Stai <strong>inclinando un sistema
+    probabilistico</strong> verso le risposte che ti servono. Ogni parola che scrivi
+    sposta il vettore di contesto, ogni struttura che dai modifica la forma della
+    distribuzione di probabilità, ogni esempio che fornisci crea un'ancora geometrica.
+  </p>
+
+  <p>
+    Capirlo cambia il modo di pensare il prompt: non più come un'<em>istruzione da
+    impartire</em>, ma come un <strong>disegno da costruire</strong> affinché il modello
+    produca naturalmente la risposta che vuoi.
+  </p>
+
+  <p>
+    Da questa premessa nascono quattro livelli di prompting, ognuno che aggiunge
+    consapevolezza al precedente. I primi tre sono progressivi (chi padroneggia il
+    secondo include il primo, chi padroneggia il terzo include i primi due). Il quarto è
+    trasversale: si applica a tutti gli altri.
+  </p>
+</section>
+
+<!-- LIVELLO 1 -->
+<section>
+  <div class="level-header">
+    <div class="level-header-num">Livello 1</div>
+    <h2>I tre principi base</h2>
+    <p>Il minimo indispensabile. Da soli, risolvono la maggioranza dei casi di prompting quotidiano.</p>
+  </div>
+
+  <p>
+    Se rispetti questi tre principi, anche un prompt molto semplice diventa efficace. Non
+    sono tecniche: sono <em>postura</em>. Sono il modo in cui dovresti approcciare ogni
+    prompt, indipendentemente dalla sua complessità.
+  </p>
+
+  <div class="principle-block">
+    <div class="principle-num">Principio 1</div>
+    <h4>Chiarezza prima di concisione</h4>
+    <p>
+      Un prompt è chiaro quando contiene tutto quello che serve al modello per capire
+      cosa vuoi, in che forma lo vuoi, e con quali vincoli. La concisione è una virtù, ma
+      viene dopo la chiarezza. <strong>Un prompt corto ma ambiguo è peggiore di un prompt
+      lungo ma esplicito.</strong>
+    </p>
+    <p>
+      La domanda diagnostica per la chiarezza è semplice:
+    </p>
+    <div class="principle-test">
+      Se passassi questo prompt a un essere umano competente che non mi conosce e non ha
+      contesto, capirebbe esattamente cosa fare? Se la risposta è no, il prompt non è
+      abbastanza chiaro per il modello — anche se "tu sai cosa intendi".
+    </div>
+    <p>
+      Tipici elementi di mancata chiarezza che si vedono spesso: istruzioni che presuppongono
+      contesto non fornito ("come al solito, fai un'analisi del documento"); pronomi senza
+      referente chiaro ("scrivila tenendo conto di questo"); aggettivi vaghi ("scrivi
+      qualcosa di interessante", "fammi un'analisi profonda"). In tutti questi casi il
+      modello non sa cosa fare con precisione, e quindi indovina — spesso male.
+    </p>
+  </div>
+
+  <div class="principle-block">
+    <div class="principle-num">Principio 2</div>
+    <h4>Specificare il formato di output</h4>
+    <p>
+      Questo è forse il principio che produce il salto più immediato di qualità. Il
+      modello, lasciato libero, segue il formato di default impostato dal system prompt
+      (lo abbiamo visto nel punto 5) o quello che statisticamente è più frequente per il
+      tipo di richiesta. Spesso non è quello che vuoi tu.
+    </p>
+    <p>
+      Specificare il formato significa dire esplicitamente: in che lunghezza vuoi la
+      risposta, in che struttura (prosa, elenco, tabella, JSON), con che livello di
+      formalità, in che lingua, con o senza preamboli, con o senza disclaimer.
+    </p>
+    <div class="example-compare">
+      <div class="example-compare-side bad">
+        <div class="example-compare-label">Generico</div>
+        <p>"Riassumi questo articolo"</p>
+      </div>
+      <div class="example-compare-side good">
+        <div class="example-compare-label">Formato specificato</div>
+        <p>"Riassumi questo articolo in tre frasi, in tono giornalistico"</p>
+      </div>
+    </div>
+    <div class="example-compare">
+      <div class="example-compare-side bad">
+        <div class="example-compare-label">Generico</div>
+        <p>"Estrai le informazioni di contatto"</p>
+      </div>
+      <div class="example-compare-side good">
+        <div class="example-compare-label">Formato specificato</div>
+        <p>"Rispondi in JSON con i campi nome, email, telefono. Se un campo è assente, restituisci null."</p>
+      </div>
+    </div>
+    <p>
+      Il costo di scrivere il formato è zero. Il guadagno è quasi sempre significativo. È
+      la modifica più semplice ed efficace che puoi fare a un prompt mediocre.
+    </p>
+  </div>
+
+  <div class="principle-block">
+    <div class="principle-num">Principio 3</div>
+    <h4>Dare il contesto che serve, non più, non meno</h4>
+    <p>
+      Dare poco contesto produce risposte generiche. Dare troppo contesto produce
+      risposte diluite (e attiva il <em>lost in the middle</em> che abbiamo visto nel
+      punto 4B). Il punto di ottimo è specifico per il task: per un task semplice basta
+      poco contesto; per un task complesso ne serve di più, ma ben strutturato.
+    </p>
+    <p>
+      Una regola pratica utile è:
+    </p>
+    <div class="principle-test">
+      Includi il contesto che, se mancasse, renderebbe la risposta del modello
+      significativamente diversa da quella che vuoi tu. Tutto il resto è rumore.
+    </div>
+    <p>
+      Questa regola ti aiuta a calibrare. Se stai scrivendo "il documento è importante e
+      riguarda un cliente strategico" senza che questa informazione cambierà davvero la
+      risposta, è rumore. Se stai scrivendo "rispondi in tono formale perché andrà a un
+      cliente istituzionale", la frase cambia effettivamente l'output ed è contesto utile.
+    </p>
+  </div>
+
+  <div class="callout callout-indigo">
+    <h4>Una verifica complessiva</h4>
+    <p>
+      Questi tre principi sembrano elementari, ma rappresentano già il 70-80% della
+      differenza tra un prompt mediocre e uno buono. Prima di andare a tecniche più
+      sofisticate, vale la pena assicurarsi di averli sempre in mente. Per la maggior
+      parte dei task quotidiani, applicare bene questi tre principi è sufficiente.
+    </p>
+  </div>
+</section>
+
+
+<!-- LIVELLO 2 — TECNICHE -->
+<section>
+  <div class="level-header">
+    <div class="level-header-num">Livello 2</div>
+    <h2>Tecniche specifiche</h2>
+    <p>Pattern di scrittura del prompt che, applicati nei contesti giusti, producono miglioramenti misurabili.</p>
+  </div>
+
+  <p>
+    Adesso passiamo a tecniche concrete. Ognuna è un pattern riusabile che vale la pena
+    avere nel proprio repertorio. Le presento per categoria, con il "perché funziona"
+    esplicito alla luce di quanto abbiamo visto nei punti precedenti.
+  </p>
+
+  <div class="technique-block">
+    <div class="technique-tag">Tecnica 1 — Ruolo</div>
+    <h4>Specificare il ruolo del modello</h4>
+    <p>
+      La tecnica più semplice e spesso sorprendentemente potente è l'<strong>assegnazione
+      di un ruolo</strong>. Frasi come "Sei un esperto di diritto del lavoro italiano" o
+      "Agisci come un editor letterario esperto di narrativa contemporanea" inserite
+      all'inizio del prompt cambiano significativamente le risposte.
+    </p>
+    <p>
+      <strong>Perché funziona</strong>: per quanto abbiamo visto sugli embedding e sulla
+      geometria del linguaggio. Specificare un ruolo sposta il vettore di contesto in una
+      regione dello spazio dove i pattern linguistici di quel ruolo sono più probabili. Le
+      predizioni successive saranno più allineate con il modo in cui un esperto di quel
+      campo si esprimerebbe — vocabolario, livello di dettaglio, riferimenti impliciti,
+      stile argomentativo.
+    </p>
+    <p>
+      <strong>Una nota di realismo</strong>: non stai "trasformando" il modello in un
+      esperto. Stai inclinando le sue risposte verso il pattern statistico di come parlano
+      quegli esperti nei testi che ha visto durante l'addestramento. Se il modello non ha
+      conoscenze profonde su un dominio, dargli il ruolo di esperto in quel dominio non
+      gliele fa apparire — produce risposte che <em>sembrano</em> esperte, il che è una
+      cosa diversa.
+    </p>
+  </div>
+
+  <div class="technique-block">
+    <div class="technique-tag">Tecnica 2 — Few-shot</div>
+    <h4>Few-shot prompting</h4>
+    <p>
+      Il <strong>few-shot prompting</strong> è la tecnica di mostrare al modello uno o più
+      esempi di "input → output" prima di dargli l'input vero. Funziona benissimo per
+      task strutturati o stilistici dove descrivere a parole quello che vuoi è difficile,
+      ma mostrarlo è facile.
+    </p>
+    <p>
+      Per esempio, se vuoi che il modello classifichi delle email per priorità, è più
+      efficace mostrare due-tre email già classificate (con la classificazione attesa)
+      che descrivere a parole i criteri di classificazione. Il modello "vede" il pattern
+      e lo replica sulla nuova email.
+    </p>
+    <p>
+      <strong>Perché funziona</strong>: stai costruendo, dentro il prompt stesso, un
+      piccolo "addestramento istantaneo" che ancora la geometria del modello a quel
+      pattern specifico. È particolarmente efficace quando il task ha sfumature che le
+      parole catturano male.
+    </p>
+    <p>
+      <strong>Tre cose da sapere sul few-shot</strong>:
+    </p>
+    <p>
+      La prima: bastano pochi esempi, anche due o tre — raramente serve di più; aggiungerne
+      troppi diluisce l'efficacia. La seconda: gli esempi devono essere rappresentativi e
+      diversi tra loro. Se sono tutti molto simili, non aiuti il modello a generalizzare,
+      lo aiuti solo per quel singolo caso. La terza: l'ordine conta — il primo esempio ha
+      più peso degli altri (per il <em>lost in the middle</em>), quindi mettilo per primo
+      se è il caso "tipico" che riassume bene il pattern.
+    </p>
+  </div>
+
+  <div class="technique-block">
+    <div class="technique-tag">Tecnica 3 — CoT</div>
+    <h4>Chain-of-Thought</h4>
+    <p>
+      Lo abbiamo già visto in dettaglio nel punto 3. Lo riprendo qui per completezza, in
+      chiave operativa.
+    </p>
+    <p>
+      Il <strong>Chain-of-Thought</strong> consiste nel chiedere al modello di ragionare
+      passo per passo prima di rispondere, e funziona perché converte la lunghezza del
+      testo in profondità computazionale. Operativamente, ci sono modi diversi di
+      attivarlo:
+    </p>
+    <p>
+      La forma più semplice è aggiungere "ragiona passo per passo" alla fine del prompt.
+      La forma più strutturata è imporre una struttura specifica del ragionamento: "Prima
+      identifica il problema. Poi pianifica i passi. Poi esegui. Infine verifica." La
+      forma più sofisticata è la <strong>decomposition</strong>: "Spezza il problema in
+      sotto-problemi e risolvili uno alla volta."
+    </p>
+    <p>
+      <strong>Quando usarlo</strong>: problemi multi-step, decisioni con vincoli multipli,
+      analisi che richiedono di considerare più dimensioni, debugging.
+    </p>
+    <p>
+      <strong>Quando non usarlo</strong>: domande fattuali semplici, generazione creativa,
+      conversazioni casuali — in quei casi rallenta senza beneficio.
+    </p>
+    <p>
+      Una variante operativa molto utile è il <strong>ragionamento più risposta concisa</strong>:
+      "Ragiona passo per passo. Poi dai SOLO la risposta finale in una riga." Sfrutti il
+      beneficio computazionale del CoT, ma in output ottieni qualcosa di pulito da
+      mostrare all'utente finale.
+    </p>
+  </div>
+
+  <div class="technique-block">
+    <div class="technique-tag">Tecnica 4 — Delimitatori</div>
+    <h4>Delimitatori e struttura</h4>
+    <p>
+      Quando il prompt contiene materiale eterogeneo — istruzioni, contesto, dati,
+      domande — usare <strong>delimitatori chiari</strong> aiuta moltissimo il modello a
+      navigarlo. Tag come <code>&lt;documento&gt;...&lt;/documento&gt;</code>,
+      <code>&lt;istruzioni&gt;...&lt;/istruzioni&gt;</code>,
+      <code>&lt;esempi&gt;...&lt;/esempi&gt;</code> creano ancore visive che il modello
+      sfrutta per tenere separati i blocchi di significato.
+    </p>
+    <p>
+      Non c'è una sintassi obbligatoria: tag XML, intestazioni markdown, separatori
+      grafici, tutto funziona se è coerente. <strong>La cosa che conta è che il modello
+      abbia una struttura riconoscibile, non che usi un formato specifico.</strong>
+    </p>
+    <p>
+      <strong>Perché funziona</strong>: la struttura visiva crea pattern che il modello
+      ha visto molte volte durante l'addestramento, e li usa come ancore per organizzare
+      l'elaborazione. Le ancore aiutano l'attenzione a "trovare" le sezioni rilevanti del
+      prompt quando deve generare la risposta.
+    </p>
+    <p>
+      Il guadagno è particolarmente forte in due casi: quando il prompt contiene
+      <strong>contenuti da analizzare</strong> (mettendoli dentro delimitatori, riduci il
+      rischio di prompt injection di cui abbiamo parlato nel punto 5); e quando il prompt
+      è lungo e ha <strong>molte sezioni</strong> (la struttura aiuta il modello a
+      navigare le parti).
+    </p>
+  </div>
+
+  <div class="technique-block">
+    <div class="technique-tag">Tecnica 5 — Negative</div>
+    <h4>Negative prompting</h4>
+    <p>
+      Una tecnica meno conosciuta ma utile è il <strong>negative prompting</strong>: dire
+      al modello cosa <em>non</em> fare, oltre a cosa fare. Esempi: "Non usare elenchi
+      puntati", "Non includere disclaimer", "Non dare esempi di codice", "Evita
+      formulazioni passive".
+    </p>
+    <p>
+      Funziona ma con una sfumatura importante: i modelli, per come sono addestrati, sono
+      <strong>più bravi a seguire istruzioni positive che negative</strong>. Dire "non
+      fare X" è meno affidabile che riformulare la richiesta in modo che X non venga
+      naturalmente prodotto.
+    </p>
+    <div class="example-compare">
+      <div class="example-compare-side bad">
+        <div class="example-compare-label">Negativo (meno affidabile)</div>
+        <p>"Non usare elenchi puntati"</p>
+      </div>
+      <div class="example-compare-side good">
+        <div class="example-compare-label">Positivo (più affidabile)</div>
+        <p>"Rispondi in prosa scorrevole"</p>
+      </div>
+    </div>
+    <p>
+      Anche se in teoria dicono la stessa cosa, in pratica la formulazione positiva
+      produce risultati più consistenti.
+    </p>
+    <p>
+      <strong>Regola operativa</strong>: prima prova a riformulare in positivo. Se non
+      basta, aggiungi anche il negativo. Ma non basare un prompt importante solo su
+      istruzioni negative — il modello potrebbe seguirle in modo intermittente.
+    </p>
+  </div>
+</section>
+
+<!-- LIVELLO 3 — ARCHITETTURA -->
+<section>
+  <div class="level-header">
+    <div class="level-header-num">Livello 3</div>
+    <h2>Il prompt come architettura</h2>
+    <p>Smettere di pensare il prompt come un testo. Cominciare a pensarlo come una struttura composta di parti che svolgono funzioni diverse.</p>
+  </div>
+
+  <p>
+    Adesso passiamo al livello che fa la differenza tra un prompting "buono" e un
+    prompting "professionale". Si tratta di smettere di pensare il prompt come un
+    <em>testo</em> e cominciare a pensarlo come un'<em>architettura</em>.
+  </p>
+
+  <p>
+    Un prompt complesso non è una richiesta scritta in modo eloquente. È una struttura
+    composta di <strong>parti che svolgono funzioni diverse e che interagiscono tra
+    loro</strong>. Vediamole, posizionandole nel prompt secondo i principi del 4B
+    (lost in the middle: inizio e fine sono privilegiati).
+  </p>
+
+  <div class="architecture">
+    <div class="arch-row">
+      <div class="arch-position">
+        <div class="arch-position-label">Posizione 1</div>
+        <div class="arch-position-name">Framing iniziale</div>
+      </div>
+      <div class="arch-content">
+        <h5>Stabilisce il contesto generale</h5>
+        <p>Chi è il modello, in che dominio opera, quali sono le regole generali. Va all'inizio per il principio del <em>lost in the middle</em>: tutto quello che dirai dopo verrà letto attraverso questa lente. È la posizione privilegiata e va usata per ciò che deve permeare tutta la risposta.</p>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-position">
+        <div class="arch-position-label">Posizione 2</div>
+        <div class="arch-position-name">Esempi (se presenti)</div>
+      </div>
+      <div class="arch-content">
+        <h5>Ancorano il pattern desiderato</h5>
+        <p>Subito dopo il framing, prima del contesto, vanno gli esempi se ne usi. Sono potenti perché ancorano la geometria del modello al pattern che vuoi vedere replicato. Ma occupano spazio, quindi vanno usati con parsimonia: due o tre esempi rappresentativi sono di solito sufficienti.</p>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-position">
+        <div class="arch-position-label">Posizione 3</div>
+        <div class="arch-position-name">Contesto materiale</div>
+      </div>
+      <div class="arch-content">
+        <h5>Il materiale informativo</h5>
+        <p>Documenti di riferimento, dati, fatti rilevanti. Va in mezzo, ben strutturato con delimitatori. È la posizione meno protetta dal <em>lost in the middle</em>, ma è l'unica disponibile per materiale corposo. Con buona strutturazione (tag, intestazioni, separatori) si gestisce bene.</p>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-position">
+        <div class="arch-position-label">Posizione 4</div>
+        <div class="arch-position-name">Ricapitolo (se serve)</div>
+      </div>
+      <div class="arch-content">
+        <h5>Sintesi compressa dei punti chiave</h5>
+        <p>Se il contesto è lungo, va verso la fine — prima della richiesta — un ricapitolo dei punti che il modello deve assolutamente tenere a mente. Lo abbiamo visto nel 4B: serve a contrastare l'attenuazione delle informazioni in mezzo. Costa qualche token in più ma migliora sensibilmente la qualità su prompt lunghi.</p>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-position">
+        <div class="arch-position-label">Posizione 5</div>
+        <div class="arch-position-name">Richiesta esplicita</div>
+      </div>
+      <div class="arch-content">
+        <h5>Cosa il modello deve fare, adesso</h5>
+        <p>L'ultima cosa nel prompt, perché è quella che il modello legge "fresca" prima di generare la risposta. Deve essere chiarissima, contenere il formato di output desiderato, eventuali vincoli specifici, e qualsiasi cosa non sia già stata stabilita nel framing. È la posizione più potente in assoluto.</p>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    Pensare il prompt in queste cinque parti — <strong>framing, esempi, contesto,
+    ricapitolo, richiesta</strong> — ti dà uno schema riutilizzabile per qualsiasi task
+    complesso. Non sempre servono tutte e cinque le parti; ma sapere che esistono ti
+    aiuta a chiederti "ho coperto questa funzione?" prima di mandare il prompt.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">Una metafora architetturale</div>
+    <p>
+      Pensa alla differenza tra "scrivere una lettera" e "progettare un edificio". La
+      lettera è un'esperienza lineare: cominci, prosegui, finisci. L'edificio è una
+      struttura: ogni parte ha una funzione, le parti devono dialogare, certe parti
+      vanno in certe posizioni perché funzionino bene.
+    </p>
+    <p>
+      Un prompt complesso è più simile a un edificio che a una lettera. La domanda
+      giusta da farsi non è "cosa sto dicendo al modello?" ma "che struttura sto
+      costruendo? Ogni parte è dove dovrebbe? Le funzioni sono coperte?". Questo cambio
+      di mentalità è il salto del livello 3.
+    </p>
+  </div>
+</section>
+
+<!-- LIVELLO 4 — ITERAZIONE -->
+<section>
+  <div class="level-header">
+    <div class="level-header-num">Livello 4</div>
+    <h2>Il prompting iterativo</h2>
+    <p>Il livello trasversale: si applica a tutti gli altri. Differenzia chi usa LLM in modo professionale da chi li usa occasionalmente.</p>
+  </div>
+
+  <p>
+    Ed ecco l'ultimo livello, che si applica a tutti gli altri perché è una postura
+    metodologica più che una tecnica. Si tratta di accettare e organizzare un fatto:
+    <strong>il primo prompt non è quasi mai quello giusto</strong>.
+  </p>
+
+  <p>
+    Il prompting professionale è un <strong>processo iterativo</strong> in cui scrivi un
+    prompt, vedi cosa produce, identifichi cosa non funziona, modifichi il prompt,
+    riprovi. Ognuno di questi cicli richiede pochi minuti, ma in tre o quattro iterazioni
+    puoi passare da un risultato mediocre a uno eccellente.
+  </p>
+
+  <p>
+    La tentazione di "scrivere il prompt giusto al primo colpo" è una tentazione costosa:
+    ti fa stare ore davanti a un foglio bianco quando potresti fare cinque iterazioni
+    nello stesso tempo. <strong>L'iterazione veloce batte la perfezione lenta</strong>,
+    quasi sempre.
+  </p>
+
+  <h3>Tre principi per iterare bene</h3>
+
+  <div class="iter-principle">
+    <div class="iter-principle-label">Principio 1</div>
+    <h5>Iterare sulla diagnosi, non sui sintomi</h5>
+    <p>
+      Quando una risposta non ti soddisfa, la tentazione è "aggiungere qualcosa al prompt
+      per correggere". Ma questo a volte amplifica il problema. La cosa giusta è
+      chiedersi: <em>perché il modello ha prodotto questo? Cosa nel prompt lo ha portato
+      qui?</em> Spesso scopri che la causa è qualcosa di diverso da quello che immaginavi,
+      e la correzione corretta è togliere o riformulare, non aggiungere.
+    </p>
+  </div>
+
+  <div class="iter-principle">
+    <div class="iter-principle-label">Principio 2</div>
+    <h5>Cambiare un elemento per volta</h5>
+    <p>
+      Se modifichi tre cose nel prompt e il risultato migliora, non sai quale delle tre
+      ha prodotto il miglioramento — e quindi non impari niente per la prossima volta.
+      Cambiare una cosa per volta è più lento sul singolo caso ma molto più veloce sul
+      medio termine, perché costruisci un bagaglio di sapere riusabile su come reagisce
+      il modello a specifiche modifiche.
+    </p>
+  </div>
+
+  <div class="iter-principle">
+    <div class="iter-principle-label">Principio 3</div>
+    <h5>Mettere alla prova con casi limite</h5>
+    <p>
+      Un prompt funziona davvero quando funziona anche su casi non standard, non solo
+      su quelli "facili". Se hai un prompt che classifica email, provalo su email
+      ambigue, vuote, in lingue diverse, con sintassi rotta. Spesso scopri problemi che
+      il caso normale non rivelava. È particolarmente importante per prompt destinati ad
+      andare in produzione.
+    </p>
+  </div>
+
+  <h3>Una tecnica avanzata: il meta-prompting</h3>
+  <p>
+    C'è una variante interessante che vale la pena conoscere: il <strong>meta-prompting</strong>,
+    ovvero usare l'LLM stesso per migliorare i propri prompt. Funziona così: prendi un
+    prompt che non ti soddisfa, lo dai al modello insieme alla risposta che ha prodotto,
+    e gli chiedi <em>"questa risposta non rispetta X. Suggerisci come riformulare il
+    prompt per ottenere il risultato desiderato"</em>.
+  </p>
+
+  <p>
+    Il modello è spesso sorprendentemente bravo a diagnosticare problemi nei prompt,
+    perché conosce le proprie regolarità di funzionamento. Non sempre funziona, ma è una
+    freccia in più nella faretra. È particolarmente utile quando sei "bloccato" su un
+    prompt che non riesci a far funzionare e non capisci perché.
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Una conseguenza filosofica</h4>
+    <p>
+      L'iterazione è anche un atteggiamento mentale: significa accettare che il prompting
+      non è un esercizio di abilità linguistica, ma di esplorazione. Tu e il modello
+      siete in un dialogo che si raffina nel tempo. Le persone più brave a usare gli LLM
+      non sono quelle che scrivono i prompt più eleganti al primo colpo: sono quelle che
+      iterano più velocemente.
+    </p>
+  </div>
+</section>
+
+<!-- ERRORI COMUNI -->
+<section>
+  <div class="section-num">02 — CHECKLIST NEGATIVA</div>
+  <h2>Errori comuni da evitare</h2>
+  <p>
+    Chiudo questa parte con una raccolta di pattern che si vedono spesso, e che producono
+    prompt meno efficaci. Sono utili come checklist negativa: quando un prompt non
+    funziona come ti aspettavi, controlla se stai cadendo in uno di questi.
+  </p>
+
+  <div class="errors-list">
+    <div class="error-row">
+      <div class="error-icon">×</div>
+      <div class="error-content">
+        <h5>Sovrastima della comprensione del modello</h5>
+        <p>Trattare il modello come se ti conoscesse, sapesse il tuo contesto, ricordasse conversazioni di settimane fa. Lui no. Quello che non è nel prompt corrente, non esiste per lui.</p>
+      </div>
+    </div>
+    <div class="error-row">
+      <div class="error-icon">×</div>
+      <div class="error-content">
+        <h5>Istruzioni contraddittorie</h5>
+        <p>Chiedere "una risposta esaustiva ma sintetica", "formale ma amichevole", "dettagliata ma non lunga". Il modello cerca di soddisfare entrambe ma il risultato è confuso. Decidi cosa vuoi davvero e dillo.</p>
+      </div>
+    </div>
+    <div class="error-row">
+      <div class="error-icon">×</div>
+      <div class="error-content">
+        <h5>Ambiguità sul formato</h5>
+        <p>Lasciare che il modello decida in che formato rispondere. Il modello ha i suoi default, che spesso non coincidono con i tuoi. È l'errore più frequente e quello che si corregge con la modifica più semplice (vedi Principio 2).</p>
+      </div>
+    </div>
+    <div class="error-row">
+      <div class="error-icon">×</div>
+      <div class="error-content">
+        <h5>Eccesso di cortesie</h5>
+        <p>Aggiungere "per favore", "se non ti dispiace", lunghi preamboli sociali. Non danneggiano, ma occupano contesto e diluiscono la richiesta. Il modello non ha bisogno di essere convinto: ha bisogno di essere informato.</p>
+      </div>
+    </div>
+    <div class="error-row">
+      <div class="error-icon">×</div>
+      <div class="error-content">
+        <h5>Negazione invece di riformulazione positiva</h5>
+        <p>Lo abbiamo già visto nella tecnica del negative prompting. "Non scrivere in modo banale" → "scrivi in modo sofisticato, con varietà lessicale e costruzioni complesse". Il secondo funziona meglio.</p>
+      </div>
+    </div>
+    <div class="error-row">
+      <div class="error-icon">×</div>
+      <div class="error-content">
+        <h5>Aggregazione di task diversi</h5>
+        <p>"Riassumi questo, poi traducilo, poi commentalo". Funziona, ma spesso è meglio dividere in tre prompt separati. Ogni task è un compito distinto, e farli insieme produce risultati più omogenei (e quindi più mediocri) rispetto a farli separati.</p>
+      </div>
+    </div>
+    <div class="error-row">
+      <div class="error-icon">×</div>
+      <div class="error-content">
+        <h5>Mancanza di iterazione</h5>
+        <p>Mandare un prompt, ricevere una risposta che non soddisfa, e accettarla. Quasi sempre, una seconda iterazione produce un salto qualitativo significativo. Iterare costa poco e guadagna molto.</p>
+      </div>
+    </div>
+    <div class="error-row">
+      <div class="error-icon">×</div>
+      <div class="error-content">
+        <h5>Voler "convincere" il modello</h5>
+        <p>Insistere su una richiesta che il modello rifiuta, sperando di trovare la formulazione magica. Come abbiamo visto nel punto 5, ci sono cose che sono nei pesi del modello e nel system prompt, e nessuna formulazione le sblocca. Riconoscere quando smettere di insistere è una competenza.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NOTA DI UMILTÀ -->
+<section>
+  <div class="section-num">03 — UNA NOTA FINALE</div>
+  <h2>Il prompting come arte sperimentale</h2>
+  <p class="lead">
+    Voglio chiudere con un'osservazione che mi sembra onesta. Tutto quello che hai letto
+    in questo punto sono <strong>euristiche, non leggi</strong>. Funzionano la maggior
+    parte delle volte, ma esistono casi specifici in cui vale il contrario.
+  </p>
+
+  <p>
+    Modelli diversi rispondono in modo diverso alle stesse tecniche. Lo stesso modello in
+    versioni diverse può comportarsi diversamente. Il system prompt cambia quanto certe
+    tecniche pesano. Quello che funziona benissimo per un task creativo può essere
+    controproducente per un task analitico, e viceversa.
+  </p>
+
+  <p>
+    La conseguenza pratica è che <strong>il prompting è in parte un'arte sperimentale</strong>.
+    Le linee guida ti danno un punto di partenza ragionevole, ma per ottenere risultati
+    eccellenti su un task specifico devi sempre testare, iterare, adattare. Non esiste il
+    "prompt giusto" universale.
+  </p>
+
+  <p>
+    Quello che invece esiste, e che spero questo percorso ti abbia dato, è una
+    <strong>comprensione del perché certe cose funzionano</strong>. Capire i meccanismi
+    sottostanti — token, embedding, predizione, attenzione, struttura dell'input — ti
+    permette di non essere prigioniero delle ricette: di adattarle, costruirne di nuove,
+    capire perché un prompt fallisce e cosa fare per correggerlo.
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Il principio finale</div>
+    <p>
+      In ultima analisi, il prompt più potente è scritto da chi ha un buon modello mentale
+      del modello. È quello che abbiamo provato a costruire insieme, punto dopo punto, in
+      tutto questo percorso.
+    </p>
+  </div>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Otto cose da portarsi via dal punto 6</h3>
+    <ol class="takeaway-list">
+      <li>
+        Scrivere un prompt non è dare un'istruzione: è modellare la traiettoria che il
+        modello farà nello spazio semantico, in modo che le predizioni più probabili
+        coincidano con quello che vuoi tu. Il prompt inclina, non comanda.
+      </li>
+      <li>
+        I tre principi base coprono il 70-80% della differenza tra prompt mediocri e
+        buoni: <em>chiarezza</em> (un umano competente capirebbe?), <em>formato di output</em>
+        (specificalo sempre), <em>contesto utile</em> (solo quello che cambia la risposta).
+      </li>
+      <li>
+        Cinque tecniche specifiche da avere sempre nel repertorio: assegnare un ruolo,
+        usare esempi (few-shot), ragionamento passo per passo (CoT), delimitatori per la
+        struttura, riformulare in positivo invece che in negativo.
+      </li>
+      <li>
+        Pensare il prompt come architettura, non come testo. Cinque funzioni in posizioni
+        precise: framing all'inizio, esempi subito dopo, contesto in mezzo (con
+        delimitatori), ricapitolo verso la fine se serve, richiesta esplicita per ultima.
+      </li>
+      <li>
+        L'iterazione veloce batte la perfezione lenta. Tre principi per iterare bene:
+        diagnosticare le cause invece di trattare i sintomi, cambiare un elemento per
+        volta, mettere alla prova con casi limite.
+      </li>
+      <li>
+        Il meta-prompting è una freccia in più: usare il modello per migliorare i propri
+        prompt. Spesso il modello sa diagnosticare cosa non funziona meglio di quanto si
+        possa intuire da soli.
+      </li>
+      <li>
+        La checklist negativa: sovrastima del modello, contraddizioni, ambiguità sul
+        formato, eccesso di cortesie, negazioni, aggregazione di task, mancata iterazione,
+        voler "convincere" il modello quando rifiuta. Sono gli errori più frequenti.
+      </li>
+      <li>
+        Tutto questo sono euristiche, non leggi. Il prompting è un'arte sperimentale. Ma
+        chi ha un buon modello mentale del modello scrive prompt più potenti — e adattare
+        è sempre meglio che applicare ricette in modo rigido.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- CHIUSURA DEL PERCORSO -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="closing">
+    <div class="closing-label">Chiusura del percorso</div>
+    <h3>Il cerchio si chiude</h3>
+    <p>
+      Sei arrivato alla fine di un percorso che è cominciato con la tokenizzazione e ha
+      attraversato embedding, predizione, attenzione, struttura del contesto, dinamica
+      delle conversazioni, fino a queste tecniche operative. È stato un viaggio
+      dall'interno del modello al di fuori, e poi di nuovo verso il fare pratico.
+    </p>
+    <p>
+      Adesso hai sia il modello mentale di come funziona un LLM, sia il repertorio
+      operativo per usarlo bene. Le due cose insieme sono più della loro somma: ti
+      permettono di non essere prigioniero delle ricette, ma di adattarle al contesto
+      capendo perché funzionano.
+    </p>
+    <p style="font-style: italic; color: var(--indigo); margin-top: 28px;">
+      Da qui in avanti la cosa più utile è semplicemente provare. Iterare, sperimentare,
+      vedere cosa funziona sui tuoi task. Il modello mentale che hai costruito ti farà
+      capire più in fretta, e iterando costruirai un'esperienza tua, calibrata sui
+      problemi che vuoi davvero risolvere.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Punto 6 di 6+1 — Percorso di approfondimento su LLM e prompting</p>
+  <p>Principi pratici di scrittura del prompt — il punto che chiude il cerchio</p>
+</footer>
+
+</body>
+</html>
