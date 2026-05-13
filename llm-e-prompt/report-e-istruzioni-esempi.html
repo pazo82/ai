@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report E — Come il modello "capisce" istruzioni ed esempi</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: var(--indigo);
+    padding: 72px 48px 88px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -100px; right: -80px;
+    width: 540px; height: 540px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(13,122,110,0.30) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -100px; left: 10%;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-overline {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 19px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 44px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 76px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.35;
+    color: var(--indigo);
+    margin: 0 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .section-arc {
+    background: var(--indigo-faint2);
+    border-left: 3px solid var(--indigo-light);
+    padding: 22px 28px;
+    margin: 0 0 40px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .section-arc-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .section-arc p {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15.5px;
+    color: var(--indigo-mid);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .callout {
+    margin: 32px 0;
+    padding: 28px 32px;
+    border-radius: 8px;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 12px;
+    letter-spacing: 0;
+  }
+
+  .callout p {
+    font-size: 15.5px;
+    line-height: 1.72;
+    margin-bottom: 12px;
+  }
+
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-indigo { background: var(--indigo-faint); border-color: var(--indigo-light); }
+  .callout-indigo h4 { color: var(--indigo); }
+  .callout-orange { background: var(--orange-faint); border-color: var(--orange); }
+  .callout-orange h4 { color: var(--orange); }
+  .callout-teal { background: var(--teal-faint); border-color: var(--teal); }
+  .callout-teal h4 { color: var(--teal); }
+  .callout-amber { background: var(--amber-faint); border-color: var(--amber); }
+  .callout-amber h4 { color: var(--amber); }
+  .callout-purple { background: var(--purple-faint); border-color: var(--purple); }
+  .callout-purple h4 { color: var(--purple); }
+
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--indigo-border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 32px 0;
+    position: relative;
+  }
+
+  .metaphor::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px; height: 100%;
+    background: var(--orange);
+    border-radius: 8px 0 0 8px;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .metaphor p {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.72;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  .insight {
+    background: var(--indigo);
+    color: white;
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+  .insight strong { color: white; font-weight: 600; }
+  .insight em { color: var(--orange-light); }
+
+  /* Pipeline pretraining - posttraining */
+  .pipeline {
+    margin: 32px 0;
+  }
+
+  .pipeline-stage {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 26px 30px;
+    margin-bottom: 14px;
+    border-left: 4px solid;
+    position: relative;
+  }
+
+  .pipeline-stage.s-pre { border-left-color: var(--teal); }
+  .pipeline-stage.s-post { border-left-color: var(--orange); }
+
+  .pipeline-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .pipeline-stage.s-pre .pipeline-tag { color: var(--teal); }
+  .pipeline-stage.s-post .pipeline-tag { color: var(--orange); }
+
+  .pipeline-title {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 19px;
+    color: var(--indigo);
+    margin-bottom: 12px;
+  }
+
+  .pipeline-desc {
+    font-size: 15px;
+    color: var(--ink-mid);
+    line-height: 1.72;
+    margin: 0;
+  }
+
+  .pipeline-desc strong { color: var(--ink); }
+
+  /* Confronto frasi */
+  .compare-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 28px 0;
+  }
+
+  .compare-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+  }
+
+  .compare-card.var-a { border-top: 3px solid var(--teal); }
+  .compare-card.var-b { border-top: 3px solid var(--orange); }
+
+  .compare-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .compare-card.var-a .compare-tag { color: var(--teal); }
+  .compare-card.var-b .compare-tag { color: var(--orange); }
+
+  .compare-text {
+    font-family: var(--serif);
+    font-size: 16.5px;
+    color: var(--ink);
+    line-height: 1.55;
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+
+  .compare-note {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Prompt esempi */
+  .prompt-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 22px 0;
+    border-top: 3px solid var(--teal);
+  }
+
+  .prompt-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--teal);
+    margin-bottom: 12px;
+  }
+
+  .prompt-text {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.7;
+    background: var(--bg2);
+    padding: 14px 16px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    white-space: pre-line;
+  }
+
+  .prompt-note {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* CoT diagram */
+  .cot-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  .cot-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 22px;
+  }
+
+  .cot-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .cot-caption {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    margin-top: 18px;
+    text-align: center;
+    font-style: italic;
+    padding: 0 20px;
+  }
+
+  /* Categorie vincoli quantitativi */
+  .vincoli-list {
+    margin: 32px 0;
+  }
+
+  .vincolo-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    padding: 22px 0;
+    border-bottom: 1px dashed var(--border);
+    align-items: start;
+  }
+
+  .vincolo-row:last-child { border-bottom: none; }
+
+  .vincolo-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--indigo);
+  }
+
+  .vincolo-name .vincolo-example {
+    display: block;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--orange);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  .vincolo-desc {
+    font-size: 15px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+  }
+
+  /* Takeaways */
+  .takeaways {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px 40px;
+    margin: 32px 0;
+  }
+
+  .takeaways h3 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: var(--orange);
+    font-size: 22px;
+  }
+
+  .takeaway-item {
+    padding: 18px 0;
+    border-bottom: 1px dashed var(--border);
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 18px;
+  }
+
+  .takeaway-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .takeaway-item:first-child { padding-top: 0; }
+
+  .takeaway-num {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  .takeaway-text {
+    font-size: 15.5px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  .takeaway-text strong { color: var(--indigo); }
+
+  /* Bridge finale - chiusura del percorso */
+  .closure {
+    background: var(--indigo);
+    color: white;
+    border-radius: 8px;
+    padding: 48px 48px;
+    margin-top: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .closure::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -60px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(240,112,64,0.28) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .closure::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(13,122,110,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .closure-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .closure h3 {
+    color: white;
+    font-family: var(--serif);
+    font-size: 32px;
+    margin: 0 0 20px;
+    font-weight: 500;
+    position: relative;
+    line-height: 1.2;
+  }
+
+  .closure p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.78;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .closure p:last-child { margin-bottom: 0; }
+  .closure em { color: var(--orange-light); }
+  .closure strong { color: white; font-weight: 600; }
+
+  footer {
+    background: var(--bg3);
+    padding: 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 36px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .compare-pair { grid-template-columns: 1fr; }
+    .vincolo-row { grid-template-columns: 1fr; gap: 8px; }
+    .insight { padding: 28px 24px; }
+    .takeaways { padding: 28px 24px; }
+    .closure { padding: 32px 26px; }
+    .closure h3 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <div class="hero-inner">
+    <div class="hero-overline">Report E · La struttura del prompt</div>
+    <h1>Come il modello <em>"capisce"</em> istruzioni ed esempi</h1>
+    <p class="hero-sub">
+      Perché un modello obbedisce, come distingue un'istruzione da una descrizione, come gestisce
+      i vincoli quantitativi, come funziona il Chain-of-Thought, perché il role-play cambia
+      tutto. È il livello più meta del prompting, ed è dove l'illusione cognitiva è più forte.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Tema</div>
+        <div class="meta-value">Obbedienza, esempi, ragionamento</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Concetto chiave</div>
+        <div class="meta-value">Pattern matching geometrico</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Posizione nel percorso</div>
+        <div class="meta-value">Chiusura — Report E</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">01 — La domanda fondamentale</div>
+  <h2>Perché un modello obbedisce a un'istruzione?</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Apriamo con la domanda più basilare e meno ovvia: cosa rende un modello capace di distinguere un'istruzione da una descrizione, e quindi di rispondere alla prima con un'azione e alla seconda con una continuazione narrativa? La risposta passa attraverso due fasi distinte dell'addestramento — pretraining e post-training — e capirle è essenziale per il resto del Report E.</p>
+  </div>
+
+  <p class="lead">
+    Se io scrivo al modello "scrivimi una poesia sull'autunno", il modello produce una poesia
+    sull'autunno. Se scrivo "spiegami la fotosintesi", il modello spiega la fotosintesi. Sembra
+    ovvio. Ma fermati un attimo a chiederti: <strong>da dove gli viene la capacità di
+    distinguere un'istruzione da una semplice osservazione?</strong>
+  </p>
+
+  <p>
+    Se io scrivessi "Mario scrive una poesia sull'autunno", non mi aspetterei che il modello
+    producesse una poesia — è una descrizione, non una richiesta. Eppure il modello sa la
+    differenza. Come? La risposta passa attraverso due fasi distinte dell'addestramento, e
+    capirle è essenziale per capire tutto il resto del Report E.
+  </p>
+
+  <div class="pipeline">
+    <div class="pipeline-stage s-pre">
+      <div class="pipeline-tag">Fase 1</div>
+      <div class="pipeline-title">Pretraining</div>
+      <p class="pipeline-desc">
+        Il modello viene addestrato su un compito apparentemente semplice: dato un pezzo di
+        testo, predire il prossimo token. Migliaia di miliardi di volte, su tutto quello che è
+        leggibile sul web e oltre. In questa fase impara la struttura statistica del linguaggio,
+        ma <strong>non ha alcun motivo speciale per "obbedire" alle istruzioni</strong>. Un
+        modello solo pre-addestrato (i modelli "base") è un completatore di testo molto
+        sofisticato, ma non ti "risponde" — perché non ha imparato che ci si aspetta una risposta.
+      </p>
+    </div>
+
+    <div class="pipeline-stage s-post">
+      <div class="pipeline-tag">Fase 2</div>
+      <div class="pipeline-title">Post-training (instruction tuning + RLHF)</div>
+      <p class="pipeline-desc">
+        Quello che trasforma un modello base in un assistente che obbedisce sono le tecniche di
+        post-training: l'<em>instruction tuning</em> (addestramento su coppie istruzione-risposta)
+        e l'<em>RLHF</em> (Reinforcement Learning from Human Feedback). Il modello vede milioni
+        di esempi del tipo "istruzione → buona risposta". I pesi si aggiornano per rinforzare un
+        comportamento specifico: <strong>quando vedi qualcosa che assomiglia a un'istruzione,
+        attiva il pattern "soddisfa la richiesta" invece del pattern "continua il testo"</strong>.
+      </p>
+    </div>
+  </div>
+
+  <h3>Da qui la distinzione</h3>
+  <p>
+    Adesso possiamo rispondere alla domanda iniziale. Le due stringhe — "scrivi una poesia" e
+    "Mario scrive una poesia" — nello spazio degli embedding e dopo l'elaborazione delle teste
+    di attenzione, finiscono in regioni diverse dello spazio.
+  </p>
+
+  <p>
+    La prima — un imperativo, in seconda persona, senza soggetto esplicito, con la forma di una
+    richiesta — è geometricamente vicina a tutte le istruzioni che il modello ha visto nel
+    post-training. La sua traiettoria di attenzione attiva i circuiti che producono
+    risposte-a-istruzioni. La seconda — un'affermazione narrativa, in terza persona, con
+    soggetto esplicito — è geometricamente vicina a frasi descrittive che il modello ha visto
+    nel pretraining. Il modello attiva il pattern narrativo e tende a continuare il testo.
+  </p>
+
+  <div class="callout callout-indigo">
+    <h4>La cosa importante</h4>
+    <p>
+      <strong>Non c'è un classificatore esplicito "istruzione vs descrizione" da nessuna parte
+      nel modello.</strong> C'è solo geometria. Pattern che cadono in certe regioni dello spazio
+      attivano certe modalità di risposta; pattern che cadono in altre regioni ne attivano altre.
+      L'obbedienza non è un meccanismo a parte: è una proprietà emergente del modo in cui certi
+      pattern di input si proiettano nello spazio appreso durante l'addestramento.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">02 — La conseguenza profonda</div>
+  <h2>L'obbedienza è pattern matching, non comprensione</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Da quello che abbiamo capito sull'origine dell'obbedienza, discende una conseguenza importante: il modello obbedisce nella misura in cui l'istruzione assomiglia, geometricamente, alle istruzioni che ha visto nel post-training. Questo spiega perché esistono "formulazioni canoniche" che funzionano meglio di altre semanticamente equivalenti.</p>
+  </div>
+
+  <p>
+    Da questa idea discende qualcosa che vale la pena fissare con cura, perché spiega molti
+    fenomeni che altrimenti sembrano misteriosi. <strong>Il modello "obbedisce" a un'istruzione
+    se quella istruzione assomiglia, geometricamente, alle istruzioni che ha visto nel
+    post-training a cui ha imparato a obbedire</strong>.
+  </p>
+
+  <p>
+    Quando l'istruzione è formulata in modo simile a quelle che ha visto, il pattern matching
+    scatta in modo netto e il modello produce una risposta ben allineata. Quando l'istruzione è
+    formulata in modo strano, ambiguo, o lontano dai pattern visti, il matching è più debole, e
+    la risposta è meno controllata. Questo significa che esistono <strong>formulazioni standard
+    delle istruzioni</strong> che funzionano meglio di altre.
+  </p>
+
+  <h3>Tre versioni della stessa richiesta</h3>
+
+  <div class="compare-pair">
+    <div class="compare-card var-a">
+      <div class="compare-tag">Canonica</div>
+      <div class="compare-text">Scrivi una sintesi del documento.</div>
+      <p class="compare-note">Imperativo, oggetto chiaro, struttura standard. Il pattern matching scatta in modo netto: il modello attiva senza ambiguità il pattern di obbedienza.</p>
+    </div>
+    <div class="compare-card var-b">
+      <div class="compare-tag">Cortese</div>
+      <div class="compare-text">Vorrei che tu mi scrivessi una sintesi del documento, se ti va.</div>
+      <p class="compare-note">Semanticamente equivalente, ma è più una richiesta cortese che un comando. Il pattern di obbedienza si attiva, ma con meno purezza del segnale.</p>
+    </div>
+  </div>
+
+  <div class="compare-pair">
+    <div class="compare-card var-b" style="grid-column: 1 / -1;">
+      <div class="compare-tag">Ambigua</div>
+      <div class="compare-text">Sarebbe possibile avere una sintesi del documento?</div>
+      <p class="compare-note">Quasi una domanda retorica. In alcuni contesti il modello potrebbe rispondere alla domanda invece di soddisfare la richiesta implicita ("Sì, certamente è possibile"), perché il pattern attivato è quello della domanda yes-no.</p>
+    </div>
+  </div>
+
+  <p>
+    Questo non vuol dire che le formulazioni cortesi non funzionino — il post-training ha visto
+    anche moltissime di queste — ma c'è un effetto di "<strong>purezza del segnale</strong>" che
+    vale la pena conoscere. Più il prompt assomiglia a un'istruzione canonica, più il modello è
+    probabile che attivi senza ambiguità il pattern di obbedienza.
+  </p>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">03 — Il caso rivelatore</div>
+  <h2>I vincoli quantitativi: come fa a capire "non più di 10 parole"?</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Uno dei casi più interessanti, perché rivela direttamente la natura pattern-matching del modello. Il modello non ha un contatore di parole, eppure rispetta — approssimativamente — i vincoli di lunghezza. Vediamo come, vediamo perché "approssimativamente", e ricaviamo indicazioni operative per chi deve gestire vincoli stretti.</p>
+  </div>
+
+  <p>
+    Come fa il modello a "capire" un'istruzione tipo "non più di 10 parole"? Il modello, come
+    abbiamo discusso, <strong>non ha un contatore di parole</strong>. Non c'è un meccanismo
+    dedicato che dice "ho prodotto 8 parole, ne posso ancora produrre 2". Tutto quello che il
+    modello fa è predire un token alla volta sulla base del vettore di contesto corrente. Eppure
+    funziona, almeno approssimativamente. Come?
+  </p>
+
+  <h3>Cosa succede meccanicamente</h3>
+  <p>
+    Quando il modello vede "non più di 10 parole" all'inizio del suo prompt, succede qualcosa di
+    geometrico. Il vettore di contesto iniziale viene inclinato in una direzione specifica —
+    quella delle risposte brevi. Le teste di attenzione che si sono specializzate, durante il
+    post-training, sul riconoscimento dei vincoli di lunghezza, attivano un'aspettativa:
+    "stiamo producendo qualcosa di corto".
+  </p>
+
+  <p>
+    Durante la generazione, ogni token prodotto è influenzato da quel vettore di contesto. Le
+    probabilità di token che "chiudono" la risposta (come il punto finale, o token che segnalano
+    fine di unità) sono leggermente elevate dopo che è stata generata una quantità di output
+    che, <strong>statisticamente, corrisponde a un output breve</strong>.
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>Il punto cruciale</h4>
+    <p>
+      Il modello non sta contando. Sta riconoscendo, in base a milioni di esempi visti nel
+      post-training, che gli output etichettati come "brevi" avevano una certa <strong>lunghezza
+      tipica</strong>. Quella distribuzione di lunghezze tipiche è codificata implicitamente nei
+      pesi del modello, e si manifesta come una pressione probabilistica a chiudere la risposta
+      entro un range. È <em>approssimazione statistica</em>, non conteggio.
+    </p>
+  </div>
+
+  <h3>Una gerarchia di vincoli, dal più al meno affidabile</h3>
+
+  <div class="vincoli-list">
+    <div class="vincolo-row">
+      <div class="vincolo-name">
+        Vincoli categoriali
+        <span class="vincolo-example">"una frase" · "un paragrafo breve" · "due righe"</span>
+      </div>
+      <div class="vincolo-desc">
+        Funzionano meglio di tutti. Sono pattern che il modello ha visto molte volte e per cui ha
+        distribuzioni tipiche ben calibrate. Una "frase" è qualcosa di abbastanza ben definito
+        statisticamente da essere riconoscibile.
+      </div>
+    </div>
+
+    <div class="vincolo-row">
+      <div class="vincolo-name">
+        Vincoli "non più di X"
+        <span class="vincolo-example">"non più di 100 parole" · "max 3 righe"</span>
+      </div>
+      <div class="vincolo-desc">
+        Funzionano meglio dei vincoli "esattamente X" perché lasciano margine di tolleranza e si
+        avvicinano al pattern naturale "scrivi qualcosa di corto, senza sforare troppo". Il
+        modello tipicamente produce qualcosa <em>vicino</em> al limite, leggermente sotto.
+      </div>
+    </div>
+
+    <div class="vincolo-row">
+      <div class="vincolo-name">
+        Vincoli numerici rotondi
+        <span class="vincolo-example">"10 parole" · "50 parole" · "100 parole"</span>
+      </div>
+      <div class="vincolo-desc">
+        Funzionano meglio dei numeri arbitrari perché statisticamente compaiono più spesso nei
+        dati come target di lunghezza. Il modello ha distribuzioni di output meglio calibrate
+        intorno a questi valori.
+      </div>
+    </div>
+
+    <div class="vincolo-row">
+      <div class="vincolo-name">
+        Vincoli numerici precisi
+        <span class="vincolo-example">"esattamente 47 parole" · "13 frasi"</span>
+      </div>
+      <div class="vincolo-desc">
+        Funzionano peggio. Il modello deve approssimare un valore numerico preciso senza poterlo
+        verificare. Si avvicinerà al target ma con una varianza non trascurabile (può darti 9, 11,
+        13 parole quando ne chiedi 10).
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-teal">
+    <h4>Tre strategie pratiche per i vincoli stretti</h4>
+    <p>
+      <strong>Combina vincoli numerici con categoriali.</strong> "In una sola frase, di circa 15
+      parole" è più potente di "esattamente 15 parole". Il vincolo categoriale è quello forte, il
+      numerico è una rifinitura.
+    </p>
+    <p>
+      <strong>Ripeti il vincolo (richiamo finale compatto del Report D).</strong> "Non più di 10
+      parole" all'inizio, e "ricordati: max 10 parole" alla fine.
+    </p>
+    <p>
+      <strong>Posiziona il vincolo nelle zone privilegiate.</strong> All'inizio del prompt come
+      quadro, e immediatamente prima della richiesta come promemoria. Se la precisione è critica,
+      meglio chiedere "il più breve possibile" e tagliare manualmente.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">04 — Il pattern matching brilla</div>
+  <h2>Il few-shot prompting: gli esempi come istruzioni implicite</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Il few-shot prompting è la tecnica per cui, invece di descrivere a parole cosa vuoi, mostri esempi di input-output. Funziona spesso meglio della descrizione esplicita, e capire perché ti dice tantissimo sul modo in cui il modello "ragiona". Vediamo cosa succede meccanicamente, quanti esempi servono, e perché la scelta degli esempi è cruciale.</p>
+  </div>
+
+  <p>
+    Il <em>few-shot prompting</em> è la tecnica per cui, invece di descrivere a parole cosa vuoi
+    che il modello faccia, <strong>gli mostri esempi di input-output</strong> e poi gli dai un
+    nuovo input. È una tecnica molto potente, e capire perché funziona ti dice tantissimo sul
+    modo in cui il modello "ragiona".
+  </p>
+
+  <div class="prompt-card">
+    <div class="prompt-tag">Un esempio di few-shot</div>
+    <div class="prompt-text">Input: il gatto dorme
+Output: GATTO
+
+Input: la pioggia cade
+Output: PIOGGIA
+
+Input: il vento soffia
+Output:</div>
+    <p class="prompt-note">Il modello riconoscerà il pattern "estrai il soggetto e mettilo in maiuscolo" senza che nessuno l'abbia mai dichiarato esplicitamente. La probabilità di "VENTO" come token successivo sarà altissima.</p>
+  </div>
+
+  <h3>Cosa succede meccanicamente</h3>
+  <p>
+    Il modello, leggendo questa sequenza, costruisce un vettore di contesto che ha una
+    caratteristica precisa: la sua geometria contiene un pattern. I primi due esempi non sono
+    materiale arbitrario — sono <strong>dimostrazioni</strong> di una trasformazione. Il pattern
+    è "estrai il soggetto della frase e mettilo in maiuscolo".
+  </p>
+
+  <p>
+    Quando il modello arriva al terzo "Input: il vento soffia" e poi a "Output:", il suo vettore
+    di contesto è fortemente inclinato verso una specifica continuazione: una parola in
+    maiuscolo, che sia il soggetto della terza frase. La probabilità di "VENTO" come prossimo
+    token è altissima, perché tutto il contesto precedente lo "tira" verso quella risposta.
+  </p>
+
+  <p>
+    Il punto importante è che <strong>nessuno ha mai detto al modello "estrai il soggetto e
+    mettilo in maiuscolo"</strong>. Il modello ha inferito la regola dai due esempi, semplicemente
+    perché quel pattern era l'unico modo coerente per spiegare entrambi. Non è una deduzione
+    logica — è ancora pattern matching geometrico, ma applicato a un caso dove il pattern è una
+    <em>trasformazione</em> visibile attraverso esempi.
+  </p>
+
+  <h3>Perché funziona meglio della descrizione esplicita</h3>
+  <p>
+    Quando descrivi a parole quello che vuoi ("estrai il soggetto della frase e mettilo in
+    maiuscolo"), il modello deve interpretare la descrizione, mapparla su un'operazione
+    concreta, e poi applicarla. C'è tutto un livello intermedio di "capisco la descrizione → la
+    traduco in operazione".
+  </p>
+
+  <p>
+    Quando invece mostri esempi, salti quel livello. Gli esempi <em>sono</em> l'operazione,
+    espressa direttamente nella forma che il modello dovrà produrre. Le teste di attenzione
+    hanno solo bisogno di riconoscere il pattern di trasformazione, non di interpretarlo. È più
+    diretto, e per questo spesso più affidabile.
+  </p>
+
+  <div class="callout callout-amber">
+    <h4>Quanti esempi servono</h4>
+    <p>
+      Per pattern molto semplici (estrai questa cosa, traduci in quella lingua, formatta così),
+      spesso <strong>un solo esempio</strong> basta. Il modello è così potente nel riconoscimento
+      di pattern che anche un'unica dimostrazione, ben fatta, è sufficiente.
+    </p>
+    <p>
+      Per pattern più complessi (classifica in categorie sottili, applica regole stilistiche
+      specifiche), servono <strong>due o tre esempi</strong>. La distribuzione di esempi aiuta il
+      modello a "triangolare" il pattern, vedendo cosa hanno in comune i casi diversi.
+    </p>
+    <p>
+      Per pattern molto complessi o con molte eccezioni, possono servire <strong>cinque o più
+      esempi</strong>, e oltre questa soglia conviene quasi sempre combinare esempi con una
+      descrizione esplicita. Ma attenzione: aggiungere troppi esempi non sempre migliora. Tre o
+      quattro esempi ben scelti battono dieci esempi mediocri.
+    </p>
+  </div>
+
+  <h3>La scelta degli esempi: un'arte sottile</h3>
+  <p>
+    Gli esempi non sono neutri: spostano la traiettoria del modello in direzioni precise. Se
+    sono tutti di un tipo specifico (tutti formali, tutti corti, tutti di un certo dominio), il
+    modello inferirà che vuoi output di quel tipo, anche se non l'hai detto esplicitamente. Se
+    vuoi varietà nelle risposte, devi mostrare varietà negli esempi.
+  </p>
+
+  <p>
+    E c'è un fenomeno particolarmente rilevante: il modello tende a <strong>imitare anche la
+    forma</strong> degli esempi, non solo la sostanza. Se i tuoi esempi hanno un certo stile di
+    formattazione, una certa lunghezza, una certa struttura, il modello tenderà a riprodurli.
+    Questo è utile (perché ti permette di controllare il formato senza descriverlo) ma anche
+    pericoloso (perché caratteristiche "accidentali" dei tuoi esempi possono propagarsi
+    all'output in modi non voluti).
+  </p>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">05 — Quando l'istruzione è complessa</div>
+  <h2>Task multi-passo e Chain-of-Thought</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Cosa succede quando un'istruzione richiede più operazioni concatenate? Il modello ce la fa, ma con vulnerabilità che vale la pena conoscere. E poi il Chain-of-Thought: capire perché funziona così bene rivela qualcosa di profondo sul modo in cui il modello "ragiona" — usando i token che genera come una memoria di lavoro esterna.</p>
+  </div>
+
+  <h3>Cosa succede con un'istruzione multi-passo</h3>
+  <p>
+    Cosa succede quando l'istruzione è complessa? Per esempio: "Leggi questo articolo, identifica
+    i tre argomenti principali, valuta la solidità di ciascuno, e proponi una possibile critica
+    per ognuno". Qui c'è un'istruzione che richiede più passi: leggere, identificare, valutare,
+    criticare. Quattro operazioni concatenate, ognuna che dipende dalla precedente.
+  </p>
+
+  <p>
+    Il modello "ce la fa", spesso, ma il meccanismo è interessante e ha delle vulnerabilità che
+    vale la pena conoscere. Le sue teste di attenzione devono fare due cose: riconoscere il
+    pattern di "task multi-passo", e costruire un vettore di contesto che mantenga attivi tutti
+    i passi simultaneamente, in modo che la generazione li affronti uno dopo l'altro.
+  </p>
+
+  <p>
+    Il punto sottile è il secondo. Il modello non ha una "agenda" esplicita dei passi da fare.
+    Non c'è un meccanismo che spunti "passo 1 fatto, ora vado al passo 2". Tutto vive nel
+    vettore di contesto, e man mano che il modello genera la risposta, il contesto cambia.
+    Questo crea un problema: <strong>più i passi sono numerosi, più è facile che qualcuno si
+    "perda"</strong>.
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>Tre indicazioni operative per istruzioni complesse</h4>
+    <p>
+      <strong>Per task con più di 3-4 passi, conviene numerarli esplicitamente.</strong> "Fai 1) X,
+      2) Y, 3) Z, 4) W" produce risultati molto migliori di "fai X, Y, Z e W". La numerazione
+      attiva un pattern fortissimo di "lista di task da eseguire" che il modello ha visto molte
+      volte, e dà alle teste di attenzione punti di riferimento espliciti.
+    </p>
+    <p>
+      <strong>Per task molto complessi, chiedi al modello di articolare l'output con la stessa
+      struttura.</strong> "Fai 1) X, 2) Y, 3) Z, e organizza la risposta in tre sezioni numerate
+      corrispondenti". Il modello, dovendo produrre output strutturato, è costretto a tenere
+      traccia dei passi mentre genera.
+    </p>
+    <p>
+      <strong>Per task dove un passo è particolarmente importante, mettilo in evidenza.</strong>
+      Usa il grassetto (Report B) o ripeti il passo critico alla fine come richiamo compatto
+      (Report D). Le teste di attenzione si distribuiscono in modo non uniforme, e hai degli
+      strumenti per dirigerne il peso.
+    </p>
+  </div>
+
+  <h3>Il Chain-of-Thought: un pattern che ha cambiato tutto</h3>
+  <p>
+    Il <em>Chain-of-Thought</em> (CoT) è la tecnica per cui, invece di chiedere al modello di
+    rispondere direttamente a una domanda, gli si chiede di "ragionare passo per passo" prima
+    di dare la risposta finale. Il fatto sperimentale è ben noto: il CoT migliora drasticamente
+    le prestazioni su task che richiedono ragionamento. Ma perché funziona?
+  </p>
+
+  <p>
+    Il modello genera un token alla volta, e ogni token è prodotto sulla base del vettore di
+    contesto corrente. Senza CoT, quando chiedi "qual è la radice quadrata di 256?", il modello
+    deve produrre la risposta direttamente: dopo aver letto la domanda, il prossimo token
+    significativo dovrebbe essere "16". Per farlo, deve aver "calcolato" tutto internamente nei
+    suoi strati di attenzione, in un singolo passaggio in avanti.
+  </p>
+
+  <p>
+    Ma il modello non ha un calcolatore. Non può "fare" calcoli interni: può solo predire token.
+    Quindi la sua capacità di rispondere correttamente in un singolo colpo dipende dal fatto
+    che, durante il pretraining, abbia visto "radice quadrata di 256 = 16" come un pattern
+    statistico abbastanza frequente da averlo memorizzato. Per numeri comuni funziona. Per
+    calcoli meno comuni, fallisce.
+  </p>
+
+  <div class="cot-diagram">
+    <div class="cot-label">Senza CoT vs con CoT</div>
+    <svg class="cot-svg" viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg">
+      <!-- Senza CoT -->
+      <text x="60" y="40" font-family="Outfit" font-size="14" fill="#1e2a5e" font-weight="600">SENZA CoT</text>
+
+      <rect x="60" y="55" width="220" height="50" rx="6" fill="#fff" stroke="#c94a1a" stroke-width="1.5"/>
+      <text x="170" y="78" font-family="Outfit" font-size="13" fill="#c94a1a" text-anchor="middle" font-weight="600">domanda complessa</text>
+      <text x="170" y="95" font-family="Lora" font-size="12" fill="#6b7280" text-anchor="middle" font-style="italic">√256 = ?</text>
+
+      <!-- Freccia singolo salto -->
+      <path d="M 285 80 L 555 80" stroke="#c94a1a" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#ar2)"/>
+      <text x="420" y="70" font-family="Outfit" font-size="11" fill="#c94a1a" text-anchor="middle" font-style="italic">salto diretto</text>
+      <text x="420" y="100" font-family="Outfit" font-size="10" fill="#c94a1a" text-anchor="middle">(fragile)</text>
+
+      <rect x="560" y="55" width="220" height="50" rx="6" fill="#fff" stroke="#c94a1a" stroke-width="1.5"/>
+      <text x="670" y="78" font-family="Outfit" font-size="13" fill="#c94a1a" text-anchor="middle" font-weight="600">risposta diretta</text>
+      <text x="670" y="95" font-family="Lora" font-size="12" fill="#6b7280" text-anchor="middle" font-style="italic">16 (o errore)</text>
+
+      <!-- Linea separatrice -->
+      <line x1="60" y1="155" x2="840" y2="155" stroke="#e4e7f2" stroke-width="1"/>
+
+      <!-- Con CoT -->
+      <text x="60" y="185" font-family="Outfit" font-size="14" fill="#1e2a5e" font-weight="600">CON CoT</text>
+
+      <rect x="60" y="200" width="160" height="50" rx="6" fill="#fff" stroke="#0d7a6e" stroke-width="1.5"/>
+      <text x="140" y="223" font-family="Outfit" font-size="13" fill="#0d7a6e" text-anchor="middle" font-weight="600">domanda</text>
+      <text x="140" y="240" font-family="Lora" font-size="11" fill="#6b7280" text-anchor="middle" font-style="italic">√256 = ?</text>
+
+      <path d="M 225 225 L 255 225" stroke="#0d7a6e" stroke-width="2" marker-end="url(#ar3)"/>
+
+      <rect x="260" y="200" width="140" height="50" rx="6" fill="#0d7a6e" fill-opacity="0.08" stroke="#0d7a6e" stroke-width="1"/>
+      <text x="330" y="220" font-family="Outfit" font-size="11" fill="#0d7a6e" text-anchor="middle" font-weight="600">passo 1</text>
+      <text x="330" y="238" font-family="Lora" font-size="11" fill="#374151" text-anchor="middle" font-style="italic">256 = 2⁸</text>
+
+      <path d="M 405 225 L 435 225" stroke="#0d7a6e" stroke-width="2" marker-end="url(#ar3)"/>
+
+      <rect x="440" y="200" width="140" height="50" rx="6" fill="#0d7a6e" fill-opacity="0.08" stroke="#0d7a6e" stroke-width="1"/>
+      <text x="510" y="220" font-family="Outfit" font-size="11" fill="#0d7a6e" text-anchor="middle" font-weight="600">passo 2</text>
+      <text x="510" y="238" font-family="Lora" font-size="11" fill="#374151" text-anchor="middle" font-style="italic">√(2⁸) = 2⁴</text>
+
+      <path d="M 585 225 L 615 225" stroke="#0d7a6e" stroke-width="2" marker-end="url(#ar3)"/>
+
+      <rect x="620" y="200" width="140" height="50" rx="6" fill="#0d7a6e" fill-opacity="0.08" stroke="#0d7a6e" stroke-width="1"/>
+      <text x="690" y="220" font-family="Outfit" font-size="11" fill="#0d7a6e" text-anchor="middle" font-weight="600">passo 3</text>
+      <text x="690" y="238" font-family="Lora" font-size="11" fill="#374151" text-anchor="middle" font-style="italic">2⁴ = 16</text>
+
+      <path d="M 765 225 L 800 225" stroke="#0d7a6e" stroke-width="2" marker-end="url(#ar3)"/>
+
+      <text x="820" y="230" font-family="Outfit" font-size="13" fill="#0d7a6e" text-anchor="middle" font-weight="700">16</text>
+
+      <!-- Nota sotto -->
+      <text x="450" y="295" font-family="Lora" font-size="13" fill="#1e2a5e" text-anchor="middle" font-style="italic" font-weight="500">Ogni passo intermedio entra nel contesto e diventa premessa per il successivo</text>
+      <text x="450" y="315" font-family="Outfit" font-size="11" fill="#6b7280" text-anchor="middle">— i token generati funzionano come una memoria di lavoro esterna —</text>
+
+      <defs>
+        <marker id="ar2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#c94a1a"/>
+        </marker>
+        <marker id="ar3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#0d7a6e"/>
+        </marker>
+      </defs>
+    </svg>
+    <p class="cot-caption">Il CoT trasforma una computazione "in un colpo solo" in una computazione distribuita su molti token. Ogni passo è scritto nel contesto, e i passi successivi possono basarsi su di esso.</p>
+  </div>
+
+  <p>
+    Adesso vediamo cosa succede con il CoT. Quando il modello "ragiona passo per passo",
+    <strong>trasforma il calcolo in generazione di token</strong>. Invece di dover produrre
+    direttamente "16", produce "256 è 2 alla ottava. La radice quadrata di 2 alla ottava è 2
+    alla quarta. 2 alla quarta è 16". Ogni passo intermedio è un token che diventa parte del
+    contesto, e il token successivo viene prodotto sulla base di quel contesto arricchito.
+  </p>
+
+  <p>
+    Il punto chiave: il CoT trasforma una computazione "in un colpo solo" in una computazione
+    distribuita su molti token. Il modello sfrutta i token intermedi come <strong>memoria di
+    lavoro</strong>: ogni passo è scritto nel contesto, e i passi successivi possono basarsi su
+    di esso. È come se il modello stesse usando il testo che genera come uno scratchpad esterno.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora dello scratchpad esterno</div>
+    <p>
+      <strong>Il modello "ragiona" usando i token che produce come supporto esterno.</strong> Non
+      c'è ragionamento interno separato dalla generazione: il ragionamento <em>è</em> la
+      generazione. Quando il modello scrive passi intermedi, sta letteralmente costruendo il
+      proprio ragionamento, un token alla volta, e ogni token entra nel contesto e diventa
+      premessa per il successivo.
+    </p>
+    <p>
+      Da qui un'indicazione pratica molto importante: <strong>per task complessi che richiedono
+      ragionamento, chiedi sempre al modello di ragionare prima di concludere</strong>. Anche un
+      semplice "prima di rispondere, ragiona passo per passo" è uno dei più potenti miglioratori
+      di prompt che esistano. Non costa quasi nulla, e spesso fa la differenza tra una risposta
+      sbagliata e una giusta.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">06 — L'effetto del ruolo</div>
+  <h2>Il role-play: "sei un esperto di X" cambia tutto</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>La pratica di dare al modello un ruolo specifico all'inizio del prompt è molto diffusa, e funziona — il modello produce risposte più competenti e mirate. Perché succede? La risposta è geometrica, e ormai dovrebbe risultarti naturale. Ma è anche importante capire i limiti del role-play, soprattutto per il problema delle allucinazioni in modalità esperta.</p>
+  </div>
+
+  <p>
+    La pratica di dire al modello "sei un esperto di X" o "comportati come un professore di Y"
+    all'inizio del prompt è molto diffusa, e l'osservazione comune è che funzioni — il modello
+    produce risposte più competenti e mirate quando gli si dà un ruolo specifico. Perché succede?
+  </p>
+
+  <p>
+    Quando scrivi "sei un esperto di medicina interna" all'inizio del prompt, stai facendo
+    qualcosa di molto preciso al vettore di contesto iniziale. Lo stai <strong>inclinando verso
+    una specifica regione dello spazio degli embedding</strong>: quella popolata dai testi che
+    il modello ha visto in addestramento e che provenivano da contesti di medicina interna.
+    Articoli scientifici, manuali, consulti, discussioni tra specialisti.
+  </p>
+
+  <p>
+    Tutto quello che viene dopo viene processato attraverso quella lente geometrica. Le teste di
+    attenzione hanno priorità rinforzata su pattern medico-tecnici. Il vocabolario attivato è
+    più probabilmente quello specialistico. La struttura argomentativa tende a quella tipica dei
+    contesti medici.
+  </p>
+
+  <h3>Perché funziona meglio della semplice domanda tecnica</h3>
+  <p>
+    Dire "sei un esperto di X" funziona spesso meglio che semplicemente fare una domanda tecnica
+    su X. Perché? Perché la formulazione attiva il pattern dell'intero <strong>registro
+    discorsivo</strong> del dominio, non solo del vocabolario. Include lo stile, la struttura
+    delle risposte tecniche, le convenzioni argomentative, il livello di profondità che ci si
+    aspetta.
+  </p>
+
+  <p>
+    Se chiedi solo "spiegami la fisiopatologia del diabete di tipo 2", il modello attiva il
+    vocabolario tecnico ma con un quadro generale neutro. Se prima dici "sei un endocrinologo
+    esperto di diabete, spiega a un collega la fisiopatologia del diabete di tipo 2", attivi non
+    solo il vocabolario, ma anche un registro discorsivo specifico — "endocrinologo a collega",
+    che ha sue convenzioni, sue assunzioni di base, suoi livelli di precisione. La differenza è
+    qualitativa, non solo quantitativa.
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>Attenzione: il limite del role-play</h4>
+    <p>
+      <strong>Il modello non diventa magicamente un esperto di X se non lo era prima.</strong>
+      Tutta la sua conoscenza viene dai dati di pretraining, e se quei dati avevano lacune o
+      errori in un dominio, il role-play non le risana. Anzi, può peggiorare le cose: un modello
+      istruito a "comportarsi come un esperto" può produrre con sicurezza affermazioni sbagliate,
+      perché ha attivato il registro della competenza senza avere la competenza sottostante.
+    </p>
+    <p>
+      È il famoso problema delle "allucinazioni in modalità esperta": il modello suona
+      competente, parla con autorità, usa il vocabolario giusto, e dice cose false. È un effetto
+      collaterale del fatto che il pattern "esperto" che il modello attiva include lo <em>stile</em>
+      della competenza, non garantisce la <em>sostanza</em>.
+    </p>
+    <p>
+      La conseguenza pratica: usa il role-play per attivare registri e modalità di risposta, ma
+      non aspettarti che ti dia accesso a conoscenze che il modello non ha. E per task ad alto
+      rischio (medico, legale, finanziario), il role-play va sempre combinato con verifiche
+      esterne.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">07 — Quando le istruzioni si pestano</div>
+  <h2>Istruzioni in conflitto e gerarchia delle priorità</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Cosa succede quando un prompt contiene istruzioni che potenzialmente si contraddicono? I modelli moderni hanno una gerarchia di priorità appresa nel post-training, ma è probabilistica e dipende da quanto i conflitti sono espliciti. Vediamo come funziona e come scrivere prompt più robusti.</p>
+  </div>
+
+  <p>
+    Cosa succede quando in un prompt ci sono istruzioni che potenzialmente entrano in conflitto?
+    Esempio: hai un system prompt che dice "rispondi sempre in modo conciso", e nel messaggio
+    utente l'utente scrive "rispondimi in modo molto dettagliato". Cosa fa il modello?
+  </p>
+
+  <p>
+    La risposta non è univoca, e qui entra un fenomeno che abbiamo accennato nel Report D: la
+    <strong>gerarchia delle istruzioni</strong>. I modelli moderni sono stati addestrati nel
+    post-training a dare priorità a certe sorgenti di istruzioni sopra altre. Tipicamente,
+    l'ordine di priorità è: prima le istruzioni di addestramento del modello (i suoi vincoli di
+    sicurezza e comportamento), poi le istruzioni del system prompt, poi le istruzioni dei
+    messaggi utente. In caso di conflitto, tende a vincere il livello più alto.
+  </p>
+
+  <p>
+    Ma questa gerarchia non è rigida — è <strong>probabilistica</strong> e dipende da quanto i
+    conflitti sono espliciti e dalla forza con cui sono espressi. Un conflitto chiaro e netto
+    tipicamente fa rispettare la gerarchia. Un conflitto sfumato può produrre comportamenti
+    misti: il modello prova a soddisfare entrambe le istruzioni a metà, finendo per soddisfarne
+    nessuna.
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Tre indicazioni pratiche</h4>
+    <p>
+      <strong>Evita istruzioni che si contraddicono nello stesso prompt.</strong> Se scrivi "sii
+      dettagliato" e poi "sii conciso", il modello dovrà mediare in un modo che non controlli.
+      Decidi cosa vuoi e dillo una volta sola.
+    </p>
+    <p>
+      <strong>Se diverse parti del prompt potrebbero entrare in conflitto, esplicita le
+      priorità.</strong> "Se devi scegliere tra essere completo e essere breve, preferisci la
+      brevità." È una formulazione che il modello riconosce dal post-training (sono frequenti
+      esempi di "in caso di conflitto, fai X"), e che riduce l'ambiguità.
+    </p>
+    <p>
+      <strong>Sfrutta la gerarchia delle istruzioni quando ti serve robustezza.</strong> Se hai
+      un comportamento che vuoi che valga sempre, mettilo nel system prompt. Il modello tenderà
+      a rispettarlo anche quando l'utente chiede il contrario.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">08 — Il principio unificante</div>
+  <h2>Il modello risponde alla geometria, non al senso</h2>
+
+  <p>
+    Voglio fissare un'idea finale che riassume non solo il Report E ma, in un certo senso,
+    l'intero percorso. Tutto quello che abbiamo visto — il peso delle parole, la forma
+    tokenizzata, la punteggiatura come barriere attentive, l'ordine come paesaggio attentivo,
+    l'obbedienza come pattern matching — converge in una sola consapevolezza.
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Il principio unificante del percorso</div>
+    <p>
+      <strong>Il modello non "capisce" il prompt come fa un essere umano. Risponde alla geometria
+      del prompt.</strong> Ogni scelta che fai quando scrivi — quale parola usi, come la
+      formatti, come la punteggi, dove la metti, come la combini con altre — produce uno
+      spostamento geometrico nel vettore di contesto del modello, e quello spostamento determina
+      la traiettoria della generazione.
+    </p>
+    <p>
+      Scrivere prompt efficaci non significa "spiegarsi meglio con il modello". Significa
+      <strong>costruire deliberatamente una traiettoria geometrica</strong> che porti il vettore
+      di contesto nella regione dello spazio dove vivono gli output che vuoi.
+    </p>
+    <p>
+      Tutti gli strumenti che abbiamo visto — la scelta delle parole strutturali, la forma per
+      rinforzare i segnali, la punteggiatura per creare confini, l'ordine per sfruttare le
+      posizioni privilegiate, gli esempi per attivare pattern di trasformazione, il role-play
+      per inclinare il registro — sono modi diversi di esercitare questo controllo geometrico.
+    </p>
+    <p>
+      Una volta che hai questa consapevolezza, smetti di chiederti <em>"perché il modello non mi
+      capisce?"</em> e cominci a chiederti <em>"in quale regione dello spazio sta cadendo il mio
+      prompt, e come posso spostarla?"</em>. È una domanda diversa, e produce risposte diverse.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">Sintesi finale</div>
+  <h2>Sette cose da portarsi via dal Report E</h2>
+
+  <div class="takeaways">
+    <h3>I punti da fissare</h3>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">01</div>
+      <div class="takeaway-text">
+        <strong>L'obbedienza viene dal post-training.</strong> Il pretraining produce un
+        completatore di testo sofisticato; sono l'instruction tuning e l'RLHF a trasformarlo in
+        un assistente. Non c'è un classificatore esplicito "istruzione vs descrizione": è tutta
+        geometria, pattern matching su regioni dello spazio degli embedding.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">02</div>
+      <div class="takeaway-text">
+        <strong>Esistono "formulazioni canoniche" delle istruzioni.</strong> Più il prompt
+        assomiglia a un'istruzione tipo del post-training, più il pattern di obbedienza si
+        attiva senza ambiguità. Imperativi chiari e diretti funzionano meglio di richieste
+        cortesi sfumate, anche quando sono semanticamente equivalenti.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">03</div>
+      <div class="takeaway-text">
+        <strong>I vincoli quantitativi sono approssimazioni statistiche.</strong> Il modello
+        non conta: riconosce pattern di lunghezza appresi. Vincoli categoriali ("una frase")
+        funzionano meglio di numerici precisi ("esattamente 47 parole"). Per precisione critica,
+        meglio "il più breve possibile" e tagliare manualmente.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">04</div>
+      <div class="takeaway-text">
+        <strong>Il few-shot funziona perché salta il livello descrittivo.</strong> Gli esempi
+        <em>sono</em> l'operazione, espressa direttamente nella forma che il modello dovrà
+        produrre. Per pattern semplici basta un esempio; per pattern complessi due-tre; oltre
+        cinque conviene combinare con descrizione esplicita. Il modello imita anche la forma,
+        non solo la sostanza.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">05</div>
+      <div class="takeaway-text">
+        <strong>Il Chain-of-Thought trasforma il ragionamento in generazione.</strong> Il modello
+        usa i token che produce come scratchpad esterno: ogni passo intermedio entra nel
+        contesto e diventa premessa per il successivo. Per task complessi, "ragiona passo per
+        passo prima di rispondere" è uno dei miglioratori più potenti che esistano.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">06</div>
+      <div class="takeaway-text">
+        <strong>Il role-play inclina il registro, non aggiunge competenza.</strong> "Sei un
+        esperto di X" attiva tutto il pattern discorsivo del dominio (vocabolario + stile +
+        convenzioni argomentative). Ma il modello non diventa esperto: rischio di allucinazioni
+        in modalità esperta. Usalo per il registro, non per la sostanza.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">07</div>
+      <div class="takeaway-text">
+        <strong>Esiste una gerarchia di istruzioni.</strong> System prompt > messaggi utente,
+        nei modelli moderni. La gerarchia è probabilistica, non rigida. Per comportamenti che
+        devono essere robusti, usa il system prompt. Per istruzioni del singolo turno, i
+        messaggi utente. Ed evita contraddizioni interne al prompt.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section style="border-bottom: none; padding-bottom: 60px;">
+  <div class="closure">
+    <div class="closure-label">Chiusura del percorso</div>
+    <h3>Da "spiegarsi al modello" a "costruire una traiettoria geometrica"</h3>
+    <p>
+      Il Report E chiude un percorso di cinque tappe che è partito dal peso meccanico delle
+      parole e ha attraversato la forma tokenizzata, la struttura sintattica, l'architettura
+      del prompt, e infine il meccanismo dell'obbedienza alle istruzioni. Ogni report ha
+      illuminato un livello, ma il filo che li lega è uno solo: la geometria appresa.
+    </p>
+    <p>
+      Il modello non legge come un essere umano. Il modello <em>è</em> uno spazio di embedding
+      con teste di attenzione che si sono auto-organizzate in patterns durante miliardi di
+      esempi. Tutto quello che fai quando scrivi un prompt è inclinare questo spazio in una
+      direzione invece che in un'altra, sfruttando strumenti che hai ora imparato a riconoscere
+      e a usare deliberatamente.
+    </p>
+    <p>
+      Da qui in poi, il prompting non è più una pratica intuitiva da affinare per tentativi.
+      È un mestiere che ha le sue leggi, le sue tecniche, e i suoi principi sottostanti. Le
+      domande iniziali da cui sei partito — su parole, punteggiatura, ordine, esempi — hanno
+      ora risposte meccaniche, non aneddotiche. <strong>E questa è la differenza tra usare
+      gli LLM e capire gli LLM.</strong>
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Report E — Come il modello "capisce" istruzioni ed esempi</p>
+  <p>Approfondimenti sulla struttura del prompt · Documento 5 di 5 · Chiusura del percorso</p>
+</footer>
+
+</body>
+</html>
