@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mappa di un LLM — Sintesi visiva dell'architettura completa</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--indigo);
+    padding: 72px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -100px; right: -60px;
+    width: 480px; height: 480px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -60px; left: -40px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 22px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 50px;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 18px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 760px;
+    font-weight: 300;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 60px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 34px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 22px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 32px 0 14px;
+  }
+
+  p {
+    font-size: 16px;
+    color: var(--ink-mid);
+    margin-bottom: 16px;
+    line-height: 1.75;
+  }
+
+  .lead {
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 24px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── DIAGRAMMA PRINCIPALE ── */
+  .diagram-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 36px 32px;
+    margin: 36px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+
+  .diagram-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .diagram-subtitle {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-light);
+    margin-bottom: 22px;
+  }
+
+  .diagram-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* ── LEGENDA SOTTO IL DIAGRAMMA ── */
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border2);
+  }
+
+  .legend-item {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+
+  .legend-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 3px;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .legend-line {
+    width: 22px;
+    height: 3px;
+    margin-top: 13px;
+    flex-shrink: 0;
+  }
+
+  .legend-text .legend-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--indigo);
+    margin-bottom: 3px;
+    font-family: var(--sans);
+  }
+
+  .legend-text .legend-desc {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.55;
+  }
+
+  /* ── COMPONENT TABLE ── */
+  .components-table {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 24px 0;
+  }
+
+  .component-row {
+    display: grid;
+    grid-template-columns: 60px 220px 1fr;
+    border-bottom: 1px solid var(--border2);
+    align-items: center;
+  }
+
+  .component-row:last-child { border-bottom: none; }
+
+  .component-row .comp-num {
+    padding: 18px 0 18px 22px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    color: var(--orange);
+  }
+
+  .component-row .comp-name {
+    padding: 18px 14px;
+    border-right: 1px solid var(--border2);
+    border-left: 1px solid var(--border2);
+  }
+
+  .component-row .comp-name-text {
+    font-family: var(--sans);
+    font-weight: 600;
+    color: var(--indigo);
+    font-size: 15px;
+    margin-bottom: 3px;
+  }
+
+  .component-row .comp-name-tech {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-light);
+    letter-spacing: 0.5px;
+  }
+
+  .component-row .comp-desc {
+    padding: 18px 22px;
+    font-size: 14.5px;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 6px;
+    padding: 22px 26px;
+    margin: 24px 0;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+
+  .callout p { font-size: 15px; line-height: 1.65; margin-bottom: 10px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-orange { background: var(--orange-faint); border-left-color: var(--orange); }
+  .callout-orange h4 { color: var(--orange); }
+
+  .callout-teal { background: var(--teal-faint); border-left-color: var(--teal); }
+  .callout-teal h4 { color: var(--teal); }
+
+  .callout-purple { background: var(--purple-faint); border-left-color: var(--purple); }
+  .callout-purple h4 { color: var(--purple); }
+
+  /* ── INSIGHT FINALE ── */
+  .insight {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 40px 0 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+  .insight em { color: var(--orange-light); font-style: italic; }
+  .insight strong { color: var(--white); }
+  .insight code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg3);
+    padding: 36px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  footer p { font-size: 13px; margin-bottom: 5px; color: var(--ink-light); }
+
+  @media (max-width: 900px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 32px; }
+    .hero-sub { font-size: 15px; }
+    .container { padding: 0 24px; }
+    section { padding: 44px 0; }
+    h2 { font-size: 26px; }
+    h3 { font-size: 18px; }
+    .insight { padding: 26px 22px; }
+    .diagram-wrap { padding: 22px 14px; }
+    .legend-grid { grid-template-columns: 1fr; }
+    .component-row { grid-template-columns: 44px 1fr; }
+    .component-row .comp-name { border-left: none; border-right: none; padding: 14px 18px; }
+    .component-row .comp-desc { padding: 0 18px 16px; grid-column: 1 / -1; }
+    .component-row .comp-num { padding: 14px 0 0 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <div class="hero-inner">
+    <div class="hero-label">Complemento al Tema 2 — Sintesi visiva</div>
+    <h1>Mappa di un <em>LLM</em></h1>
+    <p class="hero-sub">
+      Una visualizzazione integrale del macro-flusso che dal prompt testuale arriva al
+      token generato e al loop autoregressivo. Dentro: il Transformer come cuore del
+      sistema. Intorno: tokenizer, sampler, detokenizer e tutto ciò che fa di un
+      Transformer un LLM funzionante.
+    </p>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- INTRODUZIONE: COSA SI VEDE NELLA MAPPA -->
+<section>
+  <div class="section-num">COME LEGGERE LA MAPPA</div>
+  <h2>Quattro livelli di lettura, sovrapposti</h2>
+  <p class="lead">
+    La mappa che segue è pensata per essere letta a più livelli di profondità. Chi la
+    guarda da lontano deve cogliere il <em>flusso generale</em>; chi si avvicina deve
+    poter zoomare sul dettaglio di uno strato; chi torna a consultarla in futuro deve
+    avere subito la chiave dei colori e delle frecce.
+  </p>
+
+  <p>
+    I quattro livelli che si sovrappongono nella stessa figura sono questi:
+  </p>
+
+  <p>
+    <strong>(1) Il flusso verticale completo</strong>, dal prompt testuale dell'utente
+    (in alto) fino al token generato e al loop di ritorno (in basso). Sono i sette
+    moduli dell'LLM, in ordine, ognuno con il proprio nome tecnico e una micro-didascalia.
+  </p>
+
+  <p>
+    <strong>(2) Lo zoom su uno strato del Transformer</strong>, sulla destra del
+    diagramma. Mentre la pila degli strati è rappresentata in modo compatto al centro,
+    uno strato è "esploso" lateralmente per mostrare la sua struttura interna: le due
+    sotto-fasi (attenzione e FFN), le layer norm, le residual connections.
+  </p>
+
+  <p>
+    <strong>(3) Il residual stream</strong>, in teal: la linea continua che attraversa
+    tutta la pila degli strati e cattura visivamente la metafora del "flusso d'acqua"
+    che si arricchisce ma non si perde.
+  </p>
+
+  <p>
+    <strong>(4) Le annotazioni concettuali</strong>, sulla sinistra: a fianco di ogni
+    modulo, una breve didascalia dice <em>cosa</em> succede in quel punto in termini
+    concettuali (non tecnici). Sono il "perché" accanto al "cosa".
+  </p>
+</section>
+
+<!-- IL DIAGRAMMA -->
+<section>
+  <div class="diagram-wrap">
+    <div class="diagram-title">Diagramma — Architettura completa di un LLM</div>
+    <div class="diagram-subtitle">Dal prompt testuale al token generato, con zoom sulla struttura interna di uno strato del Transformer</div>
+
+    <svg class="diagram-svg" viewBox="0 0 1100 1640" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrMain" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#c94a1a"/>
+        </marker>
+        <marker id="arrLoop" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#5e2a7a"/>
+        </marker>
+        <marker id="arrTeal" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#0d7a6e"/>
+        </marker>
+        <marker id="arrThin" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#c94a1a"/>
+        </marker>
+        <!-- Pattern per pila strati -->
+        <pattern id="layerStripes" x="0" y="0" width="100%" height="46" patternUnits="userSpaceOnUse">
+          <rect width="100%" height="42" fill="#1e2a5e" opacity="0.85"/>
+          <rect y="42" width="100%" height="4" fill="#f7f8fc"/>
+        </pattern>
+      </defs>
+
+      <!-- Colonna sinistra: ANNOTAZIONI CONCETTUALI -->
+      <g font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">
+        <!-- annotazioni allineate verticalmente con i moduli -->
+      </g>
+
+      <!-- =========================== -->
+      <!-- FASE 1: PROMPT TESTUALE -->
+      <!-- =========================== -->
+      <g transform="translate(0, 30)">
+        <!-- Annotazione sinistra -->
+        <text x="20" y="38" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">il messaggio</text>
+        <text x="20" y="56" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">grezzo dell'utente,</text>
+        <text x="20" y="74" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">come testo</text>
+
+        <!-- Box modulo -->
+        <rect x="270" y="20" width="500" height="84" rx="6" fill="white" stroke="#1e2a5e" stroke-width="2"/>
+        <text x="520" y="48" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" text-anchor="middle" letter-spacing="1.5" font-weight="600">MODULO 1 — INPUT</text>
+        <text x="520" y="72" font-family="Outfit" font-size="20" fill="#1e2a5e" text-anchor="middle" font-weight="600">Prompt testuale</text>
+        <text x="520" y="92" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280" text-anchor="middle">"Il pittore osservò la sua opera, soddisfatto."</text>
+
+        <!-- Freccia in giù -->
+        <line x1="520" y1="106" x2="520" y2="146" stroke="#c94a1a" stroke-width="2.5" marker-end="url(#arrMain)"/>
+      </g>
+
+      <!-- =========================== -->
+      <!-- FASE 2: TOKENIZER -->
+      <!-- =========================== -->
+      <g transform="translate(0, 180)">
+        <!-- Annotazione sinistra -->
+        <text x="20" y="38" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">il testo viene</text>
+        <text x="20" y="56" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">spezzato in token</text>
+        <text x="20" y="74" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">e mappato a ID</text>
+
+        <!-- Box modulo -->
+        <rect x="270" y="20" width="500" height="100" rx="6" fill="white" stroke="#1e2a5e" stroke-width="2"/>
+        <text x="520" y="48" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" text-anchor="middle" letter-spacing="1.5" font-weight="600">MODULO 2 — TOKENIZER</text>
+        <text x="520" y="72" font-family="Outfit" font-size="20" fill="#1e2a5e" text-anchor="middle" font-weight="600">Tokenizzazione (BPE)</text>
+        <text x="520" y="93" font-family="JetBrains Mono" font-size="11" fill="#374151" text-anchor="middle">[245, 8927, 3344, 1102, 76, 4421, 102]</text>
+        <text x="520" y="110" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">vocabolario fisso di ~100.000 token</text>
+
+        <!-- Annotazione destra -->
+        <text x="800" y="48" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">algoritmo BPE</text>
+        <text x="800" y="64" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">— Byte Pair Encoding</text>
+        <text x="800" y="86" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">il vocabolario è</text>
+        <text x="800" y="102" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">stato appreso una</text>
+        <text x="800" y="118" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">volta sul corpus</text>
+
+        <!-- Freccia -->
+        <line x1="520" y1="122" x2="520" y2="162" stroke="#c94a1a" stroke-width="2.5" marker-end="url(#arrMain)"/>
+      </g>
+
+      <!-- =========================== -->
+      <!-- FASE 3: EMBEDDING -->
+      <!-- =========================== -->
+      <g transform="translate(0, 360)">
+        <!-- Annotazione sinistra -->
+        <text x="20" y="48" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">ogni token diventa</text>
+        <text x="20" y="66" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">un punto nello</text>
+        <text x="20" y="84" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">spazio semantico</text>
+
+        <!-- Box modulo -->
+        <rect x="270" y="20" width="500" height="100" rx="6" fill="white" stroke="#1e2a5e" stroke-width="2"/>
+        <text x="520" y="48" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" text-anchor="middle" letter-spacing="1.5" font-weight="600">MODULO 3 — EMBEDDING</text>
+        <text x="520" y="72" font-family="Outfit" font-size="19" fill="#1e2a5e" text-anchor="middle" font-weight="600">Layer di embedding + posizione</text>
+        <text x="520" y="92" font-family="JetBrains Mono" font-size="11" fill="#374151" text-anchor="middle">matrice E [vocab × dim] + positional encoding</text>
+        <text x="520" y="110" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">output: sequenza di vettori (uno per token), ognuno ~12.000 dimensioni</text>
+
+        <!-- Annotazione destra -->
+        <text x="800" y="62" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">la matrice E sarà</text>
+        <text x="800" y="78" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">riutilizzata anche</text>
+        <text x="800" y="94" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">in uscita</text>
+        <text x="800" y="110" font-family="Lora" font-style="italic" font-size="12" fill="#5e2a7a">(weight tying)</text>
+
+        <!-- Freccia -->
+        <line x1="520" y1="122" x2="520" y2="162" stroke="#c94a1a" stroke-width="2.5" marker-end="url(#arrMain)"/>
+      </g>
+
+      <!-- =========================== -->
+      <!-- FASE 4: STACK DEL TRANSFORMER + ZOOM SU UNO STRATO -->
+      <!-- =========================== -->
+      <g transform="translate(0, 540)">
+        <!-- Annotazione sinistra -->
+        <text x="20" y="58" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">la pila di strati:</text>
+        <text x="20" y="76" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">qui ogni token</text>
+        <text x="20" y="94" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">guarda i vicini,</text>
+        <text x="20" y="112" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">rielabora,</text>
+        <text x="20" y="130" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">guarda di nuovo,</text>
+        <text x="20" y="148" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">rielabora di nuovo</text>
+        <text x="20" y="166" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">— per N strati</text>
+
+        <text x="20" y="220" font-family="Lora" font-style="italic" font-size="13" fill="#0d7a6e">il residual stream</text>
+        <text x="20" y="238" font-family="Lora" font-style="italic" font-size="13" fill="#0d7a6e">(in teal) attraversa</text>
+        <text x="20" y="256" font-family="Lora" font-style="italic" font-size="13" fill="#0d7a6e">la pila senza</text>
+        <text x="20" y="274" font-family="Lora" font-style="italic" font-size="13" fill="#0d7a6e">interruzione</text>
+
+        <!-- Etichetta del Transformer -->
+        <rect x="220" y="20" width="370" height="540" rx="8" fill="#1e2a5e" fill-opacity="0.04" stroke="#1e2a5e" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <text x="405" y="46" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" text-anchor="middle" letter-spacing="1.5" font-weight="600">MODULO 4 — TRANSFORMER (CUORE)</text>
+        <text x="405" y="70" font-family="Outfit" font-size="20" fill="#1e2a5e" text-anchor="middle" font-weight="600">Stack di N strati</text>
+
+        <!-- Pila di strati (rappresentata in modo compatto) -->
+        <g transform="translate(280, 96)">
+          <!-- 8 strati visibili + ... + 1 -->
+          <rect x="0" y="0" width="250" height="34" rx="3" fill="#1e2a5e" opacity="0.95"/>
+          <text x="125" y="22" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Strato 1</text>
+
+          <rect x="0" y="40" width="250" height="34" rx="3" fill="#1e2a5e" opacity="0.85"/>
+          <text x="125" y="62" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Strato 2</text>
+
+          <rect x="0" y="80" width="250" height="34" rx="3" fill="#1e2a5e" opacity="0.75"/>
+          <text x="125" y="102" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Strato 3</text>
+
+          <rect x="0" y="120" width="250" height="34" rx="3" fill="#c94a1a" opacity="0.95" stroke="#c94a1a" stroke-width="2.5"/>
+          <text x="125" y="142" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="700">Strato k  →  zoom →</text>
+
+          <rect x="0" y="160" width="250" height="34" rx="3" fill="#1e2a5e" opacity="0.65"/>
+          <text x="125" y="182" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Strato k+1</text>
+
+          <text x="125" y="220" font-family="Outfit" font-size="22" fill="#6b7280" text-anchor="middle" letter-spacing="6" font-weight="700">⋮</text>
+
+          <rect x="0" y="240" width="250" height="34" rx="3" fill="#1e2a5e" opacity="0.85"/>
+          <text x="125" y="262" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Strato N-1</text>
+
+          <rect x="0" y="280" width="250" height="34" rx="3" fill="#1e2a5e" opacity="0.95"/>
+          <text x="125" y="302" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Strato N</text>
+        </g>
+
+        <!-- N tipico -->
+        <text x="405" y="430" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280" text-anchor="middle">N = 32, 64, 96 strati nei modelli moderni</text>
+
+        <!-- Residual stream (linea teal continua attraverso la pila) -->
+        <line x1="265" y1="96" x2="265" y2="410" stroke="#0d7a6e" stroke-width="3" stroke-dasharray="0"/>
+        <text x="245" y="260" font-family="JetBrains Mono" font-size="10" fill="#0d7a6e" font-weight="600" letter-spacing="0.8" transform="rotate(-90 245 260)">RESIDUAL STREAM</text>
+
+        <!-- Linea di connessione zoom -->
+        <line x1="535" y1="233" x2="600" y2="233" stroke="#c94a1a" stroke-width="2" stroke-dasharray="3,3"/>
+
+        <!-- ============== ZOOM SU UNO STRATO ============== -->
+        <g transform="translate(610, 60)">
+          <rect x="0" y="0" width="430" height="500" rx="6" fill="white" stroke="#c94a1a" stroke-width="2"/>
+          <text x="215" y="26" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" text-anchor="middle" letter-spacing="1.5" font-weight="600">ZOOM — STRUTTURA INTERNA DI UNO STRATO</text>
+
+          <!-- Input al sotto-blocco -->
+          <text x="215" y="52" font-family="Lora" font-style="italic" font-size="12" fill="#1e2a5e" text-anchor="middle">x  (residual stream in entrata)</text>
+          <line x1="215" y1="60" x2="215" y2="80" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrThin)"/>
+
+          <!-- Layer Norm 1 -->
+          <rect x="135" y="82" width="160" height="28" rx="3" fill="#0d7a6e" opacity="0.85"/>
+          <text x="215" y="100" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="600">Layer Norm</text>
+          <line x1="215" y1="110" x2="215" y2="128" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrThin)"/>
+
+          <!-- Attention -->
+          <rect x="80" y="130" width="270" height="50" rx="4" fill="#1e2a5e"/>
+          <text x="215" y="150" font-family="Outfit" font-size="13" fill="white" text-anchor="middle" font-weight="600">Blocco di Attenzione</text>
+          <text x="215" y="167" font-family="Lora" font-size="10.5" fill="rgba(255,255,255,0.78)" text-anchor="middle" font-style="italic">multi-head, Q/K/V — comunicazione tra posizioni</text>
+          <line x1="215" y1="180" x2="215" y2="200" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrThin)"/>
+
+          <!-- Sum 1 -->
+          <circle cx="215" cy="212" r="13" fill="white" stroke="#c94a1a" stroke-width="2"/>
+          <text x="215" y="217" font-family="JetBrains Mono" font-size="13" fill="#c94a1a" text-anchor="middle" font-weight="700">+</text>
+
+          <!-- Residual lateral 1 (da prima della norm a dopo attention) -->
+          <path d="M 215 60 Q 380 60 380 212 Q 380 212 228 212" fill="none" stroke="#0d7a6e" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrTeal)"/>
+          <text x="402" y="138" font-family="JetBrains Mono" font-size="9" fill="#0d7a6e" font-weight="600" letter-spacing="0.6" transform="rotate(90 402 138)">RESIDUAL</text>
+
+          <line x1="215" y1="225" x2="215" y2="242" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrThin)"/>
+          <text x="270" y="237" font-family="Lora" font-size="10" fill="#1e2a5e" font-style="italic">x + Δa</text>
+
+          <!-- Layer Norm 2 -->
+          <rect x="135" y="244" width="160" height="28" rx="3" fill="#0d7a6e" opacity="0.85"/>
+          <text x="215" y="262" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="600">Layer Norm</text>
+          <line x1="215" y1="272" x2="215" y2="290" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrThin)"/>
+
+          <!-- FFN -->
+          <rect x="80" y="292" width="270" height="50" rx="4" fill="#c94a1a"/>
+          <text x="215" y="312" font-family="Outfit" font-size="13" fill="white" text-anchor="middle" font-weight="600">Rete Feed-Forward (FFN)</text>
+          <text x="215" y="329" font-family="Lora" font-size="10.5" fill="rgba(255,255,255,0.85)" text-anchor="middle" font-style="italic">espandi → non-linearità → comprimi (~⅔ dei parametri)</text>
+          <line x1="215" y1="342" x2="215" y2="362" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrThin)"/>
+
+          <!-- Sum 2 -->
+          <circle cx="215" cy="374" r="13" fill="white" stroke="#c94a1a" stroke-width="2"/>
+          <text x="215" y="379" font-family="JetBrains Mono" font-size="13" fill="#c94a1a" text-anchor="middle" font-weight="700">+</text>
+
+          <!-- Residual lateral 2 -->
+          <path d="M 215 230 Q 50 230 50 374 Q 50 374 202 374" fill="none" stroke="#0d7a6e" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrTeal)"/>
+          <text x="28" y="304" font-family="JetBrains Mono" font-size="9" fill="#0d7a6e" font-weight="600" letter-spacing="0.6" transform="rotate(-90 28 304)">RESIDUAL</text>
+
+          <line x1="215" y1="387" x2="215" y2="412" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrThin)"/>
+
+          <text x="215" y="430" font-family="Lora" font-style="italic" font-size="12" fill="#1e2a5e" text-anchor="middle">x + Δa + Δf  →  strato successivo</text>
+
+          <text x="215" y="475" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">due sotto-blocchi simmetrici:</text>
+          <text x="215" y="490" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">norm → operazione → residual</text>
+        </g>
+
+        <!-- Freccia in giù dallo stack -->
+        <line x1="405" y1="560" x2="520" y2="600" stroke="#c94a1a" stroke-width="2.5" marker-end="url(#arrMain)" stroke-linecap="round"/>
+      </g>
+
+      <!-- =========================== -->
+      <!-- FASE 5: LM HEAD -->
+      <!-- =========================== -->
+      <g transform="translate(0, 1140)">
+        <!-- Annotazione sinistra -->
+        <text x="20" y="38" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">la geometria</text>
+        <text x="20" y="56" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">dello spazio</text>
+        <text x="20" y="74" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">degli embedding</text>
+        <text x="20" y="92" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">diventa</text>
+        <text x="20" y="110" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">probabilità</text>
+
+        <!-- Box modulo -->
+        <rect x="270" y="20" width="500" height="120" rx="6" fill="white" stroke="#1e2a5e" stroke-width="2"/>
+        <text x="520" y="48" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" text-anchor="middle" letter-spacing="1.5" font-weight="600">MODULO 5 — LM HEAD</text>
+        <text x="520" y="72" font-family="Outfit" font-size="19" fill="#1e2a5e" text-anchor="middle" font-weight="600">Testa di output</text>
+        <text x="520" y="93" font-family="JetBrains Mono" font-size="11" fill="#374151" text-anchor="middle">h · E<tspan baseline-shift="super" font-size="9">T</tspan>  →  100.000 logits  →  softmax</text>
+        <text x="520" y="115" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">prodotto scalare di h con ogni vettore del vocabolario</text>
+        <text x="520" y="131" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">→ distribuzione di probabilità sul prossimo token</text>
+
+        <!-- Annotazione destra -->
+        <text x="800" y="56" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">si usa solo</text>
+        <text x="800" y="72" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">l'hidden state h</text>
+        <text x="800" y="88" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">dell'ultima posizione</text>
+        <text x="800" y="111" font-family="Lora" font-style="italic" font-size="12" fill="#5e2a7a">temperatura agisce</text>
+        <text x="800" y="127" font-family="Lora" font-style="italic" font-size="12" fill="#5e2a7a">qui sui logits</text>
+
+        <!-- Freccia -->
+        <line x1="520" y1="142" x2="520" y2="180" stroke="#c94a1a" stroke-width="2.5" marker-end="url(#arrMain)"/>
+      </g>
+
+      <!-- =========================== -->
+      <!-- FASE 6: SAMPLER -->
+      <!-- =========================== -->
+      <g transform="translate(0, 1340)">
+        <!-- Annotazione sinistra -->
+        <text x="20" y="38" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">dalla distribuzione</text>
+        <text x="20" y="56" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">si estrae un token</text>
+        <text x="20" y="74" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">specifico</text>
+
+        <!-- Box modulo -->
+        <rect x="270" y="20" width="500" height="100" rx="6" fill="white" stroke="#1e2a5e" stroke-width="2"/>
+        <text x="520" y="48" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" text-anchor="middle" letter-spacing="1.5" font-weight="600">MODULO 6 — SAMPLER</text>
+        <text x="520" y="72" font-family="Outfit" font-size="19" fill="#1e2a5e" text-anchor="middle" font-weight="600">Strategia di selezione</text>
+        <text x="520" y="92" font-family="JetBrains Mono" font-size="11" fill="#374151" text-anchor="middle">greedy  /  top-k  /  top-p (nucleus)  /  temperatura</text>
+        <text x="520" y="110" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">output: 1 token (es. "latte")</text>
+
+        <!-- Freccia -->
+        <line x1="520" y1="122" x2="520" y2="162" stroke="#c94a1a" stroke-width="2.5" marker-end="url(#arrMain)"/>
+      </g>
+
+      <!-- =========================== -->
+      <!-- FASE 7: DETOKENIZER + LOOP -->
+      <!-- =========================== -->
+      <g transform="translate(0, 1520)">
+        <!-- Annotazione sinistra -->
+        <text x="20" y="38" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">il token diventa</text>
+        <text x="20" y="56" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">testo, e rientra</text>
+        <text x="20" y="74" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">nel prompt per</text>
+        <text x="20" y="92" font-family="Lora" font-style="italic" font-size="13" fill="#6b7280">il prossimo giro</text>
+
+        <!-- Box modulo -->
+        <rect x="270" y="20" width="500" height="80" rx="6" fill="white" stroke="#5e2a7a" stroke-width="2"/>
+        <text x="520" y="48" font-family="JetBrains Mono" font-size="10" fill="#5e2a7a" text-anchor="middle" letter-spacing="1.5" font-weight="600">MODULO 7 — OUTPUT + LOOP AUTOREGRESSIVO</text>
+        <text x="520" y="72" font-family="Outfit" font-size="18" fill="#5e2a7a" text-anchor="middle" font-weight="600">Detokenizer  +  feedback al prompt</text>
+        <text x="520" y="91" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">finché il modello non emette il token speciale di fine generazione (EOS)</text>
+
+        <!-- Freccia di loop verso il tokenizer -->
+        <path d="M 770 60 Q 1000 60 1000 -1300 Q 1000 -1380 770 -1380" fill="none" stroke="#5e2a7a" stroke-width="2.5" stroke-dasharray="6,5" marker-end="url(#arrLoop)"/>
+        <text x="980" y="-700" font-family="JetBrains Mono" font-size="11" fill="#5e2a7a" font-weight="600" letter-spacing="1.2" transform="rotate(-90 980 -700)">LOOP AUTOREGRESSIVO</text>
+        <text x="1006" y="-680" font-family="Lora" font-style="italic" font-size="11" fill="#5e2a7a" transform="rotate(-90 1006 -680)">il token generato torna in coda al prompt</text>
+      </g>
+
+      <!-- ETICHETTA SISTEMA LLM (perimetro) -->
+      <rect x="250" y="10" width="540" height="1620" rx="8" fill="none" stroke="#5e2a7a" stroke-width="1" stroke-dasharray="2,4" opacity="0.4"/>
+
+    </svg>
+
+    <!-- LEGENDA -->
+    <div class="legend-grid">
+      <div class="legend-item">
+        <div class="legend-icon" style="background: #1e2a5e;"></div>
+        <div class="legend-text">
+          <div class="legend-label">Componenti del Transformer</div>
+          <div class="legend-desc">Embedding, strati, attenzione, layer norm — tutto ciò che compone il cuore del modello.</div>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-icon" style="background: #c94a1a;"></div>
+        <div class="legend-text">
+          <div class="legend-label">Reti feed-forward</div>
+          <div class="legend-desc">Le FFN dentro ogni strato. Elaborazione locale non lineare. Circa due terzi dei parametri.</div>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-line" style="background: #0d7a6e;"></div>
+        <div class="legend-text">
+          <div class="legend-label">Residual stream</div>
+          <div class="legend-desc">Il flusso continuo del vettore attraverso gli strati: ogni componente <em>aggiunge</em>, non sostituisce.</div>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-icon" style="background: #5e2a7a;"></div>
+        <div class="legend-text">
+          <div class="legend-label">Componenti esterni al Transformer</div>
+          <div class="legend-desc">Tokenizer, sampler, detokenizer e loop autoregressivo. Ciò che fa di un Transformer un LLM funzionante.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TABELLA DEI SETTE COMPONENTI -->
+<section>
+  <div class="section-num">I COMPONENTI IN SINTESI</div>
+  <h2>I sette moduli, uno per uno</h2>
+  <p class="lead">
+    Una tabella di riferimento con i nomi tecnici e una micro-descrizione per ciascun
+    modulo. Pensata per essere consultata rapidamente quando si torna alla mappa.
+  </p>
+
+  <div class="components-table">
+    <div class="component-row">
+      <div class="comp-num">01</div>
+      <div class="comp-name">
+        <div class="comp-name-text">Prompt testuale</div>
+        <div class="comp-name-tech">input layer</div>
+      </div>
+      <div class="comp-desc">
+        Il messaggio dell'utente come stringa di testo. È l'unico punto in cui il modello
+        "vede" caratteri umani; da qui in poi tutto è numerico.
+      </div>
+    </div>
+
+    <div class="component-row">
+      <div class="comp-num">02</div>
+      <div class="comp-name">
+        <div class="comp-name-text">Tokenizer</div>
+        <div class="comp-name-tech">BPE — vocab ~100k</div>
+      </div>
+      <div class="comp-desc">
+        Spezza il testo in token e li mappa a ID numerici secondo un vocabolario fisso
+        appreso una volta sul corpus di addestramento.
+      </div>
+    </div>
+
+    <div class="component-row">
+      <div class="comp-num">03</div>
+      <div class="comp-name">
+        <div class="comp-name-text">Layer di embedding</div>
+        <div class="comp-name-tech">matrice E + positional</div>
+      </div>
+      <div class="comp-desc">
+        Ogni ID viene tradotto in un vettore di ~12.000 dimensioni pescando una riga
+        dalla matrice E. Si aggiunge il positional encoding per codificare la posizione
+        del token nella sequenza.
+      </div>
+    </div>
+
+    <div class="component-row">
+      <div class="comp-num">04</div>
+      <div class="comp-name">
+        <div class="comp-name-text">Stack del Transformer</div>
+        <div class="comp-name-tech">N strati: norm + attn + norm + FFN</div>
+      </div>
+      <div class="comp-desc">
+        Il cuore del modello. La sequenza di vettori attraversa N strati, ognuno con
+        attenzione (comunicazione) e FFN (elaborazione), tenuti insieme da residual
+        connections e layer normalization.
+      </div>
+    </div>
+
+    <div class="component-row">
+      <div class="comp-num">05</div>
+      <div class="comp-name">
+        <div class="comp-name-text">LM head (testa di output)</div>
+        <div class="comp-name-tech">unembedding + softmax</div>
+      </div>
+      <div class="comp-desc">
+        Il vettore <code>h</code> dell'ultima posizione viene confrontato con la matrice
+        di embedding (prodotto scalare): produce 100.000 logits, che il softmax trasforma
+        in distribuzione di probabilità sul prossimo token.
+      </div>
+    </div>
+
+    <div class="component-row">
+      <div class="comp-num">06</div>
+      <div class="comp-name">
+        <div class="comp-name-text">Sampler</div>
+        <div class="comp-name-tech">greedy / top-k / top-p / T</div>
+      </div>
+      <div class="comp-desc">
+        Sceglie un token specifico dalla distribuzione di probabilità. La strategia (e la
+        temperatura) determina quanto la generazione sarà deterministica o creativa.
+      </div>
+    </div>
+
+    <div class="component-row">
+      <div class="comp-num">07</div>
+      <div class="comp-name">
+        <div class="comp-name-text">Detokenizer + loop</div>
+        <div class="comp-name-tech">autoregressive feedback</div>
+      </div>
+      <div class="comp-desc">
+        Il token scelto viene tradotto in testo e accodato al prompt. Si rientra al
+        modulo 2, e l'intera pipeline gira di nuovo. Il ciclo si chiude solo quando il
+        modello emette il token speciale di fine generazione.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSIGHT FINALE -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="insight">
+    <div class="insight-label">Una formulazione globale</div>
+    <p>
+      Un LLM è una macchina che riceve una sequenza di vettori, li fa attraversare una
+      pila di strati ognuno dei quali alterna <em>comunicazione tra posizioni</em>
+      (attenzione) ed <em>elaborazione locale</em> (FFN), con cura nella stabilità del
+      flusso (residual e norm), e infine usa il vettore dell'ultima posizione per produrre
+      una distribuzione di probabilità sul prossimo token confrontandolo geometricamente
+      con la matrice di embedding del vocabolario.
+    </p>
+    <p>
+      Intorno a questo cuore Transformer, i moduli del sistema LLM — tokenizer, sampler,
+      detokenizer, loop autoregressivo — chiudono il ciclo che trasforma un prompt
+      testuale in una risposta testuale, un token alla volta.
+    </p>
+    <p>
+      <strong>Tutto quello che un LLM fa</strong> — dialogare, ragionare, scrivere
+      codice, tradurre, riassumere — è questa pipeline ripetuta migliaia di volte, una
+      volta per ogni token che il modello genera.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Complemento al Tema 2 — Percorso di approfondimento su LLM e prompting</p>
+  <p>Mappa visiva dell'architettura completa di un LLM</p>
+</footer>
+
+</body>
+</html>

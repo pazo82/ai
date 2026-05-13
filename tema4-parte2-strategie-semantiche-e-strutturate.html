@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tema 4 — Parte 2: Strategie semantiche e strutturate</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--indigo);
+    padding: 88px 48px 96px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 580px; height: 580px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-graphic {
+    position: absolute;
+    top: 50%; right: 7%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 54px;
+    line-height: 1.06;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 20px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 48px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--indigo);
+    margin: 28px 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  .callout p { font-size: 15.5px; line-height: 1.7; margin-bottom: 12px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-orange { background: var(--orange-faint); border-left-color: var(--orange); }
+  .callout-orange h4 { color: var(--orange); }
+
+  .callout-indigo { background: var(--indigo-faint); border-left-color: var(--indigo); }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout-teal { background: var(--teal-faint); border-left-color: var(--teal); }
+  .callout-teal h4 { color: var(--teal); }
+
+  .callout-amber { background: var(--amber-faint); border-left-color: var(--amber); }
+  .callout-amber h4 { color: var(--amber); }
+
+  .callout-purple { background: var(--purple-faint); border-left-color: var(--purple); }
+  .callout-purple h4 { color: var(--purple); }
+
+  /* ── STRATEGY SECTION ── */
+  .strategy {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0;
+    margin: 36px 0;
+    overflow: hidden;
+  }
+
+  .strategy-header {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 26px 36px;
+  }
+
+  .strategy-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .strategy-name {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    color: var(--white);
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .strategy-tagline {
+    font-family: var(--sans);
+    font-size: 14.5px;
+    color: rgba(255,255,255,0.75);
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  .strategy-body {
+    padding: 32px 36px;
+  }
+
+  .strategy-body h3:first-child { margin-top: 0; }
+
+  .strategy-body p {
+    font-size: 15.5px;
+    line-height: 1.75;
+  }
+
+  .strategy-body ul {
+    margin: 14px 0;
+    padding-left: 22px;
+  }
+
+  .strategy-body ul li {
+    font-size: 15px;
+    color: var(--ink-mid);
+    margin-bottom: 8px;
+    line-height: 1.65;
+  }
+
+  /* ── DIAGRAM ── */
+  .diagram {
+    background: var(--bg2);
+    border-radius: 6px;
+    padding: 26px;
+    margin: 24px 0;
+  }
+
+  .diagram-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .diagram-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* ── DECISIONS GRID ── */
+  .decisions {
+    margin: 28px 0;
+    counter-reset: decision-counter;
+  }
+
+  .decision {
+    background: var(--bg2);
+    border-radius: 6px;
+    padding: 22px 26px;
+    margin-bottom: 14px;
+    border-left: 3px solid var(--orange);
+  }
+
+  .decision-tag {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .decision-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 20px;
+    color: var(--orange);
+    counter-increment: decision-counter;
+  }
+
+  .decision-num::before { content: counter(decision-counter, decimal-leading-zero); }
+
+  .decision-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15.5px;
+    color: var(--indigo);
+  }
+
+  .decision p {
+    font-size: 14.5px;
+    line-height: 1.65;
+    margin: 0 0 10px;
+    color: var(--ink-mid);
+  }
+
+  .decision p:last-child { margin: 0; }
+
+  /* ── MAP TYPES ── */
+  .map-types {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .map-type {
+    background: var(--bg2);
+    border-radius: 6px;
+    padding: 20px 22px;
+    border-left: 3px solid var(--purple);
+  }
+
+  .map-type-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--indigo);
+    margin-bottom: 8px;
+  }
+
+  .map-type p {
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  /* ── WHEN BOX ── */
+  .when-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 28px 0 0;
+    padding-top: 22px;
+    border-top: 1px solid var(--border2);
+  }
+
+  .when-cell {
+    padding: 18px 22px;
+    border-radius: 6px;
+  }
+
+  .when-good {
+    background: var(--teal-faint);
+    border-left: 3px solid var(--teal);
+  }
+
+  .when-bad {
+    background: var(--orange-faint);
+    border-left: 3px solid var(--orange);
+  }
+
+  .when-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .when-good .when-label { color: var(--teal); }
+  .when-bad .when-label { color: var(--orange); }
+
+  .when-cell p {
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  /* ── DEEP-DIVE BOX ── */
+  .deep-dive {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 26px 30px;
+    margin: 28px 0;
+    border-left: 4px solid var(--teal);
+  }
+
+  .deep-dive-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--teal);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .deep-dive h4 {
+    margin: 0 0 14px;
+    color: var(--indigo);
+    font-size: 18px;
+  }
+
+  .deep-dive p {
+    font-size: 15px;
+    line-height: 1.72;
+    margin-bottom: 12px;
+  }
+
+  .deep-dive p:last-child { margin-bottom: 0; }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(13,122,110,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .takeaway-list em { color: var(--orange-light); font-style: italic; }
+  .takeaway-list strong { color: var(--white); font-weight: 600; }
+  .takeaway-list code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── BRIDGE ── */
+  .bridge {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 48px;
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .bridge h3 {
+    margin: 0 0 16px;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--indigo);
+    font-weight: 500;
+  }
+
+  .bridge p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 32px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 26px; }
+    h3 { font-size: 19px; }
+    .takeaways { padding: 40px 28px; }
+    .bridge { padding: 32px 24px; }
+    .strategy-header { padding: 22px 22px; }
+    .strategy-body { padding: 22px 22px; }
+    .map-types { grid-template-columns: 1fr; }
+    .when-box { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <svg class="hero-bg-graphic" width="260" height="260" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+    <!-- Spazio degli embedding + mappa: punti collegati -->
+    <g opacity="0.85">
+      <!-- Punti (vettori) -->
+      <circle cx="60" cy="80" r="5" fill="white" opacity="0.6"/>
+      <circle cx="120" cy="60" r="5" fill="white" opacity="0.55"/>
+      <circle cx="180" cy="90" r="5" fill="white" opacity="0.6"/>
+      <circle cx="220" cy="140" r="5" fill="white" opacity="0.55"/>
+      <circle cx="190" cy="200" r="5" fill="white" opacity="0.55"/>
+      <circle cx="100" cy="210" r="5" fill="white" opacity="0.6"/>
+      <circle cx="50" cy="160" r="5" fill="white" opacity="0.55"/>
+      <!-- Punto centrale (query) -->
+      <circle cx="140" cy="140" r="8" fill="#f07040"/>
+      <!-- Linee verso i più vicini (retrieval) -->
+      <line x1="140" y1="140" x2="120" y2="60" stroke="#f07040" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.7"/>
+      <line x1="140" y1="140" x2="180" y2="90" stroke="#f07040" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.7"/>
+      <line x1="140" y1="140" x2="190" y2="200" stroke="#f07040" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.7"/>
+    </g>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-label">Tema 4 — Parte 2 di 3</div>
+    <h1>Strategie <em>semantiche</em> e <em>strutturate</em></h1>
+    <p class="hero-sub">
+      Le strategie testuali della Parte 1 hanno limiti precisi: faticano con
+      interrogazioni mirate su corpora grandi e con task narrativamente complessi.
+      Qui i due approcci che li superano: il RAG, basato sulla geometria degli
+      embeddings, e le mappe strutturate, che rappresentano esplicitamente le
+      relazioni del documento.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">RAG, mappe strutturate</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Tema del percorso</div>
+        <div class="meta-value">4 di 4 (Parte 2)</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Caso d'uso</div>
+        <div class="meta-value">Revisione di un romanzo</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 — RIPRESA -->
+<section>
+  <div class="section-num">01 — DOVE STIAMO</div>
+  <h2>Il limite delle strategie testuali</h2>
+  <p class="lead">
+    Nella Parte 1 abbiamo costruito tre strategie per gestire documenti lunghi: full
+    context, chunking, riassunti gerarchici. Hanno una cosa in comune: lavorano
+    <strong>manipolando il testo</strong> — l'intero testo, pezzi di testo, o
+    riassunti testuali del testo. Sono potenti, ma due classi di task le mettono in
+    crisi: <em>le interrogazioni mirate su corpora grandi</em> (cercare passaggi
+    specifici in un grande corpus), e <em>i task narrativamente complessi</em> che
+    richiedono di rappresentare relazioni non lineari attraverso il documento.
+  </p>
+
+  <p>
+    In questa Parte 2 vediamo due strategie che affrontano proprio questi limiti, e
+    che condividono un salto concettuale: <strong>non rappresentano il documento
+    come testo, ma costruiscono rappresentazioni più sofisticate</strong>. Il RAG
+    costruisce una rappresentazione vettoriale (geometrica, basata sugli embeddings)
+    e la usa come indice navigabile. Le mappe strutturate costruiscono una
+    rappresentazione esplicita delle entità e relazioni del documento, e la usano
+    come riferimento permanente.
+  </p>
+
+  <p>
+    Come per le strategie della Parte 1, queste non sono alternative ma <strong>
+    complementari</strong>. Si aggiungono al toolkit, non lo sostituiscono. Un
+    workflow serio di revisione di un romanzo le userà insieme alle prime tre, in
+    fasi diverse del lavoro.
+  </p>
+</section>
+
+<!-- STRATEGIA 4 — RAG -->
+<section>
+  <div class="section-num">02 — STRATEGIA 4</div>
+  <h2>RAG: indicizzazione semantica e retrieval</h2>
+
+  <div class="strategy">
+    <div class="strategy-header">
+      <div class="strategy-label">STRATEGIA 4</div>
+      <h3 class="strategy-name">Retrieval-Augmented Generation</h3>
+      <div class="strategy-tagline">Costruire un indice semantico del documento e recuperare solo i pezzi rilevanti per ogni domanda</div>
+    </div>
+    <div class="strategy-body">
+
+      <h3>Il salto concettuale</h3>
+      <p>
+        Le prime tre strategie lavoravano manipolando il testo. Il <strong>RAG</strong>
+        (Retrieval-Augmented Generation) fa qualcosa di radicalmente diverso:
+        costruisce una <strong>rappresentazione vettoriale</strong> del documento —
+        gli stessi embeddings di cui abbiamo parlato nel punto 2 del percorso
+        precedente — e usa quella rappresentazione come <em>indice navigabile</em>.
+      </p>
+      <p>
+        Quando fai una domanda, il sistema converte anche la tua domanda in un
+        vettore, e cerca nello spazio degli embeddings i chunks del documento il cui
+        vettore è più "vicino" semanticamente al vettore della tua domanda. Solo
+        quei chunks vengono iniettati nel prompt. In altre parole: invece di leggere
+        il documento per trovare l'informazione rilevante, il RAG <strong>cerca
+        semanticamente</strong> l'informazione rilevante, e mostra al modello solo
+        quella.
+      </p>
+      <p>
+        È la stessa identica geometria dello spazio degli embedding che abbiamo
+        studiato nei Temi precedenti, ma usata in un nuovo modo: non per produrre
+        testo, ma per <em>indicizzare</em> testo esistente. Una volta capito che il
+        modello "sa" misurare la vicinanza semantica tra due testi attraverso il
+        prodotto scalare dei loro embeddings, il RAG diventa quasi ovvio come idea.
+      </p>
+
+      <h3>Come funziona, nei dettagli operativi</h3>
+      <p>
+        Il meccanismo si articola in due fasi.
+      </p>
+      <p>
+        <strong>Fase 1: indicizzazione (una volta sola, all'inizio).</strong> Spezzi
+        il documento in chunks — qui torna tutto quello che abbiamo detto sul chunking
+        nella strategia 2: dove tagliare, dimensione, eventuale overlap. Per ogni
+        chunk, chiedi a un modello di embedding (un modello diverso dal tuo LLM
+        principale, specializzato in produrre vettori) di calcolare il suo vettore —
+        tipicamente di 1.000-3.000 dimensioni. Memorizzi questi vettori, insieme al
+        testo originale dei chunks, in un <strong>database vettoriale</strong>
+        (Chroma, Qdrant, Weaviate, Pinecone, e molti altri).
+      </p>
+      <p>
+        <strong>Fase 2: interrogazione (a ogni domanda).</strong> Quando fai una
+        domanda al sistema, succedono quattro cose in rapida successione. Primo, il
+        sistema calcola l'embedding della tua domanda usando lo stesso modello di
+        embedding usato per i chunks. Secondo, il database vettoriale cerca i K chunks
+        (tipicamente 5-15) il cui vettore è più vicino al vettore della tua domanda.
+        Terzo, il sistema costruisce un prompt che contiene la tua domanda <em>più</em>
+        i chunks recuperati come contesto, e lo invia all'LLM. Quarto, l'LLM risponde
+        sulla base di quel contesto specifico.
+      </p>
+      <p>
+        L'idea pratica è che, anche se il documento totale è enorme — milioni di
+        token, magari distribuiti su centinaia di file — il prompt che effettivamente
+        arriva all'LLM è piccolo: solo i K chunks rilevanti più la domanda. Il RAG
+        <strong>scala</strong> a corpora di documenti che non entrerebbero mai in
+        nessuna context window.
+      </p>
+
+      <div class="diagram">
+        <div class="diagram-label">Il flusso del RAG: dall'indicizzazione all'interrogazione</div>
+        <svg class="diagram-svg" viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ragArr" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#c94a1a"/>
+            </marker>
+          </defs>
+
+          <!-- FASE 1: INDICIZZAZIONE -->
+          <g>
+            <text x="20" y="20" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" letter-spacing="1.5" font-weight="600">FASE 1 — INDICIZZAZIONE (UNA VOLTA)</text>
+
+            <rect x="20" y="36" width="180" height="32" rx="3" fill="#1e2a5e" opacity="0.85"/>
+            <text x="110" y="56" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Documento</text>
+
+            <line x1="200" y1="52" x2="220" y2="52" stroke="#c94a1a" stroke-width="2" marker-end="url(#ragArr)"/>
+
+            <rect x="225" y="36" width="120" height="32" rx="3" fill="#1e2a5e" opacity="0.7"/>
+            <text x="285" y="56" font-family="Outfit" font-size="11" fill="white" text-anchor="middle" font-weight="500">Chunking</text>
+
+            <line x1="345" y1="52" x2="365" y2="52" stroke="#c94a1a" stroke-width="2" marker-end="url(#ragArr)"/>
+
+            <rect x="370" y="36" width="180" height="32" rx="3" fill="#c94a1a" opacity="0.85"/>
+            <text x="460" y="56" font-family="Outfit" font-size="11" fill="white" text-anchor="middle" font-weight="500">Modello di embedding</text>
+
+            <line x1="550" y1="52" x2="570" y2="52" stroke="#c94a1a" stroke-width="2" marker-end="url(#ragArr)"/>
+
+            <rect x="575" y="36" width="160" height="32" rx="3" fill="#0d7a6e" opacity="0.85"/>
+            <text x="655" y="56" font-family="Outfit" font-size="11" fill="white" text-anchor="middle" font-weight="500">Database vettoriale</text>
+
+            <text x="380" y="92" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">Ogni chunk diventa un vettore di ~1.000-3.000 dimensioni, salvato in un indice ricercabile</text>
+          </g>
+
+          <!-- Linea separatrice -->
+          <line x1="20" y1="120" x2="740" y2="120" stroke="#374151" stroke-width="0.5" opacity="0.2"/>
+
+          <!-- FASE 2: INTERROGAZIONE -->
+          <g transform="translate(0, 130)">
+            <text x="20" y="20" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" letter-spacing="1.5" font-weight="600">FASE 2 — INTERROGAZIONE (PER OGNI DOMANDA)</text>
+
+            <rect x="20" y="36" width="140" height="32" rx="3" fill="#1e2a5e" opacity="0.85"/>
+            <text x="90" y="56" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Domanda</text>
+
+            <line x1="160" y1="52" x2="180" y2="52" stroke="#c94a1a" stroke-width="2" marker-end="url(#ragArr)"/>
+
+            <rect x="185" y="36" width="160" height="32" rx="3" fill="#c94a1a" opacity="0.85"/>
+            <text x="265" y="56" font-family="Outfit" font-size="11" fill="white" text-anchor="middle" font-weight="500">Embedding domanda</text>
+
+            <line x1="345" y1="52" x2="365" y2="52" stroke="#c94a1a" stroke-width="2" marker-end="url(#ragArr)"/>
+
+            <rect x="370" y="36" width="170" height="32" rx="3" fill="#0d7a6e" opacity="0.85"/>
+            <text x="455" y="56" font-family="Outfit" font-size="11" fill="white" text-anchor="middle" font-weight="500">Retrieval K chunks vicini</text>
+
+            <line x1="540" y1="52" x2="560" y2="52" stroke="#c94a1a" stroke-width="2" marker-end="url(#ragArr)"/>
+
+            <rect x="565" y="36" width="170" height="32" rx="3" fill="#5e2a7a" opacity="0.85"/>
+            <text x="650" y="56" font-family="Outfit" font-size="11" fill="white" text-anchor="middle" font-weight="500">LLM con contesto</text>
+
+            <text x="380" y="92" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">Solo i K chunks più rilevanti finiscono nel prompt dell'LLM, insieme alla domanda</text>
+          </g>
+        </svg>
+      </div>
+
+      <h3>La geometria della ricerca: cosa significa "vicino"</h3>
+      <p>
+        Abbiamo detto che il sistema cerca i chunks "vicini" al vettore della domanda
+        nello spazio degli embedding. In pratica, "vicino" significa
+        <strong>semanticamente correlato secondo il modello di embedding</strong>.
+        Due testi sono vicini se condividono argomenti, concetti, contesti, registro
+        — non se condividono parole letterali. Un chunk che parla di "labirinto" e
+        una domanda su "Marco si perde" possono essere vicini nello spazio anche
+        senza parole in comune, perché il modello di embedding ha imparato che
+        "perdersi" e "labirinto" sono concetti correlati.
+      </p>
+      <p>
+        Questa è una forza enorme rispetto alla ricerca per parole chiave: il RAG
+        trova materiale rilevante anche quando la formulazione della domanda è
+        diversa dalla formulazione del testo. Ma è anche dove nascono i limiti.
+      </p>
+
+      <div class="callout callout-orange">
+        <h4>I tre limiti strutturali del RAG</h4>
+        <p>
+          <strong>La rilevanza semantica non è la rilevanza concettuale.</strong> Il
+          modello di embedding ha imparato la semantica statistica del linguaggio,
+          ma questo non sempre coincide con cosa è concettualmente rilevante per la
+          tua domanda. Una domanda su "rimorso" può saltare scene dove il rimorso è
+          mostrato senza essere nominato — un gesto, uno sguardo, un silenzio.
+        </p>
+        <p>
+          <strong>I top-K possono mancare cose importanti.</strong> Se un fenomeno è
+          distribuito in 30 chunks ma tu chiedi K=10, ne vedi solo 10. E quei 10
+          saranno i "più simili" alla tua formulazione, non i 10 più rappresentativi
+          del fenomeno.
+        </p>
+        <p>
+          <strong>Il modello vede solo i chunks recuperati.</strong> Una volta che il
+          retrieval ha selezionato i chunks, l'LLM lavora solo su quelli. Se la
+          risposta giusta richiedeva un quarto chunk non pescato, il modello
+          risponderà su tre chunks come se fossero rappresentativi del tutto, senza
+          segnalare l'assenza.
+        </p>
+      </div>
+
+      <h3>Le quattro decisioni progettuali</h3>
+
+      <div class="decisions">
+        <div class="decision">
+          <div class="decision-tag">
+            <div class="decision-num"></div>
+            <div class="decision-name">Il numero di chunks recuperati (K)</div>
+          </div>
+          <p>
+            <strong>K piccolo</strong> (3-5): contesto minimo, costo basso, rischio
+            elevato di mancare informazione. <strong>K grande</strong> (20-30):
+            contesto ricco, ma rumore — l'LLM riceve molti chunks tra cui alcuni non
+            utili. La pratica comune è <strong>K=10</strong> come default, con
+            variazioni in base al tipo di domanda.
+          </p>
+        </div>
+
+        <div class="decision">
+          <div class="decision-tag">
+            <div class="decision-num"></div>
+            <div class="decision-name">La soglia di similarità (threshold)</div>
+          </div>
+          <p>
+            Alcuni sistemi permettono di fissare una soglia minima di similarità: i
+            chunks vengono inclusi solo se la loro vicinanza al vettore della domanda
+            supera un certo valore. Utile per evitare che, quando il documento non
+            contiene niente di rilevante, il sistema passi comunque K chunks "i meno
+            irrilevanti" dando una falsa impressione di rilevanza.
+          </p>
+        </div>
+
+        <div class="decision">
+          <div class="decision-tag">
+            <div class="decision-num"></div>
+            <div class="decision-name">La strategia di chunking iniziale</div>
+          </div>
+          <p>
+            Le scelte fatte in indicizzazione influenzano per sempre la qualità del
+            retrieval. Chunks troppo piccoli sono troppo specifici; chunks troppo
+            grandi diluiscono il segnale semantico. Per romanzi e testi narrativi,
+            chunks di <strong>500-1.500 token</strong> (300-1.000 parole) funzionano
+            bene, con overlap del 10-15%.
+          </p>
+        </div>
+
+        <div class="decision">
+          <div class="decision-tag">
+            <div class="decision-num"></div>
+            <div class="decision-name">La riformulazione della domanda</div>
+          </div>
+          <p>
+            Pratica avanzata che migliora significativamente il retrieval: prima di
+            cercare nei chunks, fai riformulare la domanda dall'LLM in più varianti.
+            "Marco è cambiato attraverso il libro?" può diventare "scene di
+            trasformazione", "momenti di evoluzione di Marco", "cambiamenti nel modo
+            in cui Marco agisce". Il sistema cerca chunks vicini a tutte queste
+            riformulazioni, ottenendo copertura più ampia. Tecnica nota come
+            <em>multi-query retrieval</em> o <em>HyDE</em>.
+          </p>
+        </div>
+      </div>
+
+      <h3>Il caso d'uso pratico: RAG sul romanzo</h3>
+      <p>
+        Hai il romanzo di 80.000 parole. Lo indicizzi: chunks di circa 800 parole
+        (probabilmente uno per scena o sotto-capitolo), embeddings calcolati,
+        database vettoriale popolato. Investimento iniziale fatto una volta. Vediamo
+        cosa puoi fare con questo indice.
+      </p>
+      <p>
+        <strong>"Trova i passaggi sul tema della solitudine".</strong> Il sistema
+        cerca chunks vicini all'embedding di "solitudine, isolamento". Ti torna 12
+        chunks distribuiti attraverso il libro. Il modello li mette insieme e ti dà
+        una visione di come il tema attraversa il romanzo. Un task per cui il
+        chunking semplice avrebbe richiesto di processare tutti gli 80 chunks, e il
+        full context avrebbe rumoreggiato su 100k token.
+      </p>
+      <p>
+        <strong>"Cerca le scene di dialogo tra Marco e Lucia".</strong> Stesso
+        meccanismo. Trovi i 7-8 chunks dove i due interagiscono. Operazione che con
+        altre strategie sarebbe stata lunga e fragile.
+      </p>
+      <p>
+        <strong>"Incoerenze nella descrizione della casa dei genitori".</strong>
+        Cerchi chunks vicini a "casa genitori descrizione". Pesca le 6-7 scene
+        rilevanti. Il modello le confronta e identifica eventuali incoerenze.
+      </p>
+      <p>
+        <strong>Task dove il RAG fa fatica: "l'arco del protagonista funziona?".</strong>
+        Qui la rilevanza non è localizzata: è distribuita uniformemente. Il RAG ti
+        dà i chunks più vicini ad "arco protagonista", ma sono solo alcuni dei
+        momenti significativi — quelli più espliciti. Per questo tipo di task la
+        strategia 3 (riassunti gerarchici) è migliore.
+      </p>
+
+      <h3>RAG e progetti: la connessione</h3>
+      <p>
+        Tutto questo discorso suona familiare? È perché — come avevamo già nominato
+        nella Parte 1 — <strong>i progetti di Claude (e analoghi) sono una forma di
+        RAG gestita automaticamente</strong>. Quando carichi un file in un progetto,
+        il sistema fa esattamente le fasi che abbiamo descritto. I limiti del RAG
+        sono gli stessi dei progetti.
+      </p>
+      <p>
+        La differenza pratica è che <strong>un RAG "fai-da-te" dà controllo sui
+        parametri che il progetto nasconde</strong>. Decidi tu chunking, modello di
+        embedding, numero K, eventuale riformulazione, soglia di similarità. Per
+        workflow professionali o critici, questo controllo è prezioso. Per uso
+        conversazionale standard, l'esperienza del progetto è sufficiente.
+      </p>
+
+      <h3>Due approfondimenti pratici</h3>
+
+      <div class="deep-dive">
+        <div class="deep-dive-label">APPROFONDIMENTO 1</div>
+        <h4>Embedding per RAG vs embedding interni dell'LLM</h4>
+        <p>
+          Sono <strong>due modelli fisicamente separati</strong>, anche se
+          concettualmente fanno cose simili. L'LLM principale ha i suoi embeddings
+          interni (la matrice E del Tema 1), ottimizzati per predire il prossimo
+          token. Un modello di embedding per RAG (come <code>text-embedding-3-large</code>
+          di OpenAI, <code>voyage-3</code> di Voyage AI, <code>cohere-embed-v3</code>
+          di Cohere) è una rete neurale separata, addestrata con <em>contrastive
+          learning</em>: l'obiettivo è produrre vettori dove la similarità geometrica
+          corrisponde alla similarità semantica tra testi.
+        </p>
+        <p>
+          I modelli di embedding lavorano su input intero (un chunk, una query) e
+          producono <strong>un singolo vettore per documento</strong>, tipicamente
+          di 1.000-3.000 dimensioni — più piccolo dei vettori interni dei grandi LLM
+          perché non deve catturare la ricchezza necessaria alla predizione del
+          prossimo token.
+        </p>
+        <p>
+          <strong>Conseguenze pratiche.</strong> La qualità del retrieval dipende dal
+          modello di embedding, non dall'LLM. Per romanzi in italiano, scegli un
+          modello con buona qualità multilingue (Voyage, Cohere, OpenAI hanno buoni
+          modelli multilingui; <code>BGE-M3</code> è un'ottima opzione open source).
+          Il costo dell'indicizzazione è infinitesimale (qualche centesimo per un
+          romanzo): il costo del RAG sta nelle chiamate all'LLM principale.
+        </p>
+      </div>
+
+      <div class="deep-dive">
+        <div class="deep-dive-label">APPROFONDIMENTO 2</div>
+        <h4>RAG fai-da-te con un assistente AI come interfaccia</h4>
+        <p>
+          Negli ultimi mesi si è aperto uno spazio operativo interessante grazie al
+          protocollo <strong>MCP</strong> (Model Context Protocol). Tre opzioni
+          ordinate dal meno al più tecnico.
+        </p>
+        <p>
+          <strong>Opzione A — Servizio RAG con MCP connector.</strong> Servizi come
+          LlamaIndex Cloud, Vectara o ChromaDB Cloud gestiscono l'infrastruttura.
+          Carichi i documenti, loro fanno chunking, embedding, indicizzazione, e
+          espongono il RAG via MCP che Claude supporta nativamente come connector.
+          Risultato di un RAG fai-da-te con minimo sforzo, ma dipendi da un servizio
+          esterno.
+        </p>
+        <p>
+          <strong>Opzione B — RAG locale con MCP server.</strong> Costruisci un
+          piccolo server MCP che gira sulla tua macchina ed espone funzioni di RAG su
+          documenti indicizzati localmente (database tipo ChromaDB embedded, modello
+          di embedding locale tipo BGE-M3). Connetti il server come connector a
+          Claude. Controllo completo, privacy assoluta, costi minimi. Richiede
+          familiarità tecnica con Python e MCP, ma è il compromesso migliore per chi
+          ha competenze tecniche.
+        </p>
+        <p>
+          <strong>Opzione C — RAG completo via API.</strong> Costruisci
+          un'applicazione che usa direttamente l'API di Claude e gestisce tutto il
+          RAG nel tuo codice. Controllo totale, ma perdi l'interfaccia consumer di
+          Claude. È la strada degli sviluppatori veri, per workflow professionali.
+        </p>
+        <p>
+          <strong>Una raccomandazione pratica per il caso del romanzo.</strong> Per
+          uso esplorativo, i progetti di Claude bastano. Per task specifici dove il
+          retrieval automatico fallisce, passa al full context manuale. Per workflow
+          ripetuti e seri (editor professionale che lavora su molti romanzi), valuta
+          l'Opzione B. Prima di investire, fai un esperimento: prendi 10 domande
+          tipiche, provale sia con il progetto sia con full context. Se il progetto
+          basta nel 70-80% dei casi, la complessità del RAG fai-da-te non è
+          giustificata.
+        </p>
+      </div>
+
+      <div class="when-box">
+        <div class="when-cell when-good">
+          <div class="when-label">Quando usarla</div>
+          <p>
+            Interrogazioni mirate ("trova X"), ricerca di scene con caratteristiche
+            specifiche, controllo di coerenza su elementi localizzati (descrizioni,
+            dialoghi, fatti), navigazione di corpora con più documenti. Tutte
+            situazioni dove la risposta giusta vive in alcuni passaggi specifici e
+            il problema è solo trovarli.
+          </p>
+        </div>
+        <div class="when-cell when-bad">
+          <div class="when-label">Quando NON usarla</div>
+          <p>
+            Analisi globali dell'arco narrativo (riassunti gerarchici sono migliori).
+            Valutazioni di proporzioni e bilanciamenti ("i temi A e B hanno peso
+            simile?"). Domande su assenze ("cosa manca?"). Task che richiedono di
+            considerare il documento come unità integrata (full context è migliore).
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGIA 5 — MAPPE STRUTTURATE -->
+<section>
+  <div class="section-num">03 — STRATEGIA 5</div>
+  <h2>Mappe strutturate: rappresentazioni esplicite delle relazioni</h2>
+
+  <div class="strategy">
+    <div class="strategy-header">
+      <div class="strategy-label">STRATEGIA 5</div>
+      <h3 class="strategy-name">Mappe strutturate</h3>
+      <div class="strategy-tagline">Rappresentare esplicitamente entità e relazioni del documento come scheletro consultabile</div>
+    </div>
+    <div class="strategy-body">
+
+      <h3>Il limite che apre il bisogno</h3>
+      <p>
+        Le quattro strategie viste finora rappresentano il documento come testo —
+        l'intero testo, pezzi di testo, riassunti del testo, o testo recuperato per
+        somiglianza semantica. Sono modi diversi di selezionare e organizzare
+        materiale testuale per mostrarlo al modello.
+      </p>
+      <p>
+        Prendi una domanda come: <em>"il personaggio di Lucia ha un arco di sviluppo
+        coerente, oppure il suo cambiamento nell'atto 2 contraddice quello che era
+        stato impostato nell'atto 1?"</em>. Per rispondere, il modello deve avere in
+        mente chi è Lucia inizialmente, come viene caratterizzata, cosa le succede
+        capitolo per capitolo, dove sono i momenti di cambiamento, come si rapportano
+        a quello che gli altri personaggi le fanno, perché il cambiamento avviene.
+        Tutte informazioni che esistono nel testo, ma sono <strong>distribuite e
+        relazionali</strong>: vivono nelle connessioni tra punti distanti, non in
+        passaggi specifici.
+      </p>
+      <p>
+        Con le strategie testuali, puoi ricostruire queste informazioni — ed è quello
+        che il modello fa quando glielo chiedi. Ma le ricostruisce ogni volta, da
+        zero, dentro il prompt. Ogni domanda su Lucia richiede al modello di
+        ripescare le informazioni rilevanti dal materiale testuale. È fragile,
+        costoso, ripetitivo.
+      </p>
+      <p>
+        L'idea della strategia 5 è di <strong>anticipare questo lavoro</strong>:
+        invece di lasciare al modello il compito di ricostruire ogni volta la
+        struttura del romanzo dalle sue manifestazioni testuali, costruisci
+        esplicitamente una <strong>rappresentazione strutturata</strong> del romanzo
+        — non un riassunto, ma una mappa delle entità e delle relazioni — e la dai
+        al modello come riferimento permanente.
+      </p>
+
+      <h3>Cosa è una mappa strutturata, in concreto</h3>
+      <p>
+        Una mappa strutturata del romanzo è un documento — tipicamente in JSON, YAML,
+        o markdown molto strutturato — che contiene rappresentazioni esplicite delle
+        entità e delle relazioni che ti interessano per la revisione. Cinque tipi di
+        mappa, da scegliere e combinare in base al caso.
+      </p>
+
+      <div class="map-types">
+        <div class="map-type">
+          <div class="map-type-name">Mappa dei personaggi</div>
+          <p>
+            Per ogni personaggio: descrizione iniziale, arco di sviluppo, motivazioni,
+            relazioni con altri personaggi, eventi chiave (con riferimenti ai
+            capitoli), funzione narrativa.
+          </p>
+        </div>
+        <div class="map-type">
+          <div class="map-type-name">Mappa degli archi narrativi</div>
+          <p>
+            Per ogni filo narrativo (trama principale, sottoplot): situazione
+            iniziale, sviluppo con riferimenti ai capitoli chiave, climax, risoluzione
+            o ragione per cui resta aperto.
+          </p>
+        </div>
+        <div class="map-type">
+          <div class="map-type-name">Mappa dei temi</div>
+          <p>
+            Per ogni tema: definizione come emerge in questo romanzo, scene chiave,
+            evoluzione, personaggi che lo incarnano, conclusione tematica (cosa il
+            romanzo "dice" su quel tema).
+          </p>
+        </div>
+        <div class="map-type">
+          <div class="map-type-name">Mappa cronologica/spaziale</div>
+          <p>
+            Quando e dove succede ogni capitolo. Utile per romanzi con struttura
+            temporale complessa (flashback, salti) o spazialità ricca. Per romanzi a
+            struttura semplice spesso non serve.
+          </p>
+        </div>
+        <div class="map-type">
+          <div class="map-type-name">Mappa setup/payoff</div>
+          <p>
+            Elementi introdotti (setup) e dove vengono raccolti (payoff). Rende
+            immediato vedere setup che non hanno mai payoff (cose dimenticate) e
+            payoff che non hanno setup (cose senza preparazione).
+          </p>
+        </div>
+      </div>
+
+      <p>
+        Tutte queste mappe insieme stanno in 15.000-25.000 token per un romanzo di
+        medie dimensioni. È un <strong>documento di riferimento</strong> che il
+        modello può consultare per qualsiasi domanda strutturale.
+      </p>
+
+      <h3>Come si costruisce: tre approcci</h3>
+      <p>
+        <strong>Approccio 1: dall'output dei riassunti gerarchici.</strong> Se hai
+        già fatto la strategia 3 e hai costruito la piramide, la mappa strutturata si
+        ricava in gran parte dalle schede. Carichi le 80 schede capitolo + le 4
+        schede atto + la scheda romanzo, e fai al modello una richiesta strutturata
+        per produrre le mappe. Efficiente perché riutilizza il lavoro già fatto.
+      </p>
+      <p>
+        <strong>Approccio 2: iterativo attraverso il testo.</strong> Se non hai fatto
+        i riassunti, costruisci ogni mappa con un workflow specifico. Per la mappa
+        dei personaggi: primo passaggio del romanzo a chunks chiedendo "quali
+        personaggi appaiono in questo chunk e cosa apprendiamo di loro?". Aggreghi
+        le risposte. Secondo passaggio: "per ognuno di questi personaggi, descrivi
+        l'evoluzione attraverso il libro". Più chiamate, ma mappe più accurate.
+      </p>
+      <p>
+        <strong>Approccio 3: collaborativo con l'autore.</strong> L'approccio più
+        interessante. La mappa non è solo quello che il modello ricava dal testo: è
+        anche quello che <em>tu</em> hai in mente come autore o editor. Costruisci
+        una mappa iniziale con il modello, ma editala manualmente per riflettere la
+        tua visione dell'opera. Il risultato è una mappa "doppia": rispecchia sia
+        quello che il testo dice oggettivamente, sia quello che tu pensi che dovrebbe
+        dire.
+      </p>
+
+      <h3>La mappa al lavoro: cosa cambia</h3>
+      <p>
+        Vediamo cosa puoi fare con una mappa strutturata, perché è qui che si vede
+        la differenza con le strategie precedenti.
+      </p>
+      <p>
+        <strong>"L'arco di Lucia funziona?"</strong> Carichi la sezione Lucia della
+        mappa personaggi + l'arco di Lucia dalla mappa archi. Stiamo parlando di
+        2.000-3.000 token. Il modello ha <em>già</em> in mano la rappresentazione
+        strutturata dell'arco — non deve ricostruirla dal testo — e può concentrare
+        tutto il suo budget computazionale sulla valutazione. Risposta più puntuale
+        e più precisa di quanto otterresti con qualunque altra strategia.
+      </p>
+      <p>
+        <strong>"Ci sono setup senza payoff?"</strong> Carichi la mappa setup/payoff.
+        Il modello scorre la mappa e ti elenca esattamente i setup non risolti.
+        Quasi banale da rispondere con la mappa giusta; quasi impossibile da
+        rispondere bene senza.
+      </p>
+      <p>
+        <strong>"Tutti i sottoplot si chiudono?"</strong> Carichi la mappa degli
+        archi. Il modello scorre e ti elenca gli archi aperti. Sia il chunking che
+        il RAG farebbero fatica su questo task.
+      </p>
+      <p>
+        <strong>"Il personaggio X è coerente attraverso i capitoli?"</strong>
+        Carichi la mappa di X (caratterizzazioni capitolo per capitolo) e il modello
+        verifica la coerenza, segnalando dove le caratterizzazioni non si tengono.
+        Se vuoi approfondire un punto, vai al testo del capitolo specifico — ma la
+        mappa ti ha già detto <em>dove</em> guardare.
+      </p>
+
+      <h3>Il vero superpotere: la mappa come oggetto editabile</h3>
+      <p>
+        C'è un aspetto della strategia 5 che è il più sottovalutato. Le mappe
+        strutturate <strong>sono editabili dall'umano</strong>, mentre il testo del
+        romanzo no (modificarlo richiede di scrivere bene, è il lavoro di revisione
+        vero e proprio). Cosa significa concretamente? Significa che puoi usare le
+        mappe come <strong>strumento di pianificazione della revisione</strong>.
+      </p>
+      <p>
+        Esempio. Hai identificato che l'arco di Lucia non funziona. Editi la mappa:
+        aggiungi una nota "l'arco deve essere riscritto in questa direzione", magari
+        aggiungi una scena ipotetica che dovrebbe esistere ma non c'è. Adesso la
+        mappa contiene sia lo stato attuale del personaggio (come emerge dal testo)
+        sia lo stato desiderato (la tua visione). Chiedi al modello di confrontare i
+        due, identificare i passaggi del testo che richiedono modifiche, suggerirti
+        dove intervenire.
+      </p>
+      <p>
+        Altro esempio. Hai una mappa dei temi con cinque temi, ma vuoi che il
+        romanzo si concentri su tre. Editi la mappa: marchi i due temi marginali
+        come "da eliminare". Chiedi al modello di identificare i passaggi dove i
+        temi marginali sono presenti, valutando se possono essere riscritti per
+        servire i temi principali. La mappa diventa un <strong>piano di revisione
+        strutturato</strong>.
+      </p>
+      <p>
+        In tutti questi casi, la mappa funziona come <strong>interfaccia tra la tua
+        visione editoriale e il modello</strong>. Tu lavori sulla mappa (più veloce,
+        più leggibile, più editabile), il modello traduce le tue intenzioni in
+        operazioni sul testo. È un modo di lavorare qualitativamente diverso da
+        quello che le altre strategie permettono.
+      </p>
+
+      <div class="callout callout-purple">
+        <h4>Le criticità della strategia 5</h4>
+        <p>
+          <strong>Il costo di costruzione è il più alto del Tema 4.</strong>
+          Costruire mappe accurate richiede l'equivalente di una piramide di
+          riassunti più lavoro aggiuntivo. Per task una-tantum è probabilmente
+          troppo. Ha senso quando il romanzo merita un investimento di lavoro
+          consistente.
+        </p>
+        <p>
+          <strong>La mappa "fissa" il modello su una visione specifica.</strong> Una
+          volta che hai una mappa, il modello tende a interpretare il testo
+          attraverso la mappa. Buono per task strutturati, controproducente per task
+          esplorativi liberi ("c'è qualcosa che non ho notato?"). Mitigazione:
+          mantieni anche workflow non-mappa per la scoperta libera.
+        </p>
+        <p>
+          <strong>Le mappe vanno aggiornate quando il testo cambia.</strong> Se
+          modifichi sostanzialmente alcuni capitoli durante la revisione, la mappa
+          diventa parzialmente obsoleta. O la rigeneri (costoso), o accetti che sia
+          datata (rischioso). Per workflow lunghi vale la pena pianificare momenti
+          di rigenerazione ai checkpoint importanti.
+        </p>
+      </div>
+
+      <div class="when-box">
+        <div class="when-cell when-good">
+          <div class="when-label">Quando usarla</div>
+          <p>
+            Romanzo di valore alto che merita investimento di lavoro (submission,
+            stampa, opera importante). Revisione complessa e strutturata. Voler
+            pianificare la revisione come progetto, non solo eseguire correzioni
+            isolate. Molti task strutturali — archi, temi, setup/payoff, sottoplot —
+            che richiedono visione integrata.
+          </p>
+        </div>
+        <div class="when-cell when-bad">
+          <div class="when-label">Quando NON usarla</div>
+          <p>
+            Task una-tantum, esplorativo, di portata limitata. Romanzo ancora in
+            fase troppo iniziale per giustificare l'investimento di mapping. Non hai
+            chiaro cosa vuoi dalla revisione (esplora prima con altre strategie).
+            Workflow leggero e conversazionale.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Sei cose da portarsi via dalla Parte 2</h3>
+    <ol class="takeaway-list">
+      <li>
+        Il <strong>RAG</strong> non lavora sul testo: lavora sulla
+        <em>rappresentazione vettoriale</em> del testo. Usa la stessa geometria
+        degli embeddings del Tema 1, ma per indicizzare invece che per generare.
+        Permette di scalare a corpora che non entrerebbero mai in nessuna context
+        window.
+      </li>
+      <li>
+        Il meccanismo si articola in <strong>due fasi</strong>: <em>indicizzazione</em>
+        (una volta, all'inizio: chunking, embedding, database vettoriale) e
+        <em>interrogazione</em> (per ogni domanda: embedding della query, retrieval
+        dei K chunks più vicini, generazione da parte dell'LLM).
+      </li>
+      <li>
+        Il RAG ha <strong>tre limiti strutturali</strong>: rilevanza semantica ≠
+        rilevanza concettuale (può saltare scene dove il fenomeno è mostrato senza
+        essere nominato); i top-K possono mancare cose importanti per fenomeni
+        distribuiti; il modello vede solo i chunks recuperati, e non sa cosa non gli
+        è stato dato.
+      </li>
+      <li>
+        I <strong>progetti di Claude</strong> (e analoghi) sono RAG gestiti
+        automaticamente. Per uso esplorativo bastano. Per task dove il retrieval
+        fallisce sistematicamente, full context manuale è migliore. Per workflow
+        ripetuti, un RAG fai-da-te (es. via MCP server locale) dà controllo sui
+        parametri che il progetto nasconde.
+      </li>
+      <li>
+        Le <strong>mappe strutturate</strong> rappresentano esplicitamente le entità
+        e relazioni del documento (personaggi, archi, temi, setup/payoff). Permettono
+        al modello di rispondere a domande strutturali senza dover ricostruire
+        ogni volta la struttura dal testo. Investimento iniziale alto, ROI altissimo
+        per workflow strutturati di revisione.
+      </li>
+      <li>
+        Il superpotere delle mappe è di essere <strong>editabili dall'umano</strong>.
+        Diventano interfaccia tra la tua visione editoriale e il modello: tu
+        modifichi la mappa per esprimere come vuoi che il romanzo sia, il modello
+        traduce in operazioni sul testo. È pianificazione della revisione, non solo
+        analisi.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- BRIDGE -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="bridge">
+    <div class="bridge-label">Prossimo passo</div>
+    <h3>Parte 3: ottimizzazione e sintesi</h3>
+    <p>
+      Adesso abbiamo tutte e cinque le strategie. Resta da trattare un elemento che
+      attraversa tutte: il <strong>context caching</strong>. Non è una strategia a
+      sé, è un'ottimizzazione che si applica alle altre, ma cambia significativamente
+      l'economia di molti workflow — soprattutto della strategia full context, e
+      delle strategie 3 e 5 dove c'è materiale stabile riutilizzato.
+    </p>
+    <p>
+      La <strong>Parte 3</strong> tratta il caching come ottimizzazione trasversale,
+      poi ricompone tutte e cinque le strategie come <em>ecosistema integrato</em>
+      (perché il messaggio finale del Tema 4 è che funzionano insieme, non isolate),
+      e chiude con una riflessione finale sull'intero percorso — non solo sul Tema
+      4, ma su tutto quello che abbiamo costruito insieme.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Tema 4 — Parte 2 di 3 — Percorso di approfondimento su LLM e prompting (seconda chat)</p>
+  <p>Strategie semantiche e strutturate per documenti lunghi</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tema 3 — Come "ragiona" un LLM</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--indigo);
+    padding: 88px 48px 96px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 580px; height: 580px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-graphic {
+    position: absolute;
+    top: 50%; right: 6%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 60px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 20px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 48px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--indigo);
+    margin: 28px 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  .callout p { font-size: 15.5px; line-height: 1.7; margin-bottom: 12px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-orange { background: var(--orange-faint); border-left-color: var(--orange); }
+  .callout-orange h4 { color: var(--orange); }
+
+  .callout-indigo { background: var(--indigo-faint); border-left-color: var(--indigo); }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout-teal { background: var(--teal-faint); border-left-color: var(--teal); }
+  .callout-teal h4 { color: var(--teal); }
+
+  .callout-amber { background: var(--amber-faint); border-left-color: var(--amber); }
+  .callout-amber h4 { color: var(--amber); }
+
+  .callout-purple { background: var(--purple-faint); border-left-color: var(--purple); }
+  .callout-purple h4 { color: var(--purple); }
+
+  /* ── METAPHOR BOX ── */
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--purple);
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .metaphor p { margin-bottom: 12px; font-size: 15.5px; line-height: 1.72; }
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  /* ── INSIGHT ── */
+  .insight {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+  .insight em { color: var(--orange-light); font-style: italic; }
+  .insight strong { color: var(--white); }
+  .insight code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── DIAGRAMMA ── */
+  .diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  .diagram-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .diagram-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .diagram-caption {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--ink-light);
+    text-align: center;
+    margin-top: 18px;
+    padding: 0 16px;
+    line-height: 1.6;
+  }
+
+  /* ── FAMIGLIE DI LIMITI ── */
+  .families {
+    margin: 32px 0;
+  }
+
+  .family {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin-bottom: 22px;
+    border-left: 4px solid var(--orange);
+  }
+
+  .family-label {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .family-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 26px;
+    color: var(--orange);
+    line-height: 1;
+  }
+
+  .family-title {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--indigo);
+  }
+
+  .family-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-light);
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    margin-top: -8px;
+    padding-left: 42px;
+  }
+
+  .family p {
+    font-size: 15.5px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+  }
+
+  .family p:last-child { margin-bottom: 0; }
+
+  .family-examples {
+    margin: 14px 0 14px;
+    padding-left: 22px;
+  }
+
+  .family-examples li {
+    font-size: 14.5px;
+    color: var(--ink-mid);
+    margin-bottom: 8px;
+    line-height: 1.6;
+  }
+
+  .family-mitigation {
+    margin-top: 16px;
+    padding: 12px 18px;
+    background: var(--bg2);
+    border-radius: 4px;
+    font-size: 14px;
+    color: var(--ink-mid);
+    border-left: 3px solid var(--teal);
+  }
+
+  .family-mitigation strong {
+    color: var(--teal);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+
+  /* ── PRACTICES ── */
+  .practices {
+    margin: 32px 0;
+    counter-reset: practice-counter;
+  }
+
+  .practice {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 22px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border2);
+    align-items: start;
+  }
+
+  .practice:last-child { border-bottom: none; }
+
+  .practice-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 32px;
+    color: var(--orange);
+    line-height: 1;
+    counter-increment: practice-counter;
+  }
+
+  .practice-num::before { content: counter(practice-counter, decimal-leading-zero); }
+
+  .practice h4 {
+    font-family: var(--sans);
+    font-size: 17px;
+    color: var(--indigo);
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+
+  .practice p {
+    font-size: 15.5px;
+    line-height: 1.7;
+    margin: 0 0 12px;
+  }
+
+  .practice p:last-child { margin-bottom: 0; }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(13,122,110,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .takeaway-list em { color: var(--orange-light); font-style: italic; }
+  .takeaway-list strong { color: var(--white); font-weight: 600; }
+  .takeaway-list code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── BRIDGE ── */
+  .bridge {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 48px;
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .bridge h3 {
+    margin: 0 0 16px;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--indigo);
+    font-weight: 500;
+  }
+
+  .bridge p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 38px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .insight { padding: 28px 24px; }
+    .takeaways { padding: 40px 28px; }
+    .bridge { padding: 32px 24px; }
+    .diagram { padding: 22px 16px; }
+    .family { padding: 22px 22px; }
+    .practice { grid-template-columns: 44px 1fr; gap: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <svg class="hero-bg-graphic" width="260" height="280" viewBox="0 0 260 280" xmlns="http://www.w3.org/2000/svg">
+    <!-- Una catena di token che si espande -->
+    <g opacity="0.9">
+      <rect x="20" y="30" width="120" height="26" rx="4" fill="white" opacity="0.95"/>
+      <line x1="80" y1="56" x2="80" y2="76" stroke="white" stroke-width="2" opacity="0.6"/>
+      <rect x="40" y="78" width="140" height="26" rx="4" fill="white" opacity="0.85"/>
+      <line x1="110" y1="104" x2="110" y2="124" stroke="white" stroke-width="2" opacity="0.6"/>
+      <rect x="60" y="126" width="160" height="26" rx="4" fill="white" opacity="0.75"/>
+      <line x1="140" y1="152" x2="140" y2="172" stroke="white" stroke-width="2" opacity="0.6"/>
+      <rect x="80" y="174" width="170" height="26" rx="4" fill="#f07040" opacity="0.95"/>
+      <line x1="165" y1="200" x2="165" y2="220" stroke="#f07040" stroke-width="2" opacity="0.9"/>
+      <rect x="100" y="222" width="80" height="26" rx="4" fill="#f07040" opacity="1"/>
+    </g>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-label">Tema 3 — Approfondimento</div>
+    <h1>Come <em>"ragiona"</em> un LLM</h1>
+    <p class="hero-sub">
+      Cosa succede davvero quando un modello "ragiona ad alta voce". Perché la
+      Chain-of-Thought funziona, quando produce ragionamento vero e quando solo
+      apparenza di ragionamento, e quali sono i limiti strutturali che dall'architettura
+      derivano direttamente.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">CoT, budget computazionale, limiti, prompting</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Tema del percorso</div>
+        <div class="meta-value">3 di 4</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Prerequisiti</div>
+        <div class="meta-value">Temi 1 e 2, punti 3 e 6 del percorso precedente</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 — RIPRESA DELLA QUESTIONE -->
+<section>
+  <div class="section-num">01 — IL PUNTO DI PARTENZA</div>
+  <h2>Cosa significa, davvero, che un LLM "ragioni"?</h2>
+  <p class="lead">
+    Adesso che abbiamo l'architettura intera in mano, possiamo permetterci la domanda
+    che fino a qui sarebbe stata prematura: cosa significa che un sistema come un LLM
+    "ragioni"? È un terreno scivoloso, perché le parole come <em>ragionare</em>,
+    <em>capire</em>, <em>pensare</em> portano con sé un peso semantico che viene
+    dall'esperienza umana, e applicarle a una macchina richiede attenzione a non importare
+    di soppiatto significati che non si applicano.
+  </p>
+
+  <p>
+    Prendiamo un esempio concreto. Chiedo al modello: <em>"Marco ha 23 anni. Sua sorella
+    Lucia è 5 anni più giovane. Quanti anni ha Lucia?"</em> Il modello risponde:
+    <em>"Lucia ha 18 anni."</em> Ha ragionato? Ha eseguito una sottrazione? Ha capito il
+    problema? L'intuizione immediata è dire di sì. Per produrre "18" il modello ha dovuto
+    in qualche modo "fare" il calcolo. E "fare un calcolo" assomiglia molto a quello che
+    chiamiamo ragionamento.
+  </p>
+
+  <p>
+    Ma sappiamo cosa è davvero successo. L'abbiamo costruito nei Temi 1 e 2. Il modello
+    ha ricevuto il prompt, lo ha tokenizzato, ha fatto passare i vettori attraverso le
+    decine di strati del Transformer, ha calcolato l'hidden state <code>h</code>
+    dell'ultima posizione, lo ha proiettato sul vocabolario, ha applicato softmax, ha
+    campionato un token. In quale momento di questo processo è avvenuto "il calcolo"?
+  </p>
+
+  <p>
+    La risposta è che non c'è stato un momento di calcolo nel senso in cui lo intendiamo
+    noi. Non c'è una fase in cui il modello ha messo da parte l'elaborazione linguistica
+    e ha eseguito un'operazione aritmetica. Non c'è una calcolatrice interna. L'unica
+    cosa che è successa è quella che succede sempre: le matrici di pesi del Transformer
+    hanno trasformato i vettori del prompt in un <code>h</code> finale, e quel
+    <code>h</code> è risultato allineato — nello spazio degli embedding — con il token
+    "18". <strong>Il modello ha navigato lo spazio semantico</strong>, non eseguito un
+    calcolo nel senso classico.
+  </p>
+
+  <div class="callout callout-indigo">
+    <h4>La formulazione che apre il tema</h4>
+    <p>
+      Quando un LLM produce un output che assomiglia a ragionamento — un calcolo, una
+      deduzione, una catena di inferenze — quello che sta facendo è <em>navigare uno
+      spazio semantico secondo pattern distillati dall'addestramento</em>. Per i casi
+      che cadono dentro la zona densamente popolata dei pattern visti, questa navigazione
+      produce output indistinguibili da un ragionamento vero. Per i casi che cadono fuori
+      da quella zona — casi inusuali, edge cases, configurazioni che il modello non ha
+      mai visto in modo abbastanza simile — la navigazione comincia a produrre output che
+      possono essere <em>plausibili</em> ma <em>sbagliati</em>. La regola sottostante
+      non è stata davvero applicata: è stata <em>imitata</em>.
+    </p>
+  </div>
+
+  <p>
+    Questo è il punto di partenza. Tutto quello che il modello fa, anche quando sembra
+    ragionare, è un'operazione di questa natura. Ma se la storia finisse qui, il quadro
+    sarebbe troppo semplice — e troppo pessimistico. Perché c'è un meccanismo che cambia
+    significativamente le cose, e che è il vero cuore del Tema 3:
+    la <strong>Chain-of-Thought</strong>.
+  </p>
+</section>
+
+<!-- SEZIONE 2 — CHAIN-OF-THOUGHT -->
+<section>
+  <div class="section-num">02 — COSA SUCCEDE QUANDO IL MODELLO RAGIONA AD ALTA VOCE</h2>
+  <h2>La Chain-of-Thought: dove la macchina trova spazio per pensare</h2>
+
+  <h3>Un'osservazione empirica strana</h3>
+  <p>
+    Comincio da un fatto che sembra anomalo, perché è da quel fatto che si capisce
+    tutto. Se prendi un LLM e gli chiedi:
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">Il problema della squadra di calcio</div>
+    <p>
+      <em>"Una squadra di calcio ha vinto 3 partite contro la X, perso 2 contro la Y,
+      pareggiato 4 contro la Z. La X ha 21 punti, la Y 18, la Z 15. Quanti punti ha la
+      nostra squadra in scontri diretti contro queste tre?"</em>
+    </p>
+    <p>
+      Provandolo direttamente, in modalità "rispondi e basta", il modello tende a
+      sbagliare. Magari risponde con un numero plausibile ma sbagliato, magari fa errori
+      di logica nel mezzo.
+    </p>
+    <p>
+      Ora aggiungi al prompt: <em>"Ragiona passo per passo prima di rispondere."</em>
+      Spesso — non sempre, ma spesso — l'accuratezza migliora drasticamente. Il modello
+      scrive: <em>"In Serie A le vittorie valgono 3 punti, i pareggi 1, le sconfitte 0.
+      Ho vinto 3 partite (3 × 3 = 9), pareggiato 4 (4 × 1 = 4), perso 2 (2 × 0 = 0).
+      Totale: 9 + 4 + 0 = 13 punti."</em> E arriva alla risposta corretta.
+    </p>
+  </div>
+
+  <p>
+    L'osservazione anomala è proprio questa: <strong>lo stesso modello, con gli stessi
+    pesi, sulla stessa domanda, dà risposte di qualità diversa a seconda di quanto viene
+    "lasciato scrivere" prima di arrivare alla risposta finale</strong>. Il modello non
+    è cambiato. La domanda non è cambiata. Cosa è cambiato?
+  </p>
+
+  <p>
+    La risposta è una delle cose più belle e profonde che abbiamo capito sugli LLM, e si
+    appoggia esattamente su quello che abbiamo costruito nei Temi 1 e 2.
+  </p>
+
+  <h3>La limitazione che abbiamo sotto gli occhi da un po': il budget computazionale finito</h3>
+  <p>
+    Riprendiamo l'architettura. Quando il modello deve produrre il prossimo token, fa
+    attraversare il prompt attraverso <code>N</code> strati del Transformer. Diciamo
+    <code>N = 32</code>, per fissare un numero. Ogni strato applica attenzione e FFN.
+    Alla fine produce <code>h</code>, e da <code>h</code> si campiona il token.
+  </p>
+
+  <p>
+    Quanto "calcolo" è stato fatto, in quel singolo passaggio? Esattamente quello che si
+    può fare in 32 strati. Né uno di più, né uno di meno. Le matrici di pesi sono fisse,
+    gli strati sono 32, l'attenzione e le FFN fanno quello che fanno: <strong>il budget
+    computazionale per ogni token è strettamente definito dall'architettura</strong>.
+  </p>
+
+  <p>
+    Per problemi semplici, 32 strati sono abbondanti — il modello arriva alla risposta
+    con margine. Per problemi più complessi, 32 strati possono non bastare. E quando non
+    bastano, il modello fa quello che può: produce un token, <em>qualunque</em> token,
+    perché la sua architettura impone che dopo 32 strati esca un output dalla testa di
+    output. Se il problema avrebbe richiesto un'elaborazione più profonda, il token che
+    esce sarà la migliore approssimazione che il modello riesce a comprimere in 32
+    strati. Spesso plausibile, a volte sbagliato.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora del calcolo "a mente"</div>
+    <p>
+      Pensa a un problema di matematica difficile e immagina che ti viene chiesto di
+      rispondere immediatamente, senza poter scrivere niente, senza poter fare passaggi
+      intermedi sulla carta. Devi guardare il problema e sparare la risposta. Per problemi
+      semplici (<em>"quanto fa 7 × 8?"</em>) ce la fai a tenere tutto in testa. Per
+      problemi medi (<em>"quanto fa 47 × 83?"</em>) cominci a sudare. Per problemi
+      complessi (<em>"qual è la radice quadrata di 2754?"</em>) sei spacciato — non hai
+      abbastanza "spazio mentale di lavoro" per arrivare alla risposta in un colpo solo.
+    </p>
+    <p>
+      Quello che fa la Chain-of-Thought è esattamente regalare al modello <strong>lo
+      spazio per scrivere passaggi intermedi</strong>. E quando glielo regali, succede
+      una cosa profonda: ogni passaggio intermedio <em>espande</em> il budget
+      computazionale disponibile per la risposta finale.
+    </p>
+  </div>
+
+  <h3>Il meccanismo: ogni token generato è elaborazione aggiuntiva</h3>
+  <p>
+    Pensiamoci nel dettaglio. Quando il modello ha scritto "vittorie valgono 3 punti",
+    quel testo è ora <em>parte del prompt</em>. Letteralmente. Il loop autoregressivo che
+    abbiamo visto nella mappa fa proprio questo: il token generato si accoda al prompt,
+    e il prompt aggiornato è l'input del prossimo passaggio attraverso i 32 strati.
+  </p>
+
+  <p>
+    Quindi quando il modello deve produrre il prossimo token dopo aver scritto "vittorie
+    valgono 3 punti", non sta affrontando il problema da zero con il prompt originale.
+    Sta affrontando un nuovo problema: il prompt originale <em>più</em> tutto quello che
+    ha già scritto. E ha di nuovo a disposizione 32 strati di elaborazione su questo
+    nuovo input più ricco.
+  </p>
+
+  <p>
+    Strato dopo strato, token dopo token, il modello costruisce un <strong>contesto
+    crescente</strong> in cui ogni passaggio intermedio diventa "scaffolding" per il
+    successivo. Quando arriva al momento di scrivere "13 punti", il prompt che attraversa
+    i 32 strati contiene già "9 + 4 + 0", e l'ultima operazione è banale: cade dentro la
+    zona dove i pattern sono densamente popolati.
+  </p>
+
+  <div class="diagram">
+    <div class="diagram-label">Come la CoT espande il budget computazionale</div>
+    <svg class="diagram-svg" viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="cotArr" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#c94a1a"/>
+        </marker>
+      </defs>
+
+      <!-- SCENARIO A: SENZA CoT -->
+      <g>
+        <text x="20" y="20" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" letter-spacing="1.5" font-weight="600">SCENARIO A — SENZA CoT</text>
+        <text x="20" y="38" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">tutto il calcolo in un singolo passaggio attraverso N strati</text>
+
+        <!-- Prompt -->
+        <rect x="20" y="58" width="220" height="34" rx="3" fill="#1e2a5e" opacity="0.95"/>
+        <text x="130" y="80" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Prompt (problema)</text>
+        <line x1="130" y1="92" x2="130" y2="110" stroke="#c94a1a" stroke-width="2" marker-end="url(#cotArr)"/>
+
+        <!-- Pila di strati -->
+        <rect x="50" y="112" width="160" height="120" rx="4" fill="#1e2a5e" opacity="0.12" stroke="#1e2a5e" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <text x="130" y="136" font-family="JetBrains Mono" font-size="10" fill="#1e2a5e" text-anchor="middle" letter-spacing="1.2" font-weight="600">N strati</text>
+        <g font-family="Outfit" font-size="10" fill="#1e2a5e" text-anchor="middle">
+          <rect x="65" y="146" width="130" height="14" rx="2" fill="#1e2a5e" opacity="0.55"/>
+          <rect x="65" y="164" width="130" height="14" rx="2" fill="#1e2a5e" opacity="0.55"/>
+          <rect x="65" y="182" width="130" height="14" rx="2" fill="#1e2a5e" opacity="0.55"/>
+          <rect x="65" y="200" width="130" height="14" rx="2" fill="#1e2a5e" opacity="0.55"/>
+          <rect x="65" y="218" width="130" height="14" rx="2" fill="#1e2a5e" opacity="0.55"/>
+        </g>
+
+        <line x1="130" y1="234" x2="130" y2="254" stroke="#c94a1a" stroke-width="2" marker-end="url(#cotArr)"/>
+
+        <!-- Output diretto -->
+        <rect x="20" y="256" width="220" height="34" rx="3" fill="#c94a1a" opacity="0.85"/>
+        <text x="130" y="278" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="600">Risposta diretta (rischio errore)</text>
+
+        <text x="130" y="320" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">budget: N strati per produrre la risposta</text>
+        <text x="130" y="338" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">se il problema richiede di più, sbaglia</text>
+      </g>
+
+      <!-- Separatore -->
+      <line x1="280" y1="40" x2="280" y2="340" stroke="#374151" stroke-width="0.5" opacity="0.3"/>
+
+      <!-- SCENARIO B: CON CoT -->
+      <g transform="translate(310, 0)">
+        <text x="20" y="20" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" letter-spacing="1.5" font-weight="600">SCENARIO B — CON CoT</text>
+        <text x="20" y="38" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">il calcolo è distribuito su molti passaggi, ognuno con N strati</text>
+
+        <!-- Prompt -->
+        <rect x="20" y="58" width="220" height="34" rx="3" fill="#1e2a5e" opacity="0.95"/>
+        <text x="130" y="80" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Prompt + "ragiona passo per passo"</text>
+        <line x1="130" y1="92" x2="130" y2="106" stroke="#c94a1a" stroke-width="2" marker-end="url(#cotArr)"/>
+
+        <!-- 3 passaggi consecutivi -->
+        <g transform="translate(0, 0)">
+          <rect x="50" y="108" width="160" height="36" rx="3" fill="#1e2a5e" opacity="0.55"/>
+          <text x="130" y="123" font-family="Outfit" font-size="11" fill="white" text-anchor="middle" font-weight="500">N strati → token 1</text>
+          <text x="130" y="138" font-family="Lora" font-style="italic" font-size="10" fill="rgba(255,255,255,0.85)" text-anchor="middle">"vittorie = 3 punti..."</text>
+          <line x1="130" y1="144" x2="130" y2="156" stroke="#c94a1a" stroke-width="2" marker-end="url(#cotArr)"/>
+
+          <rect x="50" y="158" width="160" height="36" rx="3" fill="#1e2a5e" opacity="0.70"/>
+          <text x="130" y="173" font-family="Outfit" font-size="11" fill="white" text-anchor="middle" font-weight="500">N strati → token 2...</text>
+          <text x="130" y="188" font-family="Lora" font-style="italic" font-size="10" fill="rgba(255,255,255,0.85)" text-anchor="middle">"3 × 3 = 9, 4 × 1 = 4..."</text>
+          <line x1="130" y1="194" x2="130" y2="206" stroke="#c94a1a" stroke-width="2" marker-end="url(#cotArr)"/>
+
+          <rect x="50" y="208" width="160" height="36" rx="3" fill="#1e2a5e" opacity="0.85"/>
+          <text x="130" y="223" font-family="Outfit" font-size="11" fill="white" text-anchor="middle" font-weight="500">N strati → token 3...</text>
+          <text x="130" y="238" font-family="Lora" font-style="italic" font-size="10" fill="rgba(255,255,255,0.85)" text-anchor="middle">"totale: 9 + 4 + 0 = ..."</text>
+          <line x1="130" y1="244" x2="130" y2="256" stroke="#c94a1a" stroke-width="2" marker-end="url(#cotArr)"/>
+        </g>
+
+        <!-- Output finale -->
+        <rect x="20" y="258" width="220" height="34" rx="3" fill="#0d7a6e" opacity="0.95"/>
+        <text x="130" y="280" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="600">Risposta corretta: 13 punti</text>
+
+        <text x="130" y="320" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">budget: N × (numero di token) strati</text>
+        <text x="130" y="338" font-family="Lora" font-style="italic" font-size="11" fill="#0d7a6e" text-anchor="middle">ogni passaggio è uno scaffolding per il successivo</text>
+      </g>
+    </svg>
+    <div class="diagram-caption">
+      Senza CoT (a sinistra), tutto il calcolo deve avvenire in un singolo passaggio
+      attraverso <code>N</code> strati. Con CoT (a destra), il calcolo è distribuito su
+      molti passaggi consecutivi, e ogni token generato si aggiunge al prompt diventando
+      scaffolding per il successivo. Il budget computazionale complessivo si moltiplica
+      per il numero di token generati.
+    </div>
+  </div>
+
+  <p>
+    In altre parole: la Chain-of-Thought <strong>spezza un problema computazionalmente
+    difficile in una sequenza di problemi computazionalmente facili</strong>, ognuno dei
+    quali sta dentro il budget di 32 strati. Il modello non è diventato più intelligente.
+    Ha ottenuto più tempo di calcolo, distribuito attraverso i token che genera.
+  </p>
+
+  <h3>Una sfumatura importante: la CoT attiva anche un pattern appreso</h3>
+  <p>
+    Devo essere preciso, perché c'è un'altra cosa che la CoT fa, oltre a darti budget
+    computazionale. Durante l'addestramento, il modello ha visto enormi quantità di testo
+    in cui le persone <strong>scrivono come ragionano</strong>. Soluzioni di problemi di
+    matematica con i passaggi intermedi. Dimostrazioni svolte. Ragionamenti articolati in
+    capitoli di filosofia, in paper scientifici, in spiegazioni didattiche.
+  </p>
+
+  <p>
+    Quando gli chiedi di "ragionare passo per passo", stai attivando questo pattern di
+    scrittura. Il modello non sta solo guadagnando tempo di calcolo: sta navigando una
+    zona dello spazio semantico — quella delle "spiegazioni passo per passo" — che è
+    particolarmente ricca di esempi corretti nei dati di addestramento. Sta, in un certo
+    senso, <em>imitando uno stile di pensiero</em> che ha visto associato a buoni
+    risultati.
+  </p>
+
+  <p>
+    Le due cose si rinforzano: il pattern del "ragionare ad alta voce" indirizza il
+    modello verso configurazioni dello spazio in cui i passaggi intermedi sono coerenti,
+    e ogni passaggio intermedio espande effettivamente il budget di calcolo per il
+    successivo.
+  </p>
+
+  <h3>E quindi: il modello ragiona, sì o no?</h3>
+  <p>
+    Provo a dirla nel modo che mi sembra più onesto. La CoT è
+    un'<strong>imitazione di ragionamento</strong> che, in virtù del meccanismo che
+    abbiamo descritto, <strong>produce occasionalmente ragionamento vero come effetto
+    collaterale</strong>.
+  </p>
+
+  <p>
+    Quando il modello scrive "vittorie valgono 3 punti, sconfitte 0, pareggi 1", sta
+    facendo qualcosa che è genuinamente difficile da distinguere dal ragionamento: sta
+    accedendo a una conoscenza fattuale e la sta esponendo in una forma utile. Quando
+    scrive "3 × 3 = 9", sta applicando una moltiplicazione semplice e la sta applicando
+    correttamente perché ha il budget computazionale per farlo. Ognuno di questi passaggi,
+    preso da solo, è un'operazione che sta dentro il dominio di competenza del modello.
+    Quando li metti in fila, ognuno con il suo budget, il risultato finale può essere
+    veramente la soluzione del problema, ottenuta attraverso passaggi che sono davvero
+    corretti.
+  </p>
+
+  <p>
+    Se il modello ha effettivamente svolto correttamente ogni passaggio intermedio, in
+    che senso non ha ragionato? In un senso meccanicistico, la differenza è chiara — non
+    c'è una "regola" applicata, ci sono pattern statistici che si compongono. Ma da un
+    punto di vista <em>funzionale</em>, il risultato può essere indistinguibile.
+  </p>
+
+  <h3>Quando la CoT funziona, e quando no</h3>
+  <p>
+    La CoT funziona quando la decomposizione del problema in passaggi più semplici porta
+    i sotto-problemi dentro la zona di competenza del modello. La somma <code>9 + 4 + 0</code>
+    è banalmente dentro la zona di competenza: il modello l'ha vista miliardi di volte.
+    La regola "vittorie valgono 3 punti" è dentro la zona di competenza: è un fatto
+    enciclopedico stabile. Quando ogni passo della catena è competente, la catena nel suo
+    insieme produce ragionamento corretto.
+  </p>
+
+  <p>
+    Funziona meno quando uno o più dei passaggi intermedi cade fuori dalla zona di
+    competenza. Se un passaggio richiede una sottrazione a 8 cifre con riporti, il modello
+    potrebbe scrivere il passaggio in modo che <em>suona</em> corretto ma con un numero
+    sbagliato. <strong>E qui sta la trappola</strong>: una volta che ha scritto un
+    passaggio sbagliato, quel passaggio diventa parte del prompt per il prossimo token.
+    Il modello non si accorge dell'errore — non ha un meccanismo di verifica indipendente.
+    Continua a costruire sopra l'errore, e produce un ragionamento internamente coerente
+    ma globalmente sbagliato.
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>La modalità di fallimento più insidiosa: la razionalizzazione</h4>
+    <p>
+      A volte il modello arriva a una risposta sbagliata in modo "intuitivo" (cioè con
+      una predizione veloce dello spazio semantico) e <em>poi</em> costruisce una
+      chain-of-thought che giustifica quella risposta. La CoT in questo caso non aiuta
+      a ragionare: serve da <strong>post-hoc rationalization</strong>, un'argomentazione
+      costruita per supportare una conclusione già predisposta. Capita quando il prompt
+      è formulato in modo che induce una direzione semantica forte verso una risposta
+      specifica, e il modello — con la CoT — costruisce passaggi che sembrano portare lì
+      in modo logico. È una delle ragioni per cui una CoT articolata non è di per sé
+      un sigillo di affidabilità.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 3 — LIMITI STRUTTURALI -->
+<section>
+  <div class="section-num">03 — I LIMITI CHE DERIVANO DALL'ARCHITETTURA</h2>
+  <h2>Quattro famiglie di limiti, derivati dalla struttura</h2>
+  <p class="lead">
+    La CoT espande il budget computazionale, sì, ma fino a un certo punto. Esiste una
+    classe di limiti che la CoT non risolve, e capirli completa il quadro del
+    "ragionamento di un LLM". Invece di darti un elenco di "cose che gli LLM non sanno
+    fare", li organizzo in <strong>quattro famiglie</strong>, ciascuna radicata in una
+    proprietà specifica dell'architettura. Il vantaggio è che ti porti via non una lista
+    da memorizzare, ma una <em>capacità di prevedere</em> dove un LLM probabilmente
+    fallirà.
+  </p>
+
+  <div class="families">
+
+    <div class="family">
+      <div class="family-label">
+        <div class="family-num">I</div>
+        <div class="family-title">Limiti dal budget computazionale finito</div>
+      </div>
+      <div class="family-meta">RADICE: N strati per token, profondità fissa</div>
+      <p>
+        La profondità computazionale per ogni token è costante: esattamente <code>N</code>
+        strati. La CoT distribuisce il budget su più token, ma <strong>un singolo passaggio
+        non può chiedere più di N strati</strong>. Quando un singolo passaggio richiederebbe
+        più profondità, il modello produce comunque un token — la migliore approssimazione
+        che riesce a comprimere in N strati — e per certi problemi questa compressione
+        produce sistematicamente errori.
+      </p>
+      <p>Tipologie di ragionamento che cadono in questa famiglia:</p>
+      <ul class="family-examples">
+        <li><strong>Calcolo aritmetico esteso</strong> — moltiplicazioni a molte cifre, divisioni, somme a colonna. <em>Esempio</em>: 4738 × 9215.</li>
+        <li><strong>Conteggio</strong> — contare quante "e" ci sono in "ineluttabilmente", contare elementi che soddisfano una condizione. Richiede un contatore che si aggiorna.</li>
+        <li><strong>Tracking di stato attraverso passaggi</strong> — chi possiede cosa dopo una sequenza di scambi, posizione di un oggetto dopo molte mosse. Più la catena si allunga, più il modello perde il filo.</li>
+        <li><strong>Backtracking e ricerca</strong> — sudoku, enigmi logici, pianificazione di mosse. Il Transformer non ha un meccanismo interno per "tornare indietro" dentro un singolo passaggio.</li>
+        <li><strong>Manipolazione simbolica precisa</strong> — ordinare una lista, invertire una stringa, applicare regole sostitutive. Algoritmi semplici per un computer, ma richiedono esecuzione passo per passo.</li>
+      </ul>
+      <p>
+        Il filo unificante: <strong>tutti questi compiti hanno una soluzione algoritmica
+        nota, ma l'algoritmo richiede di mantenere uno stato che evolve attraverso più
+        passi</strong>. L'architettura del Transformer è un calcolatore parallelo a
+        profondità fissa, non un calcolatore sequenziale con memoria di lavoro persistente.
+      </p>
+      <div class="family-mitigation">
+        <strong>Mitigazione</strong> La CoT compensa parzialmente, esternalizzando lo stato nei token che il modello genera. Funziona se ogni singolo passo della catena resta dentro il budget per token.
+      </div>
+    </div>
+
+    <div class="family">
+      <div class="family-label">
+        <div class="family-num">II</div>
+        <div class="family-title">Limiti dall'attenzione causale</div>
+      </div>
+      <div class="family-meta">RADICE: ogni token può guardare solo i precedenti</div>
+      <p>
+        Una volta scritto un token, il modello non può tornare indietro a modificarlo.
+        Il token è andato. Diventa parte del contesto. Quello che viene dopo si appoggerà
+        su quel token, lo prenderà come dato di fatto. Se è un errore, è un errore che si
+        propaga. In un essere umano che scrive, c'è un'oscillazione continua tra
+        produzione e revisione: nell'LLM autoregressivo il flusso va in una direzione
+        sola.
+      </p>
+      <p>Conseguenze concrete:</p>
+      <ul class="family-examples">
+        <li><strong>Cristallizzazione degli errori</strong> — se il modello inizia con un'affermazione sbagliata, raramente si autocorregge nel corso della risposta: la coerenza è statisticamente premiata rispetto all'autocorrezione.</li>
+        <li><strong>Anchoring</strong> — i primi token di una risposta condizionano pesantemente il resto, "tirando" lo spazio semantico in una zona specifica.</li>
+        <li><strong>Vulnerabilità alla razionalizzazione</strong> — se il modello "decide" presto nella generazione che la risposta è X, i token successivi tenderanno a giustificare X. La CoT in questo caso non aiuta: serve da impalcatura argomentativa.</li>
+      </ul>
+      <div class="family-mitigation">
+        <strong>Mitigazione</strong> La CoT non aiuta, anzi a volte amplifica. I reasoning model (di cui parleremo nel complemento) lavorano sopra l'architettura per mitigare questi limiti.
+      </div>
+    </div>
+
+    <div class="family">
+      <div class="family-label">
+        <div class="family-num">III</div>
+        <div class="family-title">Limiti dall'addestramento per imitazione</div>
+      </div>
+      <div class="family-meta">RADICE: statistiche del testo, non della realtà</div>
+      <p>
+        Il modello impara una funzione che mappa contesti a distribuzioni di probabilità
+        sul prossimo token, addestrata per riprodurre le statistiche del testo umano nel
+        corpus. Tutto ciò che si trova frequentemente espresso nel testo emerge.
+        Tutto ciò che <em>non</em> è nei testi — o che è rappresentato in modo distorto
+        rispetto alla realtà — <em>non</em> emerge bene.
+      </p>
+      <p>Conseguenze concrete:</p>
+      <ul class="family-examples">
+        <li><strong>Performance disuguale tra domini</strong> — bravissimi nei domini dove le spiegazioni didattiche abbondano (matematica scolastica, programmazione di base), mediocri dove dominano gli scritti specialistici condensati, più deboli in domini di nicchia.</li>
+        <li><strong>Forza nell'introduzione, debolezza nel dettaglio operativo</strong> — un'analisi parte forte, fluida, competente; scende nei dettagli specialistici e diventa meno precisa. La distribuzione del testo introduttivo è molto più ricca di quella tecnico-operativa.</li>
+        <li><strong>Allucinazione</strong> — il modello ha imparato a produrre output statisticamente plausibili. "Plausibile" e "vero" sono cose diverse. Per le zone rare del sapere (dettagli specifici, citazioni puntuali, informazioni quantitative precise) il modello produce con la stessa fluida sicurezza output completamente inventati.</li>
+      </ul>
+      <p>
+        L'allucinazione <strong>non è un bug</strong>. È una conseguenza diretta del fatto
+        che il modello è addestrato a produrre output plausibili, e per i casi in cui
+        plausibilità e verità divergono, il modello produce con la stessa convinzione
+        adoperata per le risposte corrette.
+      </p>
+      <div class="family-mitigation">
+        <strong>Mitigazione</strong> Nessuna tecnica di prompting risolve completamente. Il problema è nei dati e nell'obiettivo di addestramento. Aiutano: RAG, verifica esterna delle citazioni, restringere il modello a domini noti.
+      </div>
+    </div>
+
+    <div class="family">
+      <div class="family-label">
+        <div class="family-num">IV</div>
+        <div class="family-title">Limiti epistemici sul proprio funzionamento</div>
+      </div>
+      <div class="family-meta">RADICE: nessuna introspezione affidabile</div>
+      <p>
+        Gli LLM non hanno introspezione affidabile sul proprio processo. Se chiedi
+        "come hai fatto a rispondermi?", il modello produrrà una spiegazione plausibile.
+        Ma quella spiegazione non è una descrizione accurata di quello che è successo
+        computazionalmente. È <em>un nuovo output</em> generato dallo stesso meccanismo,
+        che racconta una storia coerente con la risposta precedente.
+      </p>
+      <p>Conseguenze concrete:</p>
+      <ul class="family-examples">
+        <li><strong>Auto-spiegazioni inaffidabili</strong> — quando un LLM dice "ho considerato X invece di Y", quella non è una diagnosi accurata, è un'altra produzione plausibile. Il modello non sa perché ha sbagliato.</li>
+        <li><strong>Scuse senza vera diagnosi</strong> — un LLM che si scusa per un errore non ha capito dove ha sbagliato: ha solo riconosciuto il pattern "l'utente è scontento, devo scusarmi e ricominciare".</li>
+        <li><strong>Disclaimer di incertezza non veridici</strong> — quando dice "non sono sicuro di X", non sta consultando un termometro interno della propria incertezza. Sta producendo un pattern di "quando si scrive 'non sono sicuro'" appreso dai dati. La correlazione con la reale bassa confidenza non è affidabile.</li>
+      </ul>
+      <div class="family-mitigation">
+        <strong>Mitigazione</strong> Sapere che il limite esiste, e non prendere per oro le auto-descrizioni del modello. Per affidabilità reale, servono verifiche esterne, non l'introspezione del modello.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="callout callout-amber">
+    <h4>Un'osservazione conclusiva</h4>
+    <p>
+      Questi limiti <strong>non sono incidentali, non sono bug</strong>, e in larga parte
+      <strong>non si risolveranno semplicemente "facendo modelli più grandi"</strong>.
+      Sono conseguenze della <em>forma</em> del Transformer addestrato in modalità
+      autoregressiva. Modelli più grandi spostano i confini — più zone diventano
+      "competenti", più pattern vengono coperti, le approssimazioni migliorano — ma le
+      famiglie di limiti restano. Le tecniche che davvero le affrontano (e i reasoning
+      model ne sono il primo esempio) lavorano modificando il <em>come</em> il modello
+      viene usato, non solo quanto è grande.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 4 — IMPLICAZIONI PER IL PROMPTING -->
+<section>
+  <div class="section-num">04 — IMPLICAZIONI PER LA PRATICA</div>
+  <h2>Cinque osservazioni operative sul prompting</h2>
+  <p class="lead">
+    Tutto quello che abbiamo costruito sul ragionamento, sulla CoT e sui limiti
+    strutturali ha conseguenze pratiche dirette su come si scrive un prompt efficace.
+    Cinque osservazioni operative, ognuna ancorata a un meccanismo che abbiamo già visto.
+  </p>
+
+  <div class="practices">
+
+    <div class="practice">
+      <div class="practice-num"></div>
+      <div>
+        <h4>Chiedere CoT esplicita è quasi sempre conveniente per problemi non banali</h4>
+        <p>
+          Per qualsiasi problema che richieda più di un'inferenza elementare — calcoli a
+          più passi, analisi che ne incrocia diverse, decisioni multi-fattore, valutazioni
+          pro e contro — chiedere esplicitamente di ragionare passo per passo prima di
+          rispondere è la singola modifica al prompt che produce il miglioramento più
+          affidabile.
+        </p>
+        <p>
+          Formulazioni efficaci e quasi equivalenti: <em>"Ragiona passo per passo prima
+          di rispondere"</em>, <em>"Spiega il tuo ragionamento"</em>, <em>"Prima di dare
+          la risposta finale, analizza il problema"</em>, <em>"Lavora attraverso il
+          problema mostrando i tuoi passaggi"</em>. Il modello reagisce perché ha visto
+          questi pattern nei dati, associati a risposte tipicamente articolate.
+        </p>
+        <p>
+          <strong>Il costo è trascurabile</strong>. Anche per problemi semplici, la CoT
+          non danneggia. La domanda operativa non è "in che casi metterlo?" ma "in che
+          casi <em>non</em> metterlo?".
+        </p>
+      </div>
+    </div>
+
+    <div class="practice">
+      <div class="practice-num"></div>
+      <div>
+        <h4>La formulazione del problema influenza la zona di competenza</h4>
+        <p>
+          Lo stesso problema, posto in modi diversi, attiva zone diverse della
+          "competenza distillata" del modello. Una formulazione in registro scolastico
+          standard fa atterrare il modello nella zona "matematica scolastica" — densamente
+          popolata di esempi corretti. Una formulazione inusuale lo porta in una zona
+          meno popolata.
+        </p>
+        <p>
+          Quando un problema sembra non sbloccarsi nemmeno con la CoT, <strong>vale la
+          pena riformularlo</strong>. Provare un linguaggio più tecnico o più colloquiale.
+          Esplicitare prerequisiti che davi per scontati. Tradurre il problema in un
+          dominio analogo dove il modello sia più competente (es. riformulare un problema
+          combinatorio come problema di programmazione).
+        </p>
+        <p>
+          Spesso il problema non era nel modello: era nella formulazione che lo portava
+          in una zona dove era debole. Per prompt che usi ripetutamente, vale la pena
+          iterare anche su <em>come</em> formuli la richiesta, non solo su cosa chiedi.
+        </p>
+      </div>
+    </div>
+
+    <div class="practice">
+      <div class="practice-num"></div>
+      <div>
+        <h4>Una CoT articolata non è un sigillo di affidabilità</h4>
+        <p>
+          Con un essere umano, una spiegazione articolata è generalmente un segnale di
+          accuratezza. Con un LLM, questa intuizione fallisce. Il modello è perfettamente
+          capace di produrre catene di ragionamento lunghe, articolate, formalmente
+          impeccabili, che concludono con risposte sbagliate.
+        </p>
+        <p>
+          Quando il problema è davvero al confine della competenza del modello, una CoT
+          articolata può essere meno affidabile di una risposta secca, perché ogni
+          passaggio intermedio è un'occasione in più per atterrare in una zona meno
+          densamente popolata di pattern corretti.
+        </p>
+        <p>
+          <strong>Non valutare la qualità di un output dalla sua plausibilità retorica</strong>.
+          Per problemi dove la correttezza è critica, verifica indipendentemente almeno
+          alcuni passaggi della catena: se i numeri tornano, se le citazioni esistono, se
+          le regole applicate corrispondono a quelle dichiarate. La CoT va trattata come
+          una <em>bozza di lavoro da verificare</em>, non come una conclusione.
+        </p>
+      </div>
+    </div>
+
+    <div class="practice">
+      <div class="practice-num"></div>
+      <div>
+        <h4>I prompt che inducono direzioni semantiche forti producono razionalizzazioni</h4>
+        <p>
+          Quando formuli un prompt che spinge verso una conclusione specifica — linguaggio
+          carico, presupposizione di una risposta, segnali di aspettativa — il modello
+          atterra in quella zona, e la CoT che produce sarà costruita per arrivarci. Non
+          per "compiacere" l'utente, ma perché l'attenzione del modello è guidata dai
+          segnali ricevuti.
+        </p>
+        <p>
+          Esempi: <em>"Spiegami perché [tesi X] è corretta"</em> tende a difendere X.
+          <em>"Le auto elettriche sono davvero così ecologiche come dicono?"</em> tende
+          a produrre scetticismo. <em>"Sembra che Y sia il migliore: cosa ne pensi?"</em>
+          tende a confermare Y.
+        </p>
+        <p>
+          Per analisi equilibrate, <strong>formula prompt che non presuppongano una
+          conclusione</strong>: "analizza i pro e i contro di X", "considera diverse
+          prospettive su Y". Se vuoi stress-testare un'opinione, chiedi al modello di
+          sostenere la posizione opposta. Se una CoT arriva in una direzione precisa
+          troppo presto, chiedi esplicitamente di considerare alternative.
+        </p>
+      </div>
+    </div>
+
+    <div class="practice">
+      <div class="practice-num"></div>
+      <div>
+        <h4>Alcune classi di problemi richiedono scaffolding specifico</h4>
+        <p>
+          La CoT generica non basta per tutto. Per certe classi di problemi, conviene
+          una struttura più mirata.
+        </p>
+        <p>
+          <strong>Calcolo aritmetico esteso</strong>: meglio chiedere al modello di
+          scrivere ed eseguire codice (Python, calcolatrice) invece di calcolare a mente.
+          Negli assistenti moderni questo è spesso un tool integrato.
+        </p>
+        <p>
+          <strong>Tracking di stato attraverso molti passi</strong>: chiedere di
+          mantenere uno stato esplicito mentre si procede (<em>"dopo ogni mossa, riassumi
+          chi ha cosa"</em>). Lo stato viene esternalizzato nel testo, e il modello può
+          attingervi senza ricostruirlo.
+        </p>
+        <p>
+          <strong>Problemi con molte alternative</strong>: strutturare il prompt in modo
+          che il modello produca le alternative <em>prima</em> di valutarle (<em>"prima
+          elenca tutte le opzioni, poi analizza ciascuna, poi confronta"</em>). Se chiedi
+          direttamente "qual è la migliore?", il modello sceglie nel primo token e la
+          difende.
+        </p>
+        <p>
+          <strong>Applicazione di procedure note</strong>: fornire la procedura nel prompt,
+          invece di sperare che il modello la ricostruisca. Trasformi un compito di
+          "ricordare e applicare" in un compito di "applicare", molto più affidabile.
+        </p>
+        <p>
+          Il principio unificante: <strong>strutturare il prompt in modo che ogni singolo
+          passaggio richiesto al modello cada dentro la sua zona di competenza</strong>.
+          La CoT distribuisce il calcolo nel tempo, ma se i singoli passi restano troppo
+          complessi, non basta. Il prompt ben progettato spezza il problema in passi
+          piccoli abbastanza da essere ciascuno trattabile.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">La saldatura concettuale del Tema 3</div>
+    <p>
+      Un LLM non "ragiona" nel senso umano del termine: <em>imita</em> il ragionamento
+      navigando uno spazio semantico secondo pattern distillati dall'addestramento. Per
+      problemi dentro la zona densamente popolata dei pattern, questa imitazione produce
+      output indistinguibili da un ragionamento vero.
+    </p>
+    <p>
+      La <strong>Chain-of-Thought</strong> è il trucco architetturalmente significativo
+      che cambia la situazione: <em>espande il budget computazionale</em>, distribuendo
+      il calcolo su molti token successivi, ognuno con i suoi N strati di profondità.
+      Quando ogni passo della catena cade dentro la zona di competenza del modello, il
+      risultato finale è ragionamento effettivamente corretto — non perché il modello
+      "abbia capito", ma perché ogni passaggio era trattabile.
+    </p>
+    <p>
+      I <strong>limiti</strong> nascono direttamente dall'architettura: profondità fissa
+      per token, attenzione causale irreversibile, addestramento per imitazione di
+      pattern, mancanza di introspezione. Sono limiti strutturali, non incidentali. Il
+      <strong>prompting efficace</strong> consiste nel comprenderli e costruire prompt
+      che lavorino dentro le zone di forza del modello, evitando gli scogli dove la
+      navigazione fallisce.
+    </p>
+  </div>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Otto cose da portarsi via dal Tema 3</h3>
+    <ol class="takeaway-list">
+      <li>
+        Un LLM non esegue calcoli nel senso classico: <em>naviga lo spazio semantico</em>
+        secondo pattern distillati dall'addestramento. Quando le sue produzioni
+        assomigliano al ragionamento, è perché i pattern di "ragionamento corretto" sono
+        densamente rappresentati nei dati per il caso specifico.
+      </li>
+      <li>
+        L'architettura impone un <strong>budget computazionale finito per ogni token</strong>:
+        esattamente N strati di profondità. Per problemi che richiedono più calcolo di
+        quanto ne stia in N strati, il modello produce comunque un token — la migliore
+        approssimazione possibile, talvolta corretta, talvolta sbagliata.
+      </li>
+      <li>
+        La <strong>Chain-of-Thought</strong> espande il budget computazionale distribuendolo
+        nel tempo: ogni token generato si accoda al prompt e diventa scaffolding per il
+        successivo. Il budget complessivo diventa <code>N × (numero di token generati)</code>.
+        Il modello non è più intelligente: ha più tempo di calcolo.
+      </li>
+      <li>
+        La CoT funziona quando ogni singolo passo della catena cade dentro la zona di
+        competenza del modello. Funziona meno se anche un solo passo cade fuori: l'errore
+        si cristallizza nel contesto e si propaga. È la modalità di fallimento più
+        insidiosa, perché produce ragionamenti <em>internamente coerenti ma globalmente
+        sbagliati</em>.
+      </li>
+      <li>
+        Quattro famiglie di limiti, ognuna radicata in una proprietà architetturale:
+        <strong>budget finito</strong> (calcoli profondi, conteggio, backtracking),
+        <strong>attenzione causale</strong> (cristallizzazione, anchoring,
+        razionalizzazione), <strong>addestramento per imitazione</strong> (allucinazione,
+        debolezza nei domini specialistici), <strong>limiti epistemici</strong>
+        (introspezione inaffidabile).
+      </li>
+      <li>
+        Questi limiti <strong>non sono bug</strong> e non si risolvono semplicemente
+        "facendo modelli più grandi". Sono conseguenze della forma del Transformer
+        autoregressivo. Si superano modificando come il modello viene usato — e qui
+        entrano in scena i <em>reasoning model</em>, che vediamo nel complemento.
+      </li>
+      <li>
+        Per il prompting efficace: <strong>chiedere CoT è quasi sempre conveniente</strong>;
+        la formulazione del problema sceglie la zona di competenza in cui il modello
+        atterra; <strong>la plausibilità retorica non è correttezza</strong> (verifica
+        sempre i passaggi critici); prompt con direzioni semantiche forti producono
+        razionalizzazioni; certe classi di problemi richiedono scaffolding specifico
+        (codice per il calcolo, stato esplicito per il tracking, alternative prima della
+        valutazione).
+      </li>
+      <li>
+        Una formulazione da portarsi via: la CoT è <em>imitazione di ragionamento che
+        produce occasionalmente ragionamento vero come effetto collaterale</em>. Quando
+        funziona, funziona perché la decomposizione ha portato ogni passaggio dentro la
+        zona di competenza, e le competenze elementari del modello — composte in fila —
+        producono un risultato corretto. Non c'è una "regola" applicata: c'è una
+        composizione di pattern che, nel caso fortunato, coincide con l'applicazione di
+        una regola.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- BRIDGE AL COMPLEMENTO SUI REASONING MODEL -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="bridge">
+    <div class="bridge-label">Complemento al Tema 3</div>
+    <h3>I "reasoning model": una nuova generazione di assistenti</h3>
+    <p>
+      Una conseguenza diretta di quanto abbiamo capito è che, se i limiti del ragionamento
+      di un LLM derivano dall'architettura, allora superarli richiede di modificare il
+      <em>come</em> il modello viene usato — non solo di scalarlo. Negli ultimi anni è
+      emersa una nuova famiglia di modelli, chiamati <strong>reasoning model</strong>
+      (o1, o3, Claude con extended thinking, Gemini con thinking, DeepSeek R1, e altri),
+      che cercano di fare esattamente questo.
+    </p>
+    <p>
+      Come funzionano, davvero? Spingono di default verso la CoT, o c'è qualcosa di più?
+      Sono modelli "più grandi", o "diversamente addestrati", o "diversamente usati"?
+      In quali casi conviene davvero usarli, e in quali no? Sono le domande del prossimo
+      report — un <strong>complemento dedicato al Tema 3</strong>, costruito con ricerca
+      aggiornata sul panorama attuale degli assistenti AI di ragionamento. Lì proviamo a
+      mettere in chiaro cosa cambia, sotto il cofano e nella pratica.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Tema 3 di 4 — Percorso di approfondimento su LLM e prompting (seconda chat)</p>
+  <p>Come "ragiona" un LLM</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tema 4 — Parte 3: Ottimizzazione e sintesi del percorso</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--indigo);
+    padding: 88px 48px 96px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 580px; height: 580px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-graphic {
+    position: absolute;
+    top: 50%; right: 7%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 54px;
+    line-height: 1.06;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 20px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 48px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--indigo);
+    margin: 28px 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  .callout p { font-size: 15.5px; line-height: 1.7; margin-bottom: 12px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-orange { background: var(--orange-faint); border-left-color: var(--orange); }
+  .callout-orange h4 { color: var(--orange); }
+
+  .callout-indigo { background: var(--indigo-faint); border-left-color: var(--indigo); }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout-teal { background: var(--teal-faint); border-left-color: var(--teal); }
+  .callout-teal h4 { color: var(--teal); }
+
+  .callout-amber { background: var(--amber-faint); border-left-color: var(--amber); }
+  .callout-amber h4 { color: var(--amber); }
+
+  .callout-purple { background: var(--purple-faint); border-left-color: var(--purple); }
+  .callout-purple h4 { color: var(--purple); }
+
+  /* ── INSIGHT ── */
+  .insight {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+  .insight em { color: var(--orange-light); font-style: italic; }
+  .insight strong { color: var(--white); }
+  .insight code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── CACHING MATRIX ── */
+  .matrix {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 32px 0;
+  }
+
+  .matrix-row {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .matrix-row:last-child { border-bottom: none; }
+
+  .matrix-header {
+    background: var(--indigo);
+    color: var(--white);
+  }
+
+  .matrix-header > div {
+    padding: 14px 20px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+  }
+
+  .matrix-header > div:not(:last-child) {
+    border-right: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .matrix-row:not(.matrix-header) > div {
+    padding: 18px 20px;
+    border-right: 1px solid var(--border2);
+  }
+
+  .matrix-row:not(.matrix-header) > div:last-child {
+    border-right: none;
+  }
+
+  .matrix-strategy {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--indigo);
+  }
+
+  .matrix-strategy-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--orange);
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+    font-weight: 600;
+  }
+
+  .matrix-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-mid);
+  }
+
+  .matrix-impact {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .impact-high { color: var(--teal); }
+  .impact-medium { color: var(--amber); }
+  .impact-low { color: var(--ink-light); }
+
+  /* ── ECOSYSTEM CARDS ── */
+  .ecosystem {
+    margin: 32px 0;
+  }
+
+  .eco-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 22px;
+    align-items: start;
+    border-left: 4px solid;
+  }
+
+  .eco-card-1 { border-left-color: var(--teal); }
+  .eco-card-2 { border-left-color: var(--indigo); }
+  .eco-card-3 { border-left-color: var(--orange); }
+  .eco-card-4 { border-left-color: var(--purple); }
+  .eco-card-5 { border-left-color: var(--amber); }
+
+  .eco-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 36px;
+    color: var(--orange);
+    line-height: 1;
+  }
+
+  .eco-content h4 {
+    margin: 0 0 8px;
+    font-size: 17px;
+    color: var(--indigo);
+    font-weight: 600;
+  }
+
+  .eco-tagline {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-light);
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .eco-content p {
+    font-size: 14.5px;
+    line-height: 1.65;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  /* ── WORKFLOW TIMELINE ── */
+  .timeline {
+    background: var(--bg2);
+    border-radius: 8px;
+    padding: 32px 36px;
+    margin: 32px 0;
+  }
+
+  .timeline-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .timeline-phases {
+    counter-reset: phase-counter;
+  }
+
+  .timeline-phase {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 18px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border2);
+    align-items: start;
+  }
+
+  .timeline-phase:last-child { border-bottom: none; }
+
+  .timeline-phase-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--orange);
+    font-weight: 600;
+    letter-spacing: 1px;
+    counter-increment: phase-counter;
+  }
+
+  .timeline-phase-num::before {
+    content: "FASE " counter(phase-counter);
+  }
+
+  .timeline-phase h4 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    color: var(--indigo);
+  }
+
+  .timeline-phase p {
+    font-size: 14.5px;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  .timeline-phase strong {
+    color: var(--indigo);
+    font-weight: 600;
+  }
+
+  /* ── REFLECTION ── */
+  .reflection {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 48px 52px;
+    margin: 36px 0;
+    border: 1px solid var(--border);
+  }
+
+  .reflection-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .reflection h3 {
+    margin: 0 0 20px;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--indigo);
+    font-weight: 500;
+    line-height: 1.25;
+  }
+
+  .reflection h3 em { font-style: italic; color: var(--indigo-mid); }
+
+  .reflection p {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--ink-mid);
+    margin-bottom: 16px;
+  }
+
+  .reflection p:last-child { margin-bottom: 0; }
+
+  /* ── PATH SUMMARY ── */
+  .path-summary {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 36px;
+    margin: 32px 0;
+  }
+
+  .path-summary h4 {
+    margin: 0 0 18px;
+    font-size: 16px;
+    color: var(--indigo);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 600;
+  }
+
+  .path-summary ol {
+    list-style: none;
+    counter-reset: path-counter;
+    padding: 0;
+  }
+
+  .path-summary li {
+    padding: 12px 0 12px 50px;
+    border-bottom: 1px solid var(--border2);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-mid);
+    position: relative;
+  }
+
+  .path-summary li:last-child { border-bottom: none; }
+
+  .path-summary li::before {
+    content: counter(path-counter);
+    counter-increment: path-counter;
+    position: absolute;
+    left: 0;
+    top: 12px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange);
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .path-summary strong {
+    color: var(--indigo);
+    font-weight: 600;
+  }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(13,122,110,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .takeaway-list em { color: var(--orange-light); font-style: italic; }
+  .takeaway-list strong { color: var(--white); font-weight: 600; }
+  .takeaway-list code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── FAREWELL ── */
+  .farewell {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 60px 56px;
+    border-radius: 8px;
+    margin: 56px 0 0;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .farewell::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .farewell::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -80px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(94,42,122,0.30) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .farewell-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 18px;
+    position: relative;
+  }
+
+  .farewell h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 36px;
+    margin: 0 0 24px;
+    position: relative;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .farewell h3 em { color: var(--orange-light); font-style: italic; }
+
+  .farewell p {
+    font-size: 17px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.88);
+    margin: 0 auto 18px;
+    max-width: 680px;
+    position: relative;
+  }
+
+  .farewell p:last-child { margin-bottom: 0; }
+
+  .farewell em { color: var(--orange-light); font-style: italic; }
+  .farewell strong { color: var(--white); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 32px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 26px; }
+    h3 { font-size: 19px; }
+    .insight { padding: 28px 24px; }
+    .takeaways { padding: 40px 28px; }
+    .reflection { padding: 32px 28px; }
+    .farewell { padding: 40px 28px; }
+    .farewell h3 { font-size: 26px; }
+    .matrix-row { grid-template-columns: 1fr; }
+    .matrix-row > div { border-right: none !important; border-bottom: 1px solid var(--border2); }
+    .matrix-row > div:last-child { border-bottom: none; }
+    .eco-card { grid-template-columns: 50px 1fr; gap: 14px; padding: 18px 20px; }
+    .eco-num { font-size: 28px; }
+    .timeline-phase { grid-template-columns: 60px 1fr; }
+    .path-summary { padding: 22px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <svg class="hero-bg-graphic" width="260" height="260" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+    <!-- Cinque cerchi che si intersecano - le strategie come ecosistema -->
+    <g opacity="0.85">
+      <circle cx="130" cy="80" r="40" fill="none" stroke="white" stroke-width="2" opacity="0.55"/>
+      <circle cx="80" cy="130" r="40" fill="none" stroke="white" stroke-width="2" opacity="0.55"/>
+      <circle cx="180" cy="130" r="40" fill="none" stroke="white" stroke-width="2" opacity="0.55"/>
+      <circle cx="100" cy="190" r="40" fill="none" stroke="white" stroke-width="2" opacity="0.55"/>
+      <circle cx="160" cy="190" r="40" fill="none" stroke="white" stroke-width="2" opacity="0.55"/>
+      <!-- Punto centrale arancione -->
+      <circle cx="130" cy="140" r="6" fill="#f07040"/>
+    </g>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-label">Tema 4 — Parte 3 di 3</div>
+    <h1>Ottimizzazione e <em>sintesi</em> del percorso</h1>
+    <p class="hero-sub">
+      Il context caching come ottimizzazione che attraversa tutte le strategie.
+      Le cinque strategie ricomposte come ecosistema integrato. E una riflessione
+      finale sull'intero percorso che chiudiamo qui.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">Context caching, ecosistema delle strategie, chiusura del percorso</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Tema del percorso</div>
+        <div class="meta-value">4 di 4 (Parte 3 — finale)</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Natura</div>
+        <div class="meta-value">Ottimizzazione + sintesi + riflessione</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 — CONTEXT CACHING -->
+<section>
+  <div class="section-num">01 — CONTEXT CACHING</div>
+  <h2>L'ottimizzazione che attraversa tutte le strategie</h2>
+  <p class="lead">
+    Il context caching non è una strategia a sé — è un'<strong>ottimizzazione che si
+    applica alle strategie esistenti</strong>. Ma ha conseguenze pratiche
+    significative, e vale la pena trattarlo bene perché è quello che trasforma certe
+    strategie da "teoricamente possibili" a "economicamente sensate".
+  </p>
+
+  <h3>Cosa è e perché esiste</h3>
+  <p>
+    Il problema che il caching risolve è questo: quando lavori ripetutamente sullo
+    stesso documento o sullo stesso prefisso di contesto, paghi ogni volta per
+    processare l'intero materiale stabile, anche se è identico tra le chiamate. Per
+    un romanzo di 100k token, ogni chiamata processa quei 100k token da zero. Se
+    fai 20 chiamate, hai processato 2 milioni di token cumulativi — di cui il 95% è
+    esattamente lo stesso materiale, processato 20 volte.
+  </p>
+  <p>
+    Il context caching dice: <em>aspetta, se il prefisso del prompt è identico a una
+    chiamata precedente, non rifaccio il lavoro di processarlo. Tengo in memoria il
+    risultato del processing, e lo riuso</em>. Da questa idea, semplice in sé,
+    derivano risparmi di costo del <strong>80-90%</strong> e riduzioni di latenza
+    significative per workflow iterativi.
+  </p>
+  <p>
+    Tecnicamente, il modello deve comunque "vedere" il contesto — l'attenzione deve
+    poter operare su di esso — ma la fase più costosa, che è il calcolo iniziale
+    degli stati interni a partire dal testo, viene fatta una volta sola. La cache
+    memorizza il risultato di quel calcolo, e le chiamate successive partono da
+    quello stato pre-calcolato invece che da zero.
+  </p>
+
+  <h3>Come funziona, in pratica</h3>
+  <p>
+    Il context caching si applica in tutti i provider principali (Anthropic, OpenAI,
+    Google), con dettagli diversi. Il principio comune è questo: <strong>il prefisso
+    deve essere identico byte per byte</strong> tra una chiamata e quella successiva.
+    Anche una differenza di un singolo carattere fa fallire il cache hit per il
+    prefisso, e il sistema processa tutto da zero come se la cache non esistesse.
+  </p>
+  <p>
+    Questa è la regola operativa fondamentale, e ha una conseguenza pratica
+    importante: <strong>la struttura del prompt va progettata in funzione del
+    caching</strong>. Tutto ciò che è stabile (documento, istruzioni di sistema,
+    esempi few-shot) deve venire all'inizio del prompt; tutto ciò che cambia tra le
+    chiamate (la domanda dell'utente, parametri variabili) deve venire alla fine. Se
+    metti la domanda all'inizio e il documento dopo, il caching non funziona —
+    perché il prefisso cambia ad ogni chiamata.
+  </p>
+
+  <div class="callout callout-amber">
+    <h4>Le quattro condizioni perché funzioni</h4>
+    <p>
+      <strong>1. Prefisso stabile.</strong> Tutto ciò che è invariante tra le
+      chiamate deve stare prima di tutto ciò che cambia. Date, timestamp, ID di
+      sessione — tutto questo deve stare <em>dopo</em> la parte cachata.
+    </p>
+    <p>
+      <strong>2. Blocco sufficientemente grande.</strong> I provider hanno soglie
+      minime (Anthropic: 1.024 token per modelli piccoli, 2.048 per i grandi).
+      Sotto quella soglia il caching non si attiva. Per un romanzo non è un problema.
+    </p>
+    <p>
+      <strong>3. Workflow temporalmente concentrato.</strong> I cache hanno durata
+      limitata (5 minuti default su Anthropic, opzioni estese fino a un'ora). Per
+      sfruttarli, le chiamate devono susseguirsi entro la finestra.
+    </p>
+    <p>
+      <strong>4. Provider e modello supportano.</strong> Non tutti i modelli
+      supportano il caching, e le modalità differiscono. Su Claude consumer è
+      automatico; via API si attiva con parametro <code>cache_control</code>. Su
+      OpenAI è automatico per modelli supportati. Su Google con meccanismo dedicato
+      (<code>CachedContent</code>).
+    </p>
+  </div>
+
+  <h3>Il prezzo del caching</h3>
+  <p>
+    Il caching non è gratuito, ma è molto economico rispetto al prezzo pieno.
+    Tipicamente la <strong>scrittura nel cache</strong> (prima chiamata che lo crea)
+    costa il 125% del prezzo input standard; la <strong>lettura dal cache</strong>
+    (chiamate successive che lo utilizzano) costa il 10% del prezzo standard.
+  </p>
+  <p>
+    Conseguenza: se fai una sola chiamata con caching attivo, paghi più di una
+    chiamata senza caching. Se ne fai due, sei alla pari. Da tre in avanti, il
+    caching diventa progressivamente più conveniente. Per workflow iterativi reali —
+    decine di chiamate in una sessione — il risparmio complessivo è
+    dell'<strong>80-90%</strong>.
+  </p>
+
+  <h3>Caching e le cinque strategie: l'impatto specifico</h3>
+  <p>
+    Come il caching si applica a ciascuna strategia, e quanto guadagno produce.
+  </p>
+
+  <div class="matrix">
+    <div class="matrix-row matrix-header">
+      <div>Strategia</div>
+      <div>Cosa si cacha, e cosa significa in pratica</div>
+      <div>Impatto</div>
+    </div>
+    <div class="matrix-row">
+      <div>
+        <div class="matrix-strategy-num">STRATEGIA 1</div>
+        <div class="matrix-strategy">Full context</div>
+      </div>
+      <div class="matrix-description">
+        Il documento (il romanzo) è il prefisso stabile, le domande sono la parte
+        variabile. La prima chiamata paga prezzo pieno; tutte le successive entro la
+        durata del cache pagano il 10%. Per una sessione di 20 domande, il costo
+        passa da ~6$ a ~0.9$ per Claude Sonnet.
+      </div>
+      <div class="matrix-impact impact-high">Massimo</div>
+    </div>
+    <div class="matrix-row">
+      <div>
+        <div class="matrix-strategy-num">STRATEGIA 2</div>
+        <div class="matrix-strategy">Chunking</div>
+      </div>
+      <div class="matrix-description">
+        Ogni chunk è una chiamata diversa con prefisso diverso, quindi il caching
+        sul contenuto non aiuta. Aiuta sulle <em>istruzioni di sistema</em> ripetute
+        per ogni chunk: vengono cachate dopo la prima chiamata. Risparmio modesto ma
+        reale su 80 chiamate cumulative.
+      </div>
+      <div class="matrix-impact impact-low">Modesto</div>
+    </div>
+    <div class="matrix-row">
+      <div>
+        <div class="matrix-strategy-num">STRATEGIA 3</div>
+        <div class="matrix-strategy">Riassunti gerarchici</div>
+      </div>
+      <div class="matrix-description">
+        Doppio guadagno. Durante la costruzione della piramide, le istruzioni di
+        sistema possono essere cachate come nel chunking. Più importante: una volta
+        costruita, i livelli 2+3 (o l'intera piramide) sono il prefisso stabile per
+        ogni domanda strutturale. Risparmio significativo per workflow prolungati.
+      </div>
+      <div class="matrix-impact impact-high">Alto</div>
+    </div>
+    <div class="matrix-row">
+      <div>
+        <div class="matrix-strategy-num">STRATEGIA 4</div>
+        <div class="matrix-strategy">RAG</div>
+      </div>
+      <div class="matrix-description">
+        I chunks recuperati variano da una domanda all'altra, quindi non sono
+        cachabili in modo prevedibile. Cachabili: istruzioni di sistema, eventuali
+        esempi few-shot. Alcuni sistemi RAG avanzati pre-cachano i chunks più
+        frequentemente recuperati ("hot chunks").
+      </div>
+      <div class="matrix-impact impact-medium">Medio</div>
+    </div>
+    <div class="matrix-row">
+      <div>
+        <div class="matrix-strategy-num">STRATEGIA 5</div>
+        <div class="matrix-strategy">Mappe strutturate</div>
+      </div>
+      <div class="matrix-description">
+        Eccellente abbinamento. Le mappe sono il prefisso stabile per quasi tutte
+        le domande di revisione strutturata. Ogni interrogazione sulle mappe paga
+        solo il 10% del costo della mappa. Per workflow seri, questo è il punto in
+        cui la strategia 5 diventa economicamente leggera.
+      </div>
+      <div class="matrix-impact impact-high">Alto</div>
+    </div>
+  </div>
+
+  <h3>Il caching come piano di lavoro</h3>
+  <p>
+    C'è un modo di usare il caching che va oltre l'ottimizzazione del costo, e che
+    è particolarmente interessante per la revisione di un romanzo. Una volta capito
+    che il caching premia la stabilità del prefisso, puoi <strong>progettare il
+    workflow di revisione come sequenza di "sessioni cachate" tematiche</strong>.
+  </p>
+
+  <div class="timeline">
+    <div class="timeline-label">Esempio: workflow di revisione organizzato per il caching</div>
+    <div class="timeline-phases">
+      <div class="timeline-phase">
+        <div class="timeline-phase-num"></div>
+        <div>
+          <h4>Sessione "revisione della prosa" (1 ora)</h4>
+          <p>
+            Apri una chat. Prompt: <strong>romanzo + prompt di sistema "revisione
+            della prosa"</strong>. Fai 15-20 domande di revisione della prosa in
+            modo concentrato. Il caching è massimo, e il modello opera "in modalità
+            revisore di prosa" coerentemente.
+          </p>
+        </div>
+      </div>
+      <div class="timeline-phase">
+        <div class="timeline-phase-num"></div>
+        <div>
+          <h4>Sessione "revisione dei personaggi" (1 ora)</h4>
+          <p>
+            Nuova chat. Prompt: <strong>romanzo + prompt di sistema "revisione dei
+            personaggi" + mappa dei personaggi</strong> (se l'hai costruita). 15-20
+            domande tematiche su personaggi.
+          </p>
+        </div>
+      </div>
+      <div class="timeline-phase">
+        <div class="timeline-phase-num"></div>
+        <div>
+          <h4>Sessione "revisione dei temi" (1 ora)</h4>
+          <p>
+            Nuova chat. Prompt: <strong>romanzo + prompt sistema temi + mappa
+            tematica</strong>. Stessa logica.
+          </p>
+        </div>
+      </div>
+      <div class="timeline-phase">
+        <div class="timeline-phase-num"></div>
+        <div>
+          <h4>Sessione "revisione strutturale" (1 ora)</h4>
+          <p>
+            Nuova chat. Prompt: <strong>piramide di riassunti gerarchici + mappa
+            archi narrativi + mappa setup/payoff</strong>. Domande sul pacing, sulla
+            struttura dei tre atti, sui sottoplot.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    Questa organizzazione ha due vantaggi che si rinforzano: <strong>massimizza il
+    caching</strong> (ogni sessione ha un prefisso stabile sfruttato a fondo), e
+    <strong>migliora la qualità delle risposte</strong> (il modello opera in modo
+    coerente entro ogni lente, senza dispersione tra temi diversi). È un esempio di
+    come la struttura tecnica del caching può guidare la struttura organizzativa
+    del workflow.
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Una nota pratica: consumer vs API</h4>
+    <p>
+      Quando usi Claude (o analoghi) attraverso le interfacce consumer — sito web,
+      app, progetti — il caching è gestito automaticamente. Non devi fare nulla.
+      Per l'utente, l'unico effetto visibile è che le sessioni lunghe non producono
+      costi extra per il "ricordo" del materiale già discusso.
+    </p>
+    <p>
+      Quando usi le API, il caching va attivato esplicitamente, e tu decidi i
+      parametri. Questo è il caso quando costruisci uno strumento di revisione,
+      un'applicazione che lavora ripetutamente sui documenti, o quando hai bisogno
+      di controllo fine.
+    </p>
+    <p>
+      Per la revisione di un romanzo come lavoro umano iterativo, probabilmente
+      lavorerai in claude.ai con i progetti, e il caching sarà invisibile. Non devi
+      pensarci, ma sappi che <strong>c'è, e che è ciò che rende sostenibili sessioni
+      lunghe sullo stesso materiale</strong>.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 2 — LE STRATEGIE COME ECOSISTEMA -->
+<section>
+  <div class="section-num">02 — LE STRATEGIE COME ECOSISTEMA</div>
+  <h2>Cinque strategie complementari, non alternative</h2>
+  <p class="lead">
+    Adesso abbiamo tutto. Vale la pena di chiudere il Tema 4 con una ricomposizione
+    delle cinque strategie viste come ecosistema integrato — perché il messaggio
+    finale è che funzionano <em>insieme</em>, non in alternativa. La domanda non è
+    "quale strategia scelgo per il mio documento lungo", è "qual è la combinazione
+    giusta per il mio mix di task".
+  </p>
+
+  <div class="ecosystem">
+    <div class="eco-card eco-card-1">
+      <div class="eco-num">01</div>
+      <div class="eco-content">
+        <h4>Full context</h4>
+        <div class="eco-tagline">Il workhorse universale</div>
+        <p>
+          Per il lavoro conversazionale ed esplorativo. Quando il documento ci sta,
+          è quasi sempre il punto di partenza giusto. Con il context caching attivo,
+          è anche economicamente sostenibile per sessioni lunghe.
+        </p>
+      </div>
+    </div>
+
+    <div class="eco-card eco-card-2">
+      <div class="eco-num">02</div>
+      <div class="eco-content">
+        <h4>Chunking</h4>
+        <div class="eco-tagline">Il workhorse per task locali ripetuti</div>
+        <p>
+          Spezza un grande problema in tanti piccoli problemi indipendenti, e
+          produce risultati di alta qualità su ognuno. Con output strutturato e
+          ricomposizione disciplinata, produce una mappa di problemi locali da cui
+          ripartire.
+        </p>
+      </div>
+    </div>
+
+    <div class="eco-card eco-card-3">
+      <div class="eco-num">03</div>
+      <div class="eco-content">
+        <h4>Riassunti gerarchici</h4>
+        <div class="eco-tagline">L'infrastruttura per workflow prolungati</div>
+        <p>
+          Costruisce una rappresentazione condensata navigabile a granularità
+          diverse. Primo investimento serio quando il lavoro sul documento è
+          prolungato. Diventa base permanente per le altre strategie.
+        </p>
+      </div>
+    </div>
+
+    <div class="eco-card eco-card-4">
+      <div class="eco-num">04</div>
+      <div class="eco-content">
+        <h4>RAG</h4>
+        <div class="eco-tagline">Lo strumento per interrogazioni mirate</div>
+        <p>
+          Indicizza il documento in uno spazio semantico e permette interrogazioni
+          mirate. Funziona quando la rilevanza è localizzata in passaggi specifici.
+          I progetti di Claude ne sono una versione automatica e trasparente.
+        </p>
+      </div>
+    </div>
+
+    <div class="eco-card eco-card-5">
+      <div class="eco-num">05</div>
+      <div class="eco-content">
+        <h4>Mappe strutturate</h4>
+        <div class="eco-tagline">Lo strumento di piano per workflow complessi</div>
+        <p>
+          Costruiscono rappresentazioni esplicite delle entità e relazioni. Permettono
+          al modello di rispondere su domande strutturali senza ricostruire la
+          struttura ogni volta. Editabili dall'umano, diventano <em>interfaccia tra
+          visione editoriale e operazioni sul testo</em>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Un workflow professionale di revisione: tutte le strategie in azione</h3>
+  <p>
+    Un workflow di revisione di un romanzo importante probabilmente usa <strong>tutte
+    e cinque le strategie</strong>, in fasi diverse e per scopi diversi. Vediamo
+    come si stratificano nel tempo.
+  </p>
+
+  <div class="timeline">
+    <div class="timeline-label">Workflow professionale: come si stratificano le strategie</div>
+    <div class="timeline-phases">
+      <div class="timeline-phase">
+        <div class="timeline-phase-num"></div>
+        <div>
+          <h4>Esplorazione iniziale (full context)</h4>
+          <p>
+            Apri il romanzo in <strong>full context</strong>. Sessioni esplorative
+            per capire dove sono i punti di lavoro, quali sono le tue prime
+            impressioni, dove il modello identifica problemi che tu non avevi visto.
+            Niente infrastruttura, niente investimento iniziale. Solo conversazione
+            iterativa.
+          </p>
+        </div>
+      </div>
+      <div class="timeline-phase">
+        <div class="timeline-phase-num"></div>
+        <div>
+          <h4>Catalogazione locale (chunking)</h4>
+          <p>
+            Spezzi il romanzo in chunks e fai un <strong>chunking strutturato</strong>
+            con output JSON: per ogni capitolo, i problemi di prosa, le ripetizioni,
+            i dialoghi problematici, un ranking di urgenza. Ottieni una mappa
+            puntuale di interventi locali da fare.
+          </p>
+        </div>
+      </div>
+      <div class="timeline-phase">
+        <div class="timeline-phase-num"></div>
+        <div>
+          <h4>Costruzione dell'infrastruttura (riassunti gerarchici)</h4>
+          <p>
+            Costruisci la <strong>piramide di riassunti gerarchici</strong>: schede
+            capitolo (livello 1), schede atto (livello 2), scheda romanzo (livello
+            3). È l'infrastruttura per tutti i task globali che farai in seguito.
+            Investi 85 chiamate al modello, ottieni un'infrastruttura permanente.
+          </p>
+        </div>
+      </div>
+      <div class="timeline-phase">
+        <div class="timeline-phase-num"></div>
+        <div>
+          <h4>Indicizzazione per ricerche (RAG, o progetti)</h4>
+          <p>
+            Per ricerche mirate ricorrenti — "trova tutte le scene dove emerge il
+            tema X", "cerca i dialoghi con Y" — usi i <strong>progetti di Claude</strong>
+            come RAG automatico, o costruisci un RAG fai-da-te se hai esigenze di
+            controllo. Diventa il tuo "motore di ricerca semantico" sul romanzo.
+          </p>
+        </div>
+      </div>
+      <div class="timeline-phase">
+        <div class="timeline-phase-num"></div>
+        <div>
+          <h4>Pianificazione strutturata (mappe)</h4>
+          <p>
+            Dalla piramide costruisci le <strong>mappe strutturate</strong>:
+            personaggi, archi, temi, setup/payoff. Editi le mappe per esprimere la
+            tua visione di come il romanzo dovrebbe essere. Usi le mappe per
+            confrontare lo stato attuale con lo stato desiderato, identificare
+            interventi necessari, pianificare la revisione vera e propria.
+          </p>
+        </div>
+      </div>
+      <div class="timeline-phase">
+        <div class="timeline-phase-num"></div>
+        <div>
+          <h4>Revisione vera e propria (full context + caching)</h4>
+          <p>
+            Per ogni intervento concreto sul testo, torni in <strong>full context
+            con caching attivo</strong>. Hai a disposizione tutto: il romanzo, le
+            schede, le mappe. Il modello ti supporta nella riscrittura puntuale.
+            Le mappe ti dicono <em>cosa</em> rivedere, il full context ti aiuta a
+            farlo bene.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    Le strategie si stratificano nel tempo, ognuna abilitando lavori che le altre
+    non possono fare bene. Il caching attraversa tutto come ottimizzazione
+    trasversale che rende sostenibili anche le sessioni più lunghe e gli
+    investimenti più consistenti.
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">La saldatura finale del Tema 4</div>
+    <p>
+      Gestire documenti lunghi in un AI assistant non è una questione di "scegliere
+      la strategia giusta". È una questione di <strong>capire il mix di task</strong>
+      che il tuo lavoro richiede, e <em>combinare</em> strategie diverse per
+      affrontare ciascun tipo di task con lo strumento giusto.
+    </p>
+    <p>
+      Le strategie testuali (full context, chunking, riassunti) lavorano sul testo
+      o su rappresentazioni testuali. Le strategie più sofisticate (RAG, mappe)
+      costruiscono rappresentazioni diverse — vettoriali, strutturate — che
+      permettono task altrimenti impossibili. Il caching è il livello di ottimizzazione
+      che rende sostenibile usarle insieme.
+    </p>
+    <p>
+      Per la revisione di un romanzo come per qualsiasi caso d'uso complesso su
+      documenti lunghi, la maturità nell'uso degli AI assistant consiste proprio
+      nel passare dal <em>"come metto questo documento nel prompt"</em> al <em>"come
+      organizzo il mio workflow combinando le strategie disponibili"</em>.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 3 — IL PERCORSO INTERO -->
+<section>
+  <div class="section-num">03 — IL PERCORSO INTERO</div>
+  <h2>Chiudiamo cinque mesi di lavoro</h2>
+  <p class="lead">
+    Con questo report il Tema 4 si chiude, e con esso si chiude tutto il percorso —
+    sia questa seconda chat sia la prima da cui veniamo. Vale la pena fermarsi un
+    momento a tirare le somme. Non come riassunto esaustivo (i singoli report sono
+    sempre lì come riferimento), ma come <strong>sintesi del cammino fatto</strong>.
+  </p>
+
+  <h3>Quello che abbiamo costruito, in ordine</h3>
+
+  <div class="path-summary">
+    <h4>Il percorso completo</h4>
+    <ol>
+      <li>
+        Nella prima chat: <strong>tokenizzazione</strong> (BPE, ID, vocabolari),
+        <strong>embedding</strong> (geometria del significato, vicinanza come
+        somiglianza), <strong>dalla geometria alla predizione</strong>
+        (distribuzione di probabilità, generazione autoregressiva, temperatura).
+      </li>
+      <li>
+        Sempre nella prima chat: <strong>attenzione</strong> (Q-K-V, multi-head,
+        stratificazione, positional encoding), <strong>context window</strong>
+        (costo quadratico, lost in the middle, RAG come anticipazione),
+        <strong>cosa il modello vede come input</strong> (system prompt, ruoli,
+        cronologia, prompt injection, multi-turno), <strong>principi pratici di
+        prompting</strong>.
+      </li>
+      <li>
+        In questa seconda chat — <strong>Tema 1</strong>: chiusura dell'anello
+        dall'attenzione alla predizione (l'hidden state h, la testa di output, il
+        softmax come amplificatore esponenziale).
+      </li>
+      <li>
+        <strong>Tema 2</strong>: ricomposizione del Transformer come architettura
+        completa (FFN, residual connections, layer normalization) e mappa visiva
+        dell'intero LLM.
+      </li>
+      <li>
+        <strong>Tema 3</strong>: cosa significa "ragionare" per un LLM
+        (Chain-of-Thought come espansione del budget computazionale, quattro
+        famiglie di limiti strutturali, implicazioni operative).
+      </li>
+      <li>
+        <strong>Complementi 3A e 3B</strong>: i reasoning model come paradigma
+        diverso di addestramento (RL su verifiable rewards) e il panorama 2026 dei
+        provider (OpenAI, Anthropic, Google, DeepSeek).
+      </li>
+      <li>
+        <strong>Tema 4</strong>: gestione di documenti lunghi (cinque strategie più
+        ottimizzazione trasversale del caching, applicate al caso d'uso della
+        revisione di un romanzo).
+      </li>
+    </ol>
+  </div>
+
+  <div class="reflection">
+    <div class="reflection-label">Una riflessione finale</div>
+    <h3>Cosa porta via, davvero, chi fa questo percorso?</h3>
+    <p>
+      Voglio essere onesto su una cosa che ho avuto in mente per tutto il percorso,
+      e che adesso vale la pena di dire esplicitamente.
+    </p>
+    <p>
+      Questo percorso non insegna a <strong>usare</strong> un AI assistant — quello
+      si impara facendolo. Non insegna trucchi di prompting — quelli cambiano ogni
+      mese. Non insegna nemmeno cosa offrono i singoli provider — quello è informazione
+      contingente, già obsoleta a tratti.
+    </p>
+    <p>
+      Quello che il percorso ha costruito è qualcosa di più sottile e secondo me più
+      durevole: un <strong>modello mentale</strong> di cosa è un LLM, come funziona,
+      perché funziona, dove fallisce, e — sopra tutto — <em>come pensarlo</em>. La
+      tokenizzazione, gli embeddings, l'attenzione, la predizione, il ragionamento,
+      i documenti lunghi: sono tessere di un mosaico unico in cui ogni pezzo si
+      tiene insieme con gli altri.
+    </p>
+    <p>
+      Avere questo modello mentale cambia il modo in cui interagisci con questi
+      sistemi. Non perché tu debba pensarci esplicitamente ogni volta — anzi, il
+      segno che il modello è ben assimilato è che <em>non</em> ci pensi più
+      consciamente. Ma le tue intuizioni cambiano. Sai perché un prompt funziona
+      meglio se messo in un certo modo. Sai quando una risposta dell'AI ti deve
+      mettere in guardia. Sai quando passare da un'interfaccia conversazionale a un
+      workflow più strutturato. Sai cosa puoi chiedere ragionevolmente, e cosa stai
+      chiedendo troppo.
+    </p>
+    <p>
+      <em>"Il prompt più potente è scritto da chi ha un buon modello mentale del
+      modello"</em> — era una frase nella sintesi del percorso precedente. Credo
+      che adesso quella frase risuoni con più forza, perché abbiamo passato molte
+      ore a costruire esattamente quel modello mentale, pezzo per pezzo.
+    </p>
+    <p>
+      Spero che il percorso sia stato utile come è stato bello costruirlo.
+    </p>
+  </div>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Sei cose da portarsi via dalla Parte 3</h3>
+    <ol class="takeaway-list">
+      <li>
+        Il <strong>context caching</strong> non è una strategia: è
+        un'<em>ottimizzazione trasversale</em>. Memorizza il processing del prefisso
+        stabile, e le chiamate successive con prefisso identico pagano solo il 10%
+        del costo. Per workflow iterativi reali, risparmio dell'80-90%.
+      </li>
+      <li>
+        Quattro condizioni perché funzioni: <strong>prefisso byte-identico</strong>,
+        <strong>blocco sopra la soglia minima</strong>, <strong>workflow temporalmente
+        concentrato</strong>, <strong>provider che lo supporta</strong>. La regola
+        più importante: tutto ciò che è stabile prima, tutto ciò che varia dopo.
+      </li>
+      <li>
+        Il caching ha impatti diversi sulle cinque strategie: <em>massimo</em> per
+        full context (il documento è il prefisso stabile), <em>alto</em> per
+        riassunti gerarchici e mappe strutturate (rappresentazioni stabili
+        riutilizzate), <em>medio</em> per RAG (i chunks variano, ma cachi
+        istruzioni), <em>modesto</em> per chunking (ogni chunk è una chiamata
+        diversa).
+      </li>
+      <li>
+        Il caching può <strong>guidare l'organizzazione del workflow</strong>:
+        progettare la revisione come sequenza di "sessioni cachate" tematiche
+        (sessione prosa, sessione personaggi, sessione temi) massimizza il
+        risparmio <em>e</em> migliora la qualità delle risposte, perché il modello
+        opera coerentemente entro ogni lente.
+      </li>
+      <li>
+        Le cinque strategie del Tema 4 sono un <strong>ecosistema integrato</strong>,
+        non un menu di alternative. Un workflow professionale di revisione le usa
+        tutte e cinque, stratificate nel tempo: <em>esplorazione</em> (full
+        context) → <em>catalogazione locale</em> (chunking) → <em>infrastruttura</em>
+        (riassunti) → <em>indicizzazione</em> (RAG/progetti) → <em>pianificazione</em>
+        (mappe) → <em>revisione vera</em> (full context + caching).
+      </li>
+      <li>
+        La maturità nell'uso degli AI assistant consiste nel passare dal <em>"come
+        metto questo documento nel prompt"</em> al <em>"come organizzo il mio
+        workflow combinando le strategie disponibili"</em>. È un cambio di
+        prospettiva qualitativo, non una raccolta di trucchi.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- FAREWELL -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="farewell">
+    <div class="farewell-label">Fine del percorso</div>
+    <h3>Da una <em>conversazione</em> a un <em>modello mentale</em></h3>
+    <p>
+      Siamo partiti, in un'altra chat ormai lontana, dalle parole come unità di
+      significato e da come un modello le segmenta in token. Siamo arrivati qui, alla
+      gestione strutturata di documenti complessi su workflow professionali.
+    </p>
+    <p>
+      Nel mezzo: la geometria degli embeddings, il meccanismo dell'attenzione,
+      l'architettura completa del Transformer, la natura del ragionamento di un LLM,
+      i reasoning model, il panorama dei provider, le cinque strategie per documenti
+      lunghi. Sette punti nella prima chat, quattro temi più tre complementi più
+      tre parti in questa.
+    </p>
+    <p>
+      Adesso il modello mentale è costruito. Da qui in avanti, lo strumento sei tu.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Tema 4 — Parte 3 di 3 — Percorso di approfondimento su LLM e prompting (seconda chat)</p>
+  <p>Ottimizzazione, sintesi delle strategie, chiusura del percorso</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tema 4 — Parte 1: Gestire documenti lunghi (full context, chunking, riassunti gerarchici)</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--indigo);
+    padding: 88px 48px 96px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 580px; height: 580px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-graphic {
+    position: absolute;
+    top: 50%; right: 7%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 54px;
+    line-height: 1.06;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 20px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 48px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--indigo);
+    margin: 28px 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  .callout p { font-size: 15.5px; line-height: 1.7; margin-bottom: 12px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-orange { background: var(--orange-faint); border-left-color: var(--orange); }
+  .callout-orange h4 { color: var(--orange); }
+
+  .callout-indigo { background: var(--indigo-faint); border-left-color: var(--indigo); }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout-teal { background: var(--teal-faint); border-left-color: var(--teal); }
+  .callout-teal h4 { color: var(--teal); }
+
+  .callout-amber { background: var(--amber-faint); border-left-color: var(--amber); }
+  .callout-amber h4 { color: var(--amber); }
+
+  .callout-purple { background: var(--purple-faint); border-left-color: var(--purple); }
+  .callout-purple h4 { color: var(--purple); }
+
+  /* ── TASK TYPES TABLE ── */
+  .task-types {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 32px 0;
+  }
+
+  .task-type {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+    border-left: 4px solid;
+  }
+
+  .task-type-1 { border-left-color: var(--teal); }
+  .task-type-2 { border-left-color: var(--indigo); }
+  .task-type-3 { border-left-color: var(--orange); }
+  .task-type-4 { border-left-color: var(--purple); }
+
+  .task-type-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+
+  .task-type-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--indigo);
+    margin-bottom: 10px;
+  }
+
+  .task-type p {
+    font-size: 14.5px;
+    line-height: 1.6;
+    margin: 0 0 8px;
+  }
+
+  .task-type p:last-child { margin-bottom: 0; }
+
+  .task-type em {
+    color: var(--ink-light);
+    font-style: italic;
+    font-size: 13.5px;
+  }
+
+  /* ── STRATEGY SECTION ── */
+  .strategy {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0;
+    margin: 36px 0;
+    overflow: hidden;
+  }
+
+  .strategy-header {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 26px 36px;
+  }
+
+  .strategy-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .strategy-name {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    color: var(--white);
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .strategy-tagline {
+    font-family: var(--sans);
+    font-size: 14.5px;
+    color: rgba(255,255,255,0.75);
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  .strategy-body {
+    padding: 32px 36px;
+  }
+
+  .strategy-body h3:first-child { margin-top: 0; }
+
+  .strategy-body p {
+    font-size: 15.5px;
+    line-height: 1.75;
+  }
+
+  .strategy-body ul {
+    margin: 14px 0;
+    padding-left: 22px;
+  }
+
+  .strategy-body ul li {
+    font-size: 15px;
+    color: var(--ink-mid);
+    margin-bottom: 8px;
+    line-height: 1.65;
+  }
+
+  /* ── DECISIONS GRID ── */
+  .decisions {
+    margin: 28px 0;
+    counter-reset: decision-counter;
+  }
+
+  .decision {
+    background: var(--bg2);
+    border-radius: 6px;
+    padding: 22px 26px;
+    margin-bottom: 14px;
+    border-left: 3px solid var(--orange);
+  }
+
+  .decision-tag {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .decision-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 20px;
+    color: var(--orange);
+    counter-increment: decision-counter;
+  }
+
+  .decision-num::before { content: counter(decision-counter, decimal-leading-zero); }
+
+  .decision-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15.5px;
+    color: var(--indigo);
+  }
+
+  .decision p {
+    font-size: 14.5px;
+    line-height: 1.65;
+    margin: 0 0 10px;
+    color: var(--ink-mid);
+  }
+
+  .decision p:last-child { margin: 0; }
+
+  /* ── WHEN BOX ── */
+  .when-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 28px 0 0;
+    padding-top: 22px;
+    border-top: 1px solid var(--border2);
+  }
+
+  .when-cell {
+    padding: 18px 22px;
+    border-radius: 6px;
+  }
+
+  .when-good {
+    background: var(--teal-faint);
+    border-left: 3px solid var(--teal);
+  }
+
+  .when-bad {
+    background: var(--orange-faint);
+    border-left: 3px solid var(--orange);
+  }
+
+  .when-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .when-good .when-label { color: var(--teal); }
+  .when-bad .when-label { color: var(--orange); }
+
+  .when-cell p {
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--ink-mid);
+  }
+
+  /* ── PYRAMID DIAGRAM ── */
+  .pyramid {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 28px 0;
+  }
+
+  .pyramid-svg {
+    width: 100%;
+    height: auto;
+    max-width: 700px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(13,122,110,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .takeaway-list em { color: var(--orange-light); font-style: italic; }
+  .takeaway-list strong { color: var(--white); font-weight: 600; }
+  .takeaway-list code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── BRIDGE ── */
+  .bridge {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 48px;
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .bridge h3 {
+    margin: 0 0 16px;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--indigo);
+    font-weight: 500;
+  }
+
+  .bridge p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 32px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 26px; }
+    h3 { font-size: 19px; }
+    .takeaways { padding: 40px 28px; }
+    .bridge { padding: 32px 24px; }
+    .strategy-header { padding: 22px 22px; }
+    .strategy-body { padding: 22px 22px; }
+    .task-types { grid-template-columns: 1fr; }
+    .when-box { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <svg class="hero-bg-graphic" width="260" height="260" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+    <!-- Piramide stilizzata -->
+    <g opacity="0.85">
+      <polygon points="130,30 50,210 210,210" fill="none" stroke="white" stroke-width="2" opacity="0.5"/>
+      <line x1="80" y1="150" x2="180" y2="150" stroke="white" stroke-width="1.5" opacity="0.5"/>
+      <line x1="100" y1="100" x2="160" y2="100" stroke="white" stroke-width="1.5" opacity="0.5"/>
+      <circle cx="130" cy="65" r="6" fill="#f07040"/>
+      <circle cx="130" cy="125" r="6" fill="#f07040" opacity="0.85"/>
+      <circle cx="105" cy="180" r="4" fill="white" opacity="0.7"/>
+      <circle cx="130" cy="180" r="4" fill="white" opacity="0.7"/>
+      <circle cx="155" cy="180" r="4" fill="white" opacity="0.7"/>
+      <circle cx="80" cy="180" r="4" fill="white" opacity="0.7"/>
+      <circle cx="180" cy="180" r="4" fill="white" opacity="0.7"/>
+    </g>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-label">Tema 4 — Parte 1 di 2</div>
+    <h1>Gestire <em>documenti lunghi</em><br>in un AI assistant</h1>
+    <p class="hero-sub">
+      Quando un documento eccede la context window — o non eccede ma è comunque
+      troppo grande per essere usato bene — quali strategie esistono per fargli un
+      lavoro significativo? In questa Parte 1, gli approcci testuali: full context,
+      chunking, riassunti gerarchici.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">Strategie testuali per documenti lunghi</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Tema del percorso</div>
+        <div class="meta-value">4 di 4 (Parte 1)</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Caso d'uso</div>
+        <div class="meta-value">Revisione di un romanzo</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 — DIAGNOSI DEL PROBLEMA -->
+<section>
+  <div class="section-num">01 — DIAGNOSI DEL PROBLEMA</div>
+  <h2>Non tutti i task su un documento sono dello stesso tipo</h2>
+  <p class="lead">
+    Prima delle strategie, viene la diagnosi. La tentazione, quando si affronta il
+    tema dei documenti lunghi, è di pensare in modo troppo astratto: <em>"ho un
+    documento lungo, devo trovare il modo di farglielo digerire"</em>. La verità è
+    più articolata. Hai <strong>task di natura diversa</strong>, e ognuno richiede
+    un approccio diverso. Una soluzione unica per "documenti lunghi" non esiste, e
+    cercarla porta fuori strada.
+  </p>
+
+  <p>
+    Prendiamo il caso che ci accompagnerà in tutto il Tema 4: la revisione di un
+    romanzo. Un romanzo di 80.000 parole (~400 pagine, ~100-120k token), su cui vuoi
+    fare un lavoro completo di editing — incoerenze nei personaggi, problemi di
+    pacing, archi narrativi che non si chiudono, prosa appesantita, dialoghi falsi,
+    descrizioni ripetitive, sviluppo coerente dei temi.
+  </p>
+
+  <p>
+    Ragiona su cosa questa attività richiede davvero. Non è una richiesta singola
+    che vuole una singola risposta. È un'attività composita che richiede un mix di
+    operazioni di natura completamente diversa tra loro. Vale la pena distinguerle.
+  </p>
+
+  <div class="task-types">
+    <div class="task-type task-type-1">
+      <div class="task-type-label">Tipo 1</div>
+      <div class="task-type-name">Task locali</div>
+      <p>"Rileggi questo paragrafo e dimmi se la prosa funziona."</p>
+      <p><em>Si fanno guardando una pagina alla volta, non hanno bisogno di vedere il resto del libro.</em></p>
+    </div>
+    <div class="task-type task-type-2">
+      <div class="task-type-label">Tipo 2</div>
+      <div class="task-type-name">Task comparativi locali</div>
+      <p>"Il personaggio X nel capitolo 23 è coerente con il capitolo 5?"</p>
+      <p><em>Richiedono di guardare due punti specifici, ma non l'intero libro. Il problema è sapere quali punti guardare insieme.</em></p>
+    </div>
+    <div class="task-type task-type-3">
+      <div class="task-type-label">Tipo 3</div>
+      <div class="task-type-name">Task globali</div>
+      <p>"L'arco di trasformazione del protagonista funziona dall'inizio alla fine?"</p>
+      <p><em>Richiedono una rappresentazione dell'intero romanzo. Non puoi rispondere guardando pezzi.</em></p>
+    </div>
+    <div class="task-type task-type-4">
+      <div class="task-type-label">Tipo 4</div>
+      <div class="task-type-name">Task strutturali</div>
+      <p>"I temi della libertà e del dovere si bilanciano in modo coerente?"</p>
+      <p><em>Richiedono una comprensione delle relazioni concettuali attraverso il testo intero.</em></p>
+    </div>
+  </div>
+
+  <p>
+    Questa diagnosi è il primo passo, e fa la differenza tra approcciare il problema
+    bene e male. Le strategie che vedremo si applicano in modo diverso ai diversi
+    tipi di task: alcune sono ottime per i task locali e pessime per quelli globali,
+    altre il contrario. La sequenza giusta non è "scegli una strategia": è
+    <strong>combina più strategie, ognuna per il tipo di task a cui si presta</strong>.
+  </p>
+
+  <h3>I vincoli materiali da cui tutto parte</h3>
+  <p>
+    Prima di entrare nelle strategie, richiamiamo brevemente i tre vincoli che
+    rendono il problema interessante. I primi due li abbiamo già visti nel punto 4B
+    del percorso precedente.
+  </p>
+
+  <p>
+    Il primo è il <strong>costo quadratico dell'attenzione</strong>: ogni token deve
+    guardare tutti gli altri token, e il calcolo cresce quadraticamente con la
+    lunghezza del contesto. Un prompt di 100k token non costa solo 10 volte un
+    prompt di 10k token: in realtà ne costa 100 volte di più in termini
+    computazionali, e la latenza esplode di conseguenza.
+  </p>
+
+  <p>
+    Il secondo è il <strong>lost in the middle</strong>: anche se il modello "vede"
+    tutto il contesto, la sua attenzione non è uniforme. Tende a dare più peso
+    all'inizio e alla fine, meno al centro. Per un romanzo questo significa che la
+    qualità delle risposte su elementi del capitolo 14 di un libro di 25 capitoli è
+    significativamente peggiore di quanto ti aspetteresti dal fatto che "il modello
+    ha letto il capitolo 14".
+  </p>
+
+  <p>
+    Il terzo è specifico ai documenti narrativi: <strong>la diluizione del
+    segnale</strong>. Anche con extended thinking attivo, mettere troppa carne al
+    fuoco fa atterrare il modello in una zona dello spazio semantico meno definita,
+    dove la qualità delle inferenze degrada. Non perché "non ce la fa": perché il
+    segnale che cerca è diluito in una quantità enorme di informazione irrilevante
+    per quel particolare task.
+  </p>
+
+  <div class="callout callout-indigo">
+    <h4>Il principio operativo che governa tutto il Tema 4</h4>
+    <p>
+      Le strategie che seguono <strong>non sono alternative, sono complementari</strong>.
+      Un workflow serio di revisione di un romanzo probabilmente le userà tutte:
+      full context per task semplici locali, chunking per le analisi paragrafo per
+      paragrafo, riassunti gerarchici per la rappresentazione globale. (E poi nella
+      Parte 2 vedremo anche RAG per le interrogazioni mirate e mappe strutturate per
+      i task narrativamente complessi.)
+    </p>
+    <p>
+      La domanda quindi non è "quale strategia devo scegliere", ma <em>"qual è la
+      combinazione giusta per il mio mix di task"</em>. Per rispondere, serve aver
+      capito i task — non solo le strategie.
+    </p>
+  </div>
+</section>
+
+<!-- STRATEGIA 1 — FULL CONTEXT -->
+<section>
+  <div class="section-num">02 — STRATEGIA 1</div>
+  <h2>Full context: mettere tutto nel prompt</h2>
+
+  <div class="strategy">
+    <div class="strategy-header">
+      <div class="strategy-label">STRATEGIA 1</div>
+      <h3 class="strategy-name">Full context</h3>
+      <div class="strategy-tagline">Mettere il documento intero nel prompt e fare la domanda</div>
+    </div>
+    <div class="strategy-body">
+
+      <h3>L'idea</h3>
+      <p>
+        L'idea è la più semplice possibile: metti il documento intero nel prompt, e
+        fai la tua domanda. Niente chunking, niente RAG, niente riassunti. Il modello
+        vede tutto, e lavora su tutto.
+      </p>
+      <p>
+        La tentazione, quando si studia il problema dei documenti lunghi, è di
+        considerare questa strategia come "quella ingenua" e passare subito alle
+        tecniche più sofisticate. È un errore. <strong>La strategia full context,
+        quando il documento ci sta, è spesso la scelta migliore</strong> — non per
+        pigrizia, ma per ragioni precise.
+      </p>
+
+      <h3>Perché spesso è la scelta giusta</h3>
+      <p>
+        La prima ragione è che <strong>elimina ogni complessità di ingegneria del
+        prompt</strong>. Quando metti il documento intero, il modello ha accesso a
+        tutto contemporaneamente, e può fare connessioni tra pezzi distanti senza
+        che tu debba pre-decidere quali. Se il modello deve confrontare il capitolo
+        5 con il capitolo 23, lo fa naturalmente. Nei sistemi più sofisticati (RAG,
+        riassunti gerarchici), tu come progettista devi decidere <em>in anticipo</em>
+        cosa il modello vedrà — e quelle decisioni si rivelano spesso sbagliate solo
+        dopo, quando capisci che il modello aveva bisogno di qualcosa che gli hai
+        negato.
+      </p>
+      <p>
+        La seconda è la <strong>qualità del ragionamento integrato</strong>. Quando
+        il modello vede l'intero documento, le inferenze che fa hanno una qualità
+        diversa da quelle che fa lavorando su pezzi. Lost in the middle esiste, sì,
+        ma è un problema <em>attenuato</em> rispetto al non avere proprio il pezzo
+        centrale nel contesto. Avere tutto, anche se non uniformemente attenzionato,
+        è meglio di avere solo alcune parti.
+      </p>
+      <p>
+        La terza è <strong>operativa</strong>: è la strategia che richiede meno
+        infrastruttura. Niente database vettoriale, niente pipeline di chunking,
+        niente riassunti da mantenere. Hai il documento, lo metti, fai domande. Per
+        workflow di revisione che non sono produzione automatica ma lavoro umano
+        iterativo — esattamente il caso della revisione di un romanzo — questa
+        semplicità è un beneficio enorme.
+      </p>
+
+      <h3>Quando non va bene</h3>
+      <p>
+        Tre limiti precisi, e capirli ti aiuta a sapere quando passare alle altre
+        strategie.
+      </p>
+      <p>
+        Il primo è <strong>materiale</strong>: se il documento non ci sta nella
+        context window, non puoi farlo. Per un romanzo di 80.000 parole (100-120k
+        token) ci sta in Claude Sonnet/Opus 4.6 (200k), GPT-5.4 (272k), Gemini 3 Pro
+        (1M). Ma se devi caricare il romanzo <em>più</em> il manoscritto di lavoro,
+        le note dell'editor, la guida stilistica, cominci a saturare. E con dieci
+        romanzi da confrontare la strategia non scala.
+      </p>
+      <p>
+        Il secondo è <strong>economico</strong>. Pagare 100k token di input per ogni
+        domanda è costoso. Su Claude Sonnet 4.6 a $3/1M token input, 100k token per
+        chiamata sono 30 centesimi solo di input. Cinquanta iterazioni sono 15
+        dollari di solo input, prima ancora del thinking e dell'output. Per uso
+        ripetuto conta; per una revisione una-tantum no.
+      </p>
+      <p>
+        Il terzo è la <strong>diluizione del segnale</strong>. Per task molto locali
+        — "questa pagina ha problemi di prosa?" — passare l'intero romanzo è
+        controproducente. Il modello deve "filtrare" il rumore del resto del libro
+        per concentrarsi sulla pagina. Per task locali ben definiti il modello
+        produce risposte più precise se lo isoli sul pezzo specifico.
+      </p>
+
+      <h3>Il trucco operativo: context caching</h3>
+      <p>
+        C'è un modo intelligente di usare la strategia full context che molte
+        persone non sfruttano. I provider moderni — Claude, OpenAI, Gemini —
+        permettono di <strong>cachare</strong> parti del contesto: se le rimandi
+        identiche nella chiamata successiva, paghi solo una frazione (tipicamente il
+        10%) del costo originale per quei token.
+      </p>
+      <p>
+        Per la revisione di un romanzo è enorme: il romanzo è la parte stabile del
+        contesto, le tue domande sono la parte variabile. Se cachi il romanzo, la
+        prima chiamata è cara ma le successive sono molto più economiche.
+      </p>
+      <p>
+        Su Claude, nelle interfacce consumer (claude.ai, app, progetti) il caching è
+        gestito automaticamente da Anthropic — l'utente non deve fare nulla. Via API
+        si attiva esplicitamente marcando con <code>cache_control</code> i blocchi
+        del prompt che vuoi cachare. Il caching funziona solo se il prefisso è
+        byte-identico tra chiamate, quindi la struttura ideale del prompt è:
+        <em>[documento cachato] → [istruzioni di sistema cachate] → [domanda
+        variabile]</em>. Inverti l'ordine e il caching non funziona.
+      </p>
+
+      <div class="when-box">
+        <div class="when-cell when-good">
+          <div class="when-label">Quando usarla</div>
+          <p>
+            Il documento entra confortevolmente nella context window. Lavoro
+            <em>iterativo e conversazionale</em>: esplori, cambi direzione, fai
+            connessioni inaspettate. Sessione umana, non centinaia di iterazioni in
+            batch. Task globali o comparativi tra pezzi distanti che il modello deve
+            poter mettere insieme liberamente.
+          </p>
+        </div>
+        <div class="when-cell when-bad">
+          <div class="when-label">Quando NON usarla</div>
+          <p>
+            Documenti che eccedono la context window. Task molto locali e ripetuti
+            (per cui il chunking è migliore). Workflow industriali con centinaia o
+            migliaia di iterazioni (costo proibitivo). Confronti su corpus grandi di
+            molti documenti.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout callout-purple">
+        <h4>Progetti vs documento nel prompt: cosa cambia</h4>
+        <p>
+          Una distinzione spesso confusa. Quando carichi un file in un <em>progetto</em>
+          di Claude (o ChatGPT, o Gemini), il file non viene messo nel prompt di ogni
+          conversazione tutto insieme: il sistema usa un meccanismo di
+          <strong>retrieval</strong> che ad ogni messaggio decide quali porzioni del
+          file sono rilevanti per la domanda corrente. È, in pratica, una forma di
+          RAG gestita automaticamente.
+        </p>
+        <p>
+          Per <em>task locali e comparativi</em> i progetti vanno benissimo: il
+          retrieval pesca i pezzi giusti, l'esperienza d'uso è fluida. Per <em>task
+          globali e strutturali</em> i progetti sono significativamente peggiori del
+          full context manuale: il retrieval ti dà solo alcuni pezzi, non una visione
+          integrata. Per quei task, apri una chat dedicata, metti il romanzo nel
+          prompt full context con caching, e lavori lì. <strong>Usare entrambi gli
+          approcci in modo complementare</strong> è la pratica migliore per il caso
+          d'uso della revisione di un romanzo.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGIA 2 — CHUNKING -->
+<section>
+  <div class="section-num">03 — STRATEGIA 2</div>
+  <h2>Chunking: spezzare e processare in parallelo</h2>
+
+  <div class="strategy">
+    <div class="strategy-header">
+      <div class="strategy-label">STRATEGIA 2</div>
+      <h3 class="strategy-name">Chunking semplice</h3>
+      <div class="strategy-tagline">Spezzare il documento in pezzi e processare ogni pezzo separatamente</div>
+    </div>
+    <div class="strategy-body">
+
+      <h3>L'idea</h3>
+      <p>
+        L'idea, ridotta all'osso: spezzi il documento in N porzioni (chunks) di
+        dimensione gestibile. Per ogni chunk fai un'operazione del modello — la
+        stessa per tutti o diversa a seconda del task — e poi raccogli i risultati.
+      </p>
+      <p>
+        Concretamente, per il caso del romanzo: spezzi il libro in 80 chunks da 1000
+        parole (uno per "capitoletto" di 4-5 pagine). Per ogni chunk lanci una
+        chiamata con un prompt tipo <em>"Rivedi questo passaggio. Identifica
+        problemi di prosa: ripetizioni, frasi pesanti, dialoghi che non funzionano,
+        descrizioni eccessive."</em>. Ottieni 80 risposte. Le metti insieme.
+      </p>
+      <p>
+        La forza di questa strategia è che <strong>scala linearmente</strong>. Un
+        romanzo di 80.000 parole o uno di 800.000 fanno la stessa fatica per chunk:
+        semplicemente, il secondo ha 10 volte più chiamate. Il costo per chiamata è
+        basso perché ogni chunk è piccolo, e il modello fa un lavoro mirato e di
+        alta qualità su un materiale concentrato. È l'opposto della strategia full
+        context: lì il modello vede tutto ma fa un lavoro più diluito; qui vede poco
+        ma fa un lavoro intenso.
+      </p>
+
+      <h3>Le tre decisioni progettuali</h3>
+      <p>
+        Quello che distingue un chunking efficace da uno pasticciato sono tre
+        decisioni prese all'inizio.
+      </p>
+
+      <div class="decisions">
+        <div class="decision">
+          <div class="decision-tag">
+            <div class="decision-num"></div>
+            <div class="decision-name">Dove tagliare</div>
+          </div>
+          <p>
+            I confini "buoni" sono confini naturali del testo: per un romanzo, in
+            ordine di qualità decrescente — <strong>confini di capitolo</strong>
+            (l'ideale, quando i capitoli sono di dimensione gestibile), <strong>confini
+            di sezione</strong> (i "rompi" interni a un capitolo segnati da spazi
+            bianchi o asterischi), <strong>confini di scena</strong> (cambio di
+            punto di vista o ambiente), <strong>confini di paragrafo</strong>.
+            Tagliare a metà di un paragrafo è sempre sbagliato.
+          </p>
+          <p>
+            Per un romanzo strutturato bene, il chunking per capitolo è quasi sempre
+            la scelta giusta — anche se i capitoli sono di lunghezza variabile.
+            Stai rispettando l'unità narrativa che l'autore stesso ha disegnato, e
+            il modello lavora su unità coerenti.
+          </p>
+        </div>
+
+        <div class="decision">
+          <div class="decision-tag">
+            <div class="decision-num"></div>
+            <div class="decision-name">La dimensione</div>
+          </div>
+          <p>
+            Chunks più grandi (5.000 parole) danno più contesto al modello per ogni
+            operazione, ma costano di più per chiamata e diluiscono l'attenzione.
+            Chunks più piccoli (500-1.000 parole) sono più mirati, economici, più
+            precisi, ma rischiano di tagliare l'unità di senso.
+          </p>
+          <p>
+            La regola euristica: <strong>il chunk dovrebbe essere grande quanto serve
+            per contenere l'unità minima di significato per il task che stai
+            facendo</strong>. Per revisione frase per frase, 500-1.000 parole
+            bastano. Per la struttura di una scena, ti serve la scena intera —
+            2.000-3.000 parole. Per giudicare un capitolo come unità narrativa, il
+            capitolo intero. <em>Adatti la dimensione del chunk al task, non
+            viceversa.</em>
+          </p>
+        </div>
+
+        <div class="decision">
+          <div class="decision-tag">
+            <div class="decision-num"></div>
+            <div class="decision-name">L'overlap</div>
+          </div>
+          <p>
+            La decisione meno ovvia, e secondo me la più importante. La domanda: i
+            chunks consecutivi devono essere completamente disgiunti o sovrapporsi
+            un po'? Con un overlap di 200 parole, il chunk 6 comincia 200 parole
+            <em>prima</em> della fine del chunk 5. Il modello, quando processa il
+            chunk 6, ha quindi un po' di "memoria" del chunk precedente.
+          </p>
+          <p>
+            Per task locali di pura revisione, l'overlap è spesso superfluo. Per
+            task dove serve continuità ("questo paragrafo fluisce bene dal
+            precedente?"), un overlap del 10-20% è buona pratica. Per task globali,
+            l'overlap del chunking non basta comunque, e serve la strategia 3.
+          </p>
+        </div>
+      </div>
+
+      <h3>La ricomposizione: il problema sottovalutato</h3>
+      <p>
+        Ottenere 80 risposte è facile. <strong>Trasformarle in qualcosa di utile è
+        il vero lavoro.</strong> Se sono lunghe (e tendono a esserlo), leggerle
+        tutte è come leggere un nuovo romanzo. Se le metti insieme nello stesso
+        documento, perdi la struttura. Se vuoi che il modello sintetizzi gli 80 in
+        una revisione complessiva, sei tornato al problema di partenza.
+      </p>
+      <p>
+        Tre strategie di ricomposizione, da scegliere in base a cosa vuoi farne dei
+        risultati.
+      </p>
+
+      <h4>A — Aggregazione strutturata</h4>
+      <p>
+        Chiedi al modello, per ogni chunk, output in forma <strong>strutturata</strong>
+        — tipicamente JSON con campi predefiniti. Per la revisione, ad esempio per
+        ogni chunk: <code>{"problemi_di_prosa": [...], "ripetizioni": [...],
+        "dialoghi_problematici": [...], "ranking_complessivo": ...}</code>. Adesso
+        hai 80 oggetti JSON che puoi processare programmaticamente: aggregare tutte
+        le ripetizioni in una lista unica, ordinare i chunks per ranking per trovare
+        le pagine più problematiche, fare statistiche. <em>La struttura permette di
+        lavorare con il volume.</em>
+      </p>
+
+      <h4>B — Piramide di sintesi</h4>
+      <p>
+        Per ogni chunk ottieni una revisione completa. Poi raggruppi i chunks (per
+        esempio in gruppi di 10) e chiedi al modello di sintetizzare le revisioni
+        di un gruppo in un'osservazione di livello superiore. Poi metti insieme le
+        8 sintesi di gruppo in una sintesi di romanzo. <em>È il ponte verso la
+        strategia 3 (riassunti gerarchici), e vedremo che le due si possono usare
+        insieme.</em>
+      </p>
+
+      <h4>C — Indicizzazione per task successivi</h4>
+      <p>
+        Usi i risultati del chunking come una <strong>mappa</strong> del documento,
+        per task successivi. Dopo aver fatto il chunking, sai che il chunk 23 ha un
+        dialogo problematico, il chunk 41 ha un personaggio incoerente, eccetera.
+        Quando devi lavorare sul dialogo problematico, vai al chunk 23 e ci fai una
+        sessione mirata. La ricomposizione non è un output finale, è
+        un'<em>organizzazione del lavoro futuro</em>.
+      </p>
+
+      <div class="when-box">
+        <div class="when-cell when-good">
+          <div class="when-label">Quando usarla</div>
+          <p>
+            Task locali ripetuti: revisione paragrafo per paragrafo, errori
+            grammaticali, consistenza dei dialoghi scena per scena, descrizioni
+            ridondanti, pacing scena per scena. Per tutti questi task il chunking
+            produce risultati di alta qualità.
+          </p>
+        </div>
+        <div class="when-cell when-bad">
+          <div class="when-label">Quando NON usarla</div>
+          <p>
+            Task globali e strutturali: arco del protagonista, coerenza tematica,
+            bilanciamento dei sottoplot. Il chunking per sua natura non vede questi
+            pattern. Anche con ricomposizione a piramide, perdi qualcosa rispetto a
+            una visione integrata.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout callout-teal">
+        <h4>Un'osservazione pratica per la revisione di un romanzo</h4>
+        <p>
+          La combinazione più efficace nella pratica è il <strong>chunking strutturato
+          come primo passaggio del workflow</strong>, non come strategia unica.
+          Spezzi il romanzo, fai una revisione di base chunk per chunk con output
+          strutturato (JSON), e ottieni una mappa di "problemi locali" del libro.
+          Poi, sulla base di quella mappa, decidi dove approfondire. Per i punti più
+          problematici fai sessioni mirate con quel singolo chunk in full context.
+          Per le domande globali usi la strategia 3 o la 4 della Parte 2. Il chunking
+          è quindi un workhorse del workflow: fa il lavoro grosso di catalogazione,
+          ma non è la sola strategia.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGIA 3 — RIASSUNTI GERARCHICI -->
+<section>
+  <div class="section-num">04 — STRATEGIA 3</div>
+  <h2>Riassunti gerarchici: rappresentazioni condensate del documento</h2>
+
+  <div class="strategy">
+    <div class="strategy-header">
+      <div class="strategy-label">STRATEGIA 3</div>
+      <h3 class="strategy-name">Riassunti gerarchici</h3>
+      <div class="strategy-tagline">Costruire una piramide di riassunti strutturati e lavorare su quella</div>
+    </div>
+    <div class="strategy-body">
+
+      <h3>Il salto concettuale</h3>
+      <p>
+        Le prime due strategie lavoravano direttamente sul documento — l'intero
+        testo (full context) o porzioni del testo (chunking). I riassunti gerarchici
+        fanno qualcosa di diverso: costruiscono una <strong>rappresentazione
+        condensata</strong> del documento, e poi lavorano su quella rappresentazione
+        invece che sul testo originale.
+      </p>
+      <p>
+        Prendi il romanzo, lo spezzi in chunks (capitolo per capitolo). Per ogni
+        capitolo chiedi al modello di produrre un <strong>riassunto strutturato</strong>.
+        Poi prendi i riassunti dei capitoli, li raggruppi (per atti narrativi, o
+        gruppi di 5-7 capitoli), e fai sintesi di livello superiore. Infine, dalle
+        sintesi di gruppo, costruisci una sintesi del romanzo intero. Hai costruito
+        una <strong>piramide</strong>.
+      </p>
+      <p>
+        Una volta che hai la piramide, puoi fare cose che con le strategie precedenti
+        non potevi. Puoi caricare nel prompt il riassunto di tutto il romanzo (5.000-10.000
+        token invece di 100.000) e fare domande globali sulla struttura. Puoi
+        caricare i riassunti di tre capitoli specifici per confrontarli. Puoi
+        <em>navigare il documento dall'alto verso il basso</em>: prima la sintesi
+        complessiva per orientarti, poi la sintesi dell'atto, poi il riassunto del
+        capitolo, e solo se serve risali al testo originale.
+      </p>
+
+      <h3>Il punto cruciale: la natura dei riassunti</h3>
+      <p>
+        Qui c'è la decisione progettuale più importante di tutta la strategia. I
+        riassunti non sono tutti uguali. Un riassunto narrativo classico — <em>"in
+        questo capitolo Marco va al bar, incontra Lucia, discutono del padre"</em>
+        — è quello che produrresti per uno studente che deve sapere cosa succede nel
+        libro. Ma è quasi sempre il <strong>tipo sbagliato</strong> di riassunto per
+        un workflow di revisione.
+      </p>
+      <p>
+        Il riassunto narrativo perde proprio le cose che ti servono. Sì, ti dice che
+        Marco va al bar. Ma il bar è descritto in modo evocativo o anonimo? Il
+        dialogo con Lucia funziona o suona didascalico? Il tema del padre, già
+        introdotto al capitolo 3, viene riapprofondito o lasciato cadere? La voce
+        narrativa è coerente? Tutte queste informazioni — proprio quelle utili per
+        la revisione — il riassunto narrativo le perde.
+      </p>
+      <p>
+        Quello che serve è un <strong>riassunto strutturato per task</strong>. Tu
+        decidi in anticipo a cosa ti serviranno i riassunti, e progetti la loro
+        struttura di conseguenza. Per la revisione di un romanzo, una struttura che
+        funziona contiene campi come:
+      </p>
+      <ul>
+        <li><strong>Eventi</strong>: cosa succede di fatto, in 3-5 frasi.</li>
+        <li><strong>Personaggi presenti e loro stato</strong>: chi appare, a che punto del proprio arco si trova.</li>
+        <li><strong>Sviluppi tematici</strong>: quali temi emergono o si sviluppano qui.</li>
+        <li><strong>Sviluppi di sottoplot</strong>: quali avanzano, quali sono lasciati in stand-by, se qualcuno si chiude.</li>
+        <li><strong>Tono e voce</strong>: registro prevalente, eventuali shift.</li>
+        <li><strong>Pacing</strong>: ritmo del capitolo. Concentrazione di scene d'azione vs riflessive.</li>
+        <li><strong>Punti notevoli</strong>: passaggi particolarmente riusciti o problematici, con riferimenti precisi.</li>
+        <li><strong>Connessioni intratestuali</strong>: riferimenti a eventi o personaggi di altri capitoli, setup o pay-off.</li>
+      </ul>
+      <p>
+        Adesso vedi cosa è successo: il riassunto non è più una narrazione condensata.
+        È una <strong>scheda diagnostica del capitolo</strong>, costruita per essere
+        utile a domande di revisione. Quando in seguito chiederai "i sottoplot
+        avanzano in modo bilanciato attraverso il libro?", il modello legge gli 80
+        campi "Sviluppi di sottoplot" delle schede, e ha tutto quello che gli serve.
+      </p>
+
+      <div class="callout callout-orange">
+        <h4>La regola che governa tutto</h4>
+        <p>
+          La struttura del riassunto va decisa <strong>prima</strong> di costruire
+          la piramide. Se cominci a fare i riassunti capitolo per capitolo senza una
+          struttura definita, ottieni 80 testi narrativi che dovranno essere
+          riprocessati per estrarne le informazioni utili — e a quel punto hai fatto
+          lavoro in più, non in meno. Investi 20 minuti all'inizio per decidere la
+          struttura giusta, e ti risparmi ore di lavoro dopo.
+        </p>
+      </div>
+
+      <h3>I tre livelli della piramide</h3>
+      <p>
+        Per un romanzo di 80.000 parole, una struttura a tre livelli funziona bene.
+      </p>
+
+      <div class="pyramid">
+        <svg class="pyramid-svg" viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+          <!-- Romanzo -->
+          <rect x="40" y="20" width="620" height="40" rx="4" fill="#1e2a5e" opacity="0.15"/>
+          <text x="350" y="38" font-family="JetBrains Mono" font-size="11" fill="#6b7280" text-anchor="middle" letter-spacing="1">ROMANZO ORIGINALE</text>
+          <text x="350" y="54" font-family="Lora" font-style="italic" font-size="12" fill="#374151" text-anchor="middle">~100.000+ token</text>
+
+          <!-- Freccia in giù -->
+          <path d="M 350 65 L 350 78" stroke="#c94a1a" stroke-width="2" marker-end="url(#pyrArr)"/>
+          <defs>
+            <marker id="pyrArr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#c94a1a"/>
+            </marker>
+          </defs>
+
+          <!-- Livello 1: schede capitolo -->
+          <rect x="40" y="82" width="620" height="58" rx="4" fill="#1e2a5e"/>
+          <text x="60" y="104" font-family="JetBrains Mono" font-size="10" fill="#f07040" letter-spacing="1.5" font-weight="600">LIVELLO 1</text>
+          <text x="60" y="124" font-family="Outfit" font-size="14" fill="white" font-weight="600">Schede capitolo (80 schede)</text>
+          <text x="640" y="124" font-family="Lora" font-style="italic" font-size="12" fill="rgba(255,255,255,0.85)" text-anchor="end">~40.000 token</text>
+          <g transform="translate(60, 130)">
+            <rect x="0" y="0" width="22" height="3" fill="white" opacity="0.85"/>
+            <rect x="26" y="0" width="22" height="3" fill="white" opacity="0.75"/>
+            <rect x="52" y="0" width="22" height="3" fill="white" opacity="0.65"/>
+            <rect x="78" y="0" width="22" height="3" fill="white" opacity="0.55"/>
+            <text x="106" y="3" font-family="JetBrains Mono" font-size="9" fill="rgba(255,255,255,0.7)">... 76 schede</text>
+          </g>
+
+          <!-- Freccia in giù -->
+          <path d="M 350 145 L 350 158" stroke="#c94a1a" stroke-width="2" marker-end="url(#pyrArr)"/>
+
+          <!-- Livello 2: schede atto -->
+          <rect x="100" y="162" width="500" height="58" rx="4" fill="#1e2a5e" opacity="0.85"/>
+          <text x="120" y="184" font-family="JetBrains Mono" font-size="10" fill="#f07040" letter-spacing="1.5" font-weight="600">LIVELLO 2</text>
+          <text x="120" y="204" font-family="Outfit" font-size="14" fill="white" font-weight="600">Schede atto (3-4 schede)</text>
+          <text x="580" y="204" font-family="Lora" font-style="italic" font-size="12" fill="rgba(255,255,255,0.85)" text-anchor="end">~7.000 token</text>
+
+          <!-- Freccia in giù -->
+          <path d="M 350 225 L 350 238" stroke="#c94a1a" stroke-width="2" marker-end="url(#pyrArr)"/>
+
+          <!-- Livello 3: scheda romanzo -->
+          <rect x="200" y="242" width="300" height="58" rx="4" fill="#c94a1a" opacity="0.95"/>
+          <text x="220" y="264" font-family="JetBrains Mono" font-size="10" fill="white" letter-spacing="1.5" font-weight="600">LIVELLO 3</text>
+          <text x="220" y="284" font-family="Outfit" font-size="14" fill="white" font-weight="600">Scheda romanzo (1)</text>
+          <text x="480" y="284" font-family="Lora" font-style="italic" font-size="12" fill="rgba(255,255,255,0.9)" text-anchor="end">~4.000 token</text>
+
+          <!-- Etichetta laterale: navigazione -->
+          <text x="20" y="170" font-family="JetBrains Mono" font-size="10" fill="#0d7a6e" font-weight="600" letter-spacing="1" transform="rotate(-90 20 170)">DETTAGLIO</text>
+          <text x="20" y="280" font-family="JetBrains Mono" font-size="10" fill="#0d7a6e" font-weight="600" letter-spacing="1" transform="rotate(-90 20 280)">PANORAMICA</text>
+
+          <!-- Totale -->
+          <text x="350" y="335" font-family="Lora" font-style="italic" font-size="13" fill="#374151" text-anchor="middle">Tutta la piramide: ~50.000 token</text>
+          <text x="350" y="354" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280" text-anchor="middle">vs ~100.000+ token del romanzo — compressione 2:1, ma soprattutto strutturata e navigabile</text>
+        </svg>
+      </div>
+
+      <p>
+        Il punto pratico più importante: adesso puoi mettere nel prompt <strong>solo
+        il livello 3</strong> (4.000 token) per domande di altissimo livello;
+        <strong>livelli 2+3</strong> (11.000 token) per la maggior parte delle
+        domande strutturali e tematiche; <strong>livelli 1+2+3</strong> (50.000
+        token) quando vuoi il dettaglio capitolo per capitolo; o <strong>solo le
+        schede di alcuni capitoli specifici più i livelli 2+3</strong>, quando lavori
+        in profondità su una sezione mantenendo il contesto generale.
+      </p>
+
+      <h3>Il processo di costruzione</h3>
+      <p>
+        Tre fasi.
+      </p>
+      <p>
+        <strong>Fase 1: costruzione del livello 1.</strong> 80 chiamate al modello,
+        una per capitolo, ognuna con prompt che chiede di compilare la scheda
+        strutturata. Un trucco che funziona molto bene: fornire al modello uno
+        schema esplicito della scheda (in JSON o formato semi-strutturato) e
+        chiedere di compilarla campo per campo. Riduce drasticamente la variabilità
+        tra schede di capitoli diversi. Pratica che migliora ancora la qualità:
+        fare una scheda d'esempio "a mano" e includerla come riferimento few-shot
+        nel prompt per gli altri 79 capitoli.
+      </p>
+      <p>
+        <strong>Fase 2: costruzione del livello 2.</strong> 3-4 chiamate, una per
+        atto. Ognuna ha in input le 15-25 schede di capitolo dell'atto, e produce
+        una scheda di livello 2 che <em>non ricopia</em> le informazioni dei capitoli
+        ma le sintetizza a un livello superiore: tendenze, archi, pattern.
+      </p>
+      <p>
+        <strong>Fase 3: costruzione del livello 3.</strong> Una singola chiamata che
+        ha in input le 3-4 schede di atto e produce la scheda romanzo.
+      </p>
+      <p>
+        <strong>Totale: 85 chiamate.</strong> Sembra tanto, ma è un investimento
+        iniziale. Una volta costruita la piramide, ogni successiva domanda di
+        revisione costa una sola chiamata, e la chiamata è veloce perché lavora su
+        10.000-50.000 token invece di 100.000+. Se prevedi anche solo 20-30 domande
+        di revisione, il ROI della piramide è già altissimo.
+      </p>
+
+      <h3>La piramide al lavoro: esempi concreti</h3>
+      <p>
+        <strong>Task: "l'arco del protagonista funziona attraverso il libro?"</strong>
+        Carichi i livelli 2+3. Nelle schede atto c'è il campo "evoluzione dei
+        personaggi". Chiedi al modello di descrivere l'arco nei tre atti e di
+        valutare se è coerente. Una chiamata su 11.000 token, risposta di alta
+        qualità perché il modello ha una visione integrata.
+      </p>
+      <p>
+        <strong>Task: "ci sono sottoplot aperti che non si chiudono?"</strong> Stesso
+        materiale. Le schede tracciano i sottoplot. Il modello identifica se un
+        sottoplot menzionato nell'atto 1 sparisce nell'atto 2 senza essere risolto.
+        Task in cui il chunking fallisce e il full context fa fatica.
+      </p>
+      <p>
+        <strong>Task: "il pacing è equilibrato?"</strong> Carichi tutta la piramide.
+        Le schede capitolo hanno il campo "pacing". Il modello traccia il pacing
+        capitolo per capitolo, identifica buchi, confronta con la struttura ideale
+        dei tre atti.
+      </p>
+      <p>
+        <strong>Task: "approfondiamo il capitolo 23".</strong> Carichi il livello 3
+        (contesto generale), la scheda atto a cui appartiene (contesto narrativo
+        immediato), la scheda capitolo 23, e il testo originale del capitolo 23. Il
+        modello ha tutto: quadro generale, quadro locale, diagnosi sintetica, testo
+        da rileggere.
+      </p>
+
+      <h3>Le criticità del metodo</h3>
+      <p>
+        Tre limiti da conoscere.
+      </p>
+      <p>
+        <strong>Le schede possono perdere cose.</strong> Se un dettaglio importante
+        del capitolo 12 non finisce nella scheda, è come se non esistesse per i task
+        successivi. Mitigazione: la struttura va progettata in funzione dei task
+        che farai, e per task imprevisti devi risalire al testo originale.
+      </p>
+      <p>
+        <strong>Gli errori si propagano verticalmente.</strong> Se la scheda del
+        capitolo 12 ha una sintesi imprecisa, la scheda dell'atto 2 (che la usa
+        come fonte) erediterà l'imprecisione. Mitigazione: verificare a campione le
+        schede del livello 1 durante la costruzione, e correggere prima di salire.
+      </p>
+      <p>
+        <strong>L'investimento iniziale è significativo.</strong> 85 chiamate, più
+        progettazione e verifica. Per una revisione una-tantum può essere troppo.
+        Ha senso quando prevedi un workflow prolungato in cui i riassunti vengono
+        riusati molte volte.
+      </p>
+
+      <div class="when-box">
+        <div class="when-cell when-good">
+          <div class="when-label">Quando usarla</div>
+          <p>
+            Workflow di revisione prolungato (settimane o mesi). Molti task globali
+            e strutturali, non solo task locali. Voler navigare il romanzo a
+            granularità diverse. Modelli con context window relativamente piccola.
+            Voler una rappresentazione del romanzo leggibile anche dall'umano per
+            tenere il filo durante la revisione.
+          </p>
+        </div>
+        <div class="when-cell when-bad">
+          <div class="when-label">Quando NON usarla</div>
+          <p>
+            Task una-tantum dove non rivisiterai i risultati. Workflow con solo
+            task locali (chunking è migliore). Documento abbastanza piccolo da
+            entrare nel full context con caching e poche domande sopra.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout callout-teal">
+        <h4>La piramide come infrastruttura</h4>
+        <p>
+          Un workflow serio probabilmente costruisce la piramide all'inizio del
+          progetto, e poi la usa come <strong>base permanente</strong> su cui
+          appoggiare le altre strategie: chunking quando serve, full context per
+          task specifici, RAG (Parte 2) per interrogazioni mirate. La piramide
+          diventa l'infrastruttura, le altre strategie sono attività che ci si
+          appoggiano sopra.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Otto cose da portarsi via dalla Parte 1</h3>
+    <ol class="takeaway-list">
+      <li>
+        Prima delle strategie viene la <strong>diagnosi dei task</strong>: task
+        locali, comparativi locali, globali, strutturali. Ognuno richiede un
+        approccio diverso. Una soluzione unica per "documenti lunghi" non esiste.
+      </li>
+      <li>
+        Tre vincoli materiali governano il problema: <em>costo quadratico
+        dell'attenzione</em>, <em>lost in the middle</em>, <em>diluizione del
+        segnale</em>. Tutte le strategie sono modi diversi di negoziare con questi
+        vincoli.
+      </li>
+      <li>
+        <strong>Full context</strong> (Strategia 1) è spesso la scelta giusta quando
+        il documento ci sta, soprattutto per workflow conversazionali e iterativi.
+        Non è "la strategia ingenua": elimina la complessità di ingegneria del
+        prompt e mantiene la qualità del ragionamento integrato. Si potenzia con il
+        <em>context caching</em>.
+      </li>
+      <li>
+        Attenzione alla differenza tra <strong>caricare un file in un progetto</strong>
+        (che usa retrieval automatico, e può fallire silenziosamente su task globali)
+        e <strong>mettere il documento nel prompt manualmente</strong> (full context
+        vero). Usare entrambi in modo complementare è la pratica migliore.
+      </li>
+      <li>
+        <strong>Chunking</strong> (Strategia 2) è il workhorse per task locali
+        ripetuti. Le tre decisioni progettuali — <em>dove tagliare</em>, <em>dimensione</em>,
+        <em>overlap</em> — determinano se funzionerà bene o male. La regola
+        operativa: <em>il chunk dev'essere grande quanto serve per contenere
+        l'unità minima di significato per il task</em>.
+      </li>
+      <li>
+        Il problema sottovalutato del chunking è la <strong>ricomposizione</strong>:
+        80 risposte non sono utili se non hai un modo di metterle insieme. Tre
+        strategie: <em>aggregazione strutturata</em> (output in JSON), <em>piramide
+        di sintesi</em> (compressione progressiva), <em>indicizzazione per task
+        successivi</em> (mappa di problemi).
+      </li>
+      <li>
+        <strong>Riassunti gerarchici</strong> (Strategia 3) costruiscono una
+        rappresentazione condensata e strutturata del documento. Il punto cruciale:
+        i riassunti devono essere <em>strutturati per task</em>, non narrativi. La
+        struttura va decisa <strong>prima</strong> della costruzione.
+      </li>
+      <li>
+        Una <strong>piramide a tre livelli</strong> (schede capitolo → schede atto
+        → scheda romanzo) trasforma 100k token di romanzo in 50k token di
+        rappresentazione strutturata e navigabile. Investimento iniziale di ~85
+        chiamate; ROI alto se prevedi un workflow di revisione prolungato.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- BRIDGE -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="bridge">
+    <div class="bridge-label">Prossimo passo</div>
+    <h3>Parte 2: le strategie avanzate</h3>
+    <p>
+      Le tre strategie viste in questa Parte 1 condividono una natura: lavorano sul
+      testo, o su rappresentazioni testuali del testo. Sono potenti, ma hanno limiti
+      precisi. In particolare, fanno fatica con due classi di task: le
+      <em>interrogazioni mirate</em> (cercare passaggi specifici in un grande corpus)
+      e i <em>task narrativamente complessi</em> che richiedono di rappresentare
+      relazioni non lineari attraverso il documento.
+    </p>
+    <p>
+      Nella <strong>Parte 2</strong> vediamo due strategie più sofisticate che
+      affrontano proprio questi limiti. Il <strong>RAG</strong>
+      (Retrieval-Augmented Generation), che permette di interrogare il documento in
+      modo mirato usando embeddings. E le <strong>mappe strutturate</strong>, che
+      costruiscono rappresentazioni esplicite delle relazioni del documento
+      (personaggi, archi, temi, sottoplot) come scheletro consultabile dal modello.
+      Aggiungeremo anche il <em>context caching</em> come ottimizzazione trasversale
+      che si applica a tutte le strategie.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Tema 4 — Parte 1 di 2 — Percorso di approfondimento su LLM e prompting (seconda chat)</p>
+  <p>Gestire documenti lunghi: full context, chunking, riassunti gerarchici</p>
+</footer>
+
+</body>
+</html>

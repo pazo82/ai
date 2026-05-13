@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report C — Punteggiatura, capoversi, struttura</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: var(--indigo);
+    padding: 72px 48px 88px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -100px; right: -80px;
+    width: 540px; height: 540px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.30) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -100px; left: 10%;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(13,122,110,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-overline {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 19px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 44px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 76px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.35;
+    color: var(--indigo);
+    margin: 0 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .section-arc {
+    background: var(--indigo-faint2);
+    border-left: 3px solid var(--indigo-light);
+    padding: 22px 28px;
+    margin: 0 0 40px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .section-arc-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .section-arc p {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15.5px;
+    color: var(--indigo-mid);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .callout {
+    margin: 32px 0;
+    padding: 28px 32px;
+    border-radius: 8px;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 12px;
+    letter-spacing: 0;
+  }
+
+  .callout p {
+    font-size: 15.5px;
+    line-height: 1.72;
+    margin-bottom: 12px;
+  }
+
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-indigo { background: var(--indigo-faint); border-color: var(--indigo-light); }
+  .callout-indigo h4 { color: var(--indigo); }
+  .callout-orange { background: var(--orange-faint); border-color: var(--orange); }
+  .callout-orange h4 { color: var(--orange); }
+  .callout-teal { background: var(--teal-faint); border-color: var(--teal); }
+  .callout-teal h4 { color: var(--teal); }
+  .callout-amber { background: var(--amber-faint); border-color: var(--amber); }
+  .callout-amber h4 { color: var(--amber); }
+  .callout-purple { background: var(--purple-faint); border-color: var(--purple); }
+  .callout-purple h4 { color: var(--purple); }
+
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--indigo-border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 32px 0;
+    position: relative;
+  }
+
+  .metaphor::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px; height: 100%;
+    background: var(--orange);
+    border-radius: 8px 0 0 8px;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .metaphor p {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.72;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  .insight {
+    background: var(--indigo);
+    color: white;
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+  .insight strong { color: white; font-weight: 600; }
+  .insight em { color: var(--orange-light); }
+
+  /* Confronto frasi */
+  .compare-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 28px 0;
+  }
+
+  .compare-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+  }
+
+  .compare-card.var-a { border-top: 3px solid var(--teal); }
+  .compare-card.var-b { border-top: 3px solid var(--orange); }
+
+  .compare-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .compare-card.var-a .compare-tag { color: var(--teal); }
+  .compare-card.var-b .compare-tag { color: var(--orange); }
+
+  .compare-text {
+    font-family: var(--serif);
+    font-size: 16.5px;
+    color: var(--ink);
+    line-height: 1.55;
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+
+  .compare-text .highlight-a { color: var(--teal); font-weight: 600; font-style: normal; }
+  .compare-text .highlight-b { color: var(--orange); font-weight: 600; font-style: normal; }
+
+  .compare-note {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Tabella punteggiatura */
+  .punct-list {
+    margin: 32px 0;
+  }
+
+  .punct-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 24px;
+    padding: 24px 0;
+    border-bottom: 1px dashed var(--border);
+    align-items: start;
+  }
+
+  .punct-row:last-child { border-bottom: none; }
+
+  .punct-symbol {
+    font-family: var(--mono);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--indigo);
+    line-height: 1;
+    text-align: center;
+    padding-top: 4px;
+  }
+
+  .punct-content h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--indigo);
+    margin-bottom: 8px;
+  }
+
+  .punct-content p {
+    font-size: 15px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    margin-bottom: 0;
+  }
+
+  /* Barriere graduate */
+  .barriers-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  .barriers-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 22px;
+  }
+
+  .barriers-row {
+    display: grid;
+    grid-template-columns: 90px 60px 1fr;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .barriers-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .barrier-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--indigo);
+  }
+
+  .barrier-bar {
+    height: 8px;
+    border-radius: 4px;
+    position: relative;
+  }
+
+  .barrier-bar.b1 { background: linear-gradient(90deg, var(--teal) 15%, transparent 15%); }
+  .barrier-bar.b2 { background: linear-gradient(90deg, var(--amber) 35%, transparent 35%); }
+  .barrier-bar.b3 { background: linear-gradient(90deg, var(--orange) 65%, transparent 65%); }
+  .barrier-bar.b4 { background: linear-gradient(90deg, var(--purple) 90%, transparent 90%); }
+
+  .barrier-desc {
+    font-size: 14px;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+
+  /* Frasi annotate */
+  .annotated-sentence {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 26px 30px;
+    margin: 26px 0;
+  }
+
+  .annotated-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .annotated-text {
+    font-family: var(--serif);
+    font-size: 16.5px;
+    color: var(--ink);
+    line-height: 1.75;
+    margin-bottom: 16px;
+  }
+
+  .annotated-text .frame-soggetto { background: var(--teal-faint); color: var(--teal); padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+  .annotated-text .frame-verbo { background: var(--orange-faint); color: var(--orange); padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+  .annotated-text .frame-sub { background: var(--amber-faint); color: var(--amber); padding: 2px 6px; border-radius: 3px; font-style: italic; }
+
+  .annotated-note {
+    font-size: 14px;
+    color: var(--ink-light);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* Prompt blocks - confronto strutturato */
+  .prompt-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 28px 0;
+  }
+
+  .prompt-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 26px;
+  }
+
+  .prompt-card.bad { border-top: 3px solid var(--orange); }
+  .prompt-card.good { border-top: 3px solid var(--teal); }
+
+  .prompt-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .prompt-card.bad .prompt-tag { color: var(--orange); }
+  .prompt-card.good .prompt-tag { color: var(--teal); }
+
+  .prompt-text {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.7;
+    background: var(--bg2);
+    padding: 14px 16px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    white-space: pre-line;
+  }
+
+  .prompt-note {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Salienza posizionale - diagramma */
+  .salience-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  .salience-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .salience-caption {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    margin-top: 18px;
+    text-align: center;
+    font-style: italic;
+    padding: 0 20px;
+  }
+
+  /* Takeaways */
+  .takeaways {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px 40px;
+    margin: 32px 0;
+  }
+
+  .takeaways h3 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: var(--orange);
+    font-size: 22px;
+  }
+
+  .takeaway-item {
+    padding: 18px 0;
+    border-bottom: 1px dashed var(--border);
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 18px;
+  }
+
+  .takeaway-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .takeaway-item:first-child { padding-top: 0; }
+
+  .takeaway-num {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  .takeaway-text {
+    font-size: 15.5px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  .takeaway-text strong { color: var(--indigo); }
+
+  /* Bridge */
+  .bridge {
+    background: var(--indigo);
+    color: white;
+    border-radius: 8px;
+    padding: 36px 40px;
+    margin-top: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bridge::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(240,112,64,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .bridge h3 {
+    color: white;
+    font-family: var(--serif);
+    font-size: 26px;
+    margin: 0 0 16px;
+    font-weight: 500;
+  }
+
+  .bridge p {
+    color: rgba(255,255,255,0.88);
+    font-size: 16px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  footer {
+    background: var(--bg3);
+    padding: 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 36px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .compare-pair, .prompt-compare { grid-template-columns: 1fr; }
+    .punct-row { grid-template-columns: 60px 1fr; gap: 16px; }
+    .punct-symbol { font-size: 24px; }
+    .barriers-row { grid-template-columns: 80px 50px 1fr; gap: 10px; }
+    .insight { padding: 28px 24px; }
+    .takeaways { padding: 28px 24px; }
+    .bridge { padding: 28px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <div class="hero-inner">
+    <div class="hero-overline">Report C · La struttura del prompt</div>
+    <h1>Punteggiatura, <em>capoversi</em>, struttura</h1>
+    <p class="hero-sub">
+      Virgola, punto, parentesi, accapo, organizzazione delle frasi e dei paragrafi. Per il
+      modello non sono convenzioni ortografiche: sono segnali strutturali che le teste di
+      attenzione hanno imparato a leggere come confini, pause e demarcazioni. La sintassi è
+      geometria.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Tema</div>
+        <div class="meta-value">Struttura sintattica e architettura del testo</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Concetto chiave</div>
+        <div class="meta-value">Barriere attentive graduate</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Posizione nel percorso</div>
+        <div class="meta-value">Approfondimenti — Report C</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">01 — Aprendo dalla domanda fondamentale</div>
+  <h2>La virgola e il punto sono davvero diversi per il modello?</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Partiamo dal confronto tra virgola e punto, che a un lettore italiano sembrano quasi intercambiabili in molti contesti. Mostriamo che per il modello sono token completamente diversi, con dinamiche di attenzione opposte, e da qui ricaviamo l'idea generale: la punteggiatura è un sistema di "barriere attentive" che il modello ha imparato a leggere come segnali strutturali.</p>
+  </div>
+
+  <p class="lead">Considera queste due frasi:</p>
+
+  <div class="compare-pair">
+    <div class="compare-card var-a">
+      <div class="compare-tag">Con virgola</div>
+      <div class="compare-text">Marco è arrivato in ritardo<span class="highlight-a">,</span> era stanco morto.</div>
+      <p class="compare-note">Suona più fluida e narrativa. Le due informazioni sono presentate come strettamente correlate, in un rapporto causale o esplicativo implicito.</p>
+    </div>
+    <div class="compare-card var-b">
+      <div class="compare-tag">Con punto</div>
+      <div class="compare-text">Marco è arrivato in ritardo<span class="highlight-b">.</span> Era stanco morto.</div>
+      <p class="compare-note">Suona più nettamente segmentata. Le due informazioni sono presentate come unità separate che si succedono, ognuna con una propria autonomia.</p>
+    </div>
+  </div>
+
+  <p>
+    Per un lettore italiano sono quasi la stessa cosa. C'è una sfumatura stilistica — la versione
+    con la virgola suona più fluida e narrativa, quella con il punto più nettamente segmentata —
+    ma il significato è lo stesso. Si potrebbe pensare: "il modello sicuramente le tratta come
+    equivalenti".
+  </p>
+
+  <p>
+    E invece no. Sono <strong>token completamente diversi</strong>, con embedding diversi, e
+    producono dinamiche di attenzione diverse. Per capire perché, devo introdurre un'idea che è
+    il cuore di questa sezione: i segni di punteggiatura, dal punto di vista del modello, non
+    sono "convenzioni ortografiche". Sono <strong>segnali strutturali</strong> che dicono alle
+    teste di attenzione come comportarsi.
+  </p>
+
+  <h3>Il punto come "barriera attentiva"</h3>
+  <p>
+    Quando il modello processa "Marco è arrivato in ritardo. Era stanco morto", il token
+    <code>.</code> non è un'inezia. È un token che il modello ha incontrato miliardi di volte nei
+    dati di training, e ha imparato una cosa molto specifica: <strong>dopo un punto, di solito si
+    apre un nuovo pensiero</strong>. Questo non è una regola — è un pattern statistico che è
+    entrato negli embedding.
+  </p>
+
+  <p>
+    Cosa significa concretamente? Significa che certe teste di attenzione hanno imparato a
+    trattare il punto come una specie di "barriera morbida": i token che vengono dopo il punto
+    fanno meno attenzione ai token che venivano prima, rispetto a quanto farebbero se non ci
+    fosse stata interruzione. Non è che il modello "dimentichi" cosa c'era prima — la context
+    window è la stessa — ma le connessioni di attenzione tra "stanco" e "Marco" diventano
+    statisticamente più deboli quando c'è un punto in mezzo, rispetto a quanto sarebbero state
+    con una virgola.
+  </p>
+
+  <p>
+    In pratica, il punto dice al modello: "qui finisce un'unità, quella che viene è un'unità
+    nuova". E il modello, addestrato su miliardi di esempi dove i punti segnavano effettivamente
+    cambi di unità, ha calibrato i suoi pesi di attenzione di conseguenza.
+  </p>
+
+  <h3>La virgola come "ponte attentivo"</h3>
+  <p>
+    La virgola fa l'opposto. È anch'essa un token, con la sua firma geometrica nello spazio degli
+    embedding, ma il pattern che il modello ha imparato è diverso: <strong>dopo una virgola, di
+    solito si continua a parlare della stessa cosa</strong>. La virgola lega, non separa.
+  </p>
+
+  <p>
+    Quando il modello legge "Marco è arrivato in ritardo, era stanco morto", le teste di attenzione
+    vedono la virgola e mantengono attive le connessioni: "era stanco morto" viene contestualizzato
+    in stretto rapporto con "Marco è arrivato in ritardo". Le due parti della frase formano
+    un'unità unica, con un rapporto causale o esplicativo che resta implicito ma forte. Non c'è
+    la barriera morbida del punto.
+  </p>
+
+  <div class="callout callout-indigo">
+    <h4>Il principio operativo</h4>
+    <p>
+      Se vuoi che il modello veda due informazioni come <strong>strettamente correlate</strong>,
+      mettile in una sola frase separata da virgola. Se vuoi che le veda come <strong>due
+      informazioni che si succedono ma sono separate</strong>, dividile con un punto. La
+      differenza non è solo stilistica — è una differenza nei pesi di attenzione che si attivano,
+      e quindi nella geometria del vettore di contesto.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">02 — Gli altri segni della famiglia</div>
+  <h2>Punto e virgola, due punti, parentesi: tre segnali con personalità distinte</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Oltre a virgola e punto, l'italiano ha tre famiglie di segni con comportamenti specifici: il punto e virgola che porta una firma di registro elevato, i due punti che funzionano come "annunciatori" di contenuto importante, e le parentesi che creano zone di informazione subordinata. Ognuno con un'eredità statistica diversa.</p>
+  </div>
+
+  <h3>Il punto e virgola: il caso più interessante</h3>
+  <p>
+    C'è un segno di punteggiatura che merita un'attenzione speciale, perché ha proprietà che non
+    si vedono facilmente: il punto e virgola. Nei dati di training, il punto e virgola è raro.
+    Molto più raro della virgola, e molto più raro del punto. Compare quasi esclusivamente in due
+    tipi di contesti: nei testi scritti curati, dove un autore ha voluto creare un legame tra due
+    frasi che potrebbero stare da sole; e nei testi tecnici, dove serve a separare elementi di
+    una lista complessa che contengono già delle virgole interne.
+  </p>
+
+  <p>
+    Questo significa che, quando il modello incontra un <code>;</code>, due cose succedono.
+    Primo: il token è raro, e quindi statisticamente porta surprisal alto — è un segnale che
+    cattura attenzione. Secondo: i contesti in cui è apparso nel training sono prevalentemente
+    <strong>scrittura curata, riflessiva, intellettuale</strong>. Quindi il punto e virgola,
+    oltre a fare il suo lavoro strutturale (separazione meno netta del punto, più netta della
+    virgola), porta con sé una sfumatura di <strong>registro elevato</strong>.
+  </p>
+
+  <p>
+    In pratica, se in un prompt usi il punto e virgola dove avresti potuto usare un punto, stai
+    mandando al modello un segnale di registro: "siamo in modalità scrittura curata". Il modello,
+    leggendo quel segnale, può inclinare leggermente la sua produzione verso un registro più
+    sofisticato. Non è una tecnica da abusare — un prompt pieno di punti e virgola suona
+    affettato anche al modello, perché statisticamente è un pattern raro che diventa innaturale
+    se ripetuto troppo. Ma usato con misura, è uno strumento sottile.
+  </p>
+
+  <h3>I due punti: l'annunciatore</h3>
+  <p>
+    I due punti hanno una funzione che li rende particolari: <strong>annunciano</strong>.
+    Statisticamente, nei dati di training, i due punti vengono usati per introdurre una
+    spiegazione, una lista, una citazione, un'enumerazione, una conseguenza. Sono quasi sempre
+    seguiti da qualcosa di rilevante.
+  </p>
+
+  <p>
+    Il modello ha imparato che, dopo i due punti, <strong>arriva l'informazione importante</strong>.
+    Le teste di attenzione che monitorano i due punti tendono ad attivare un'aspettativa:
+    "preparati a contestualizzare attentamente quello che viene". Il vettore di contesto che il
+    modello costruisce dopo un <code>:</code> è leggermente "in tensione", in attesa del materiale
+    che dovrà essere integrato.
+  </p>
+
+  <div class="compare-pair">
+    <div class="compare-card var-a">
+      <div class="compare-tag">Con due punti</div>
+      <div class="compare-text">Il vincolo è: massimo 100 parole.</div>
+      <p class="compare-note">Struttura "annuncio + contenuto annunciato". Le teste di attenzione si preparano a contestualizzare con peso il "100 parole" — è quello che il <code>:</code> sta annunciando.</p>
+    </div>
+    <div class="compare-card var-b">
+      <div class="compare-tag">Senza due punti</div>
+      <div class="compare-text">Il vincolo è massimo 100 parole.</div>
+      <p class="compare-note">Stessa informazione ma resa come affermazione lineare. Il "100 parole" è solo una parte della predicazione, senza un'attesa attentiva specifica che lo focalizzi.</p>
+    </div>
+  </div>
+
+  <p>
+    Questo ha una conseguenza pratica molto utile per chi scrive prompt. Se vuoi che il modello
+    presti particolare attenzione a una parte specifica del tuo input, mettila dopo i due punti.
+    Le due frasi sopra dicono la stessa cosa, ma la prima — con i due punti — ha una struttura
+    che il modello legge come "annuncio + contenuto annunciato", e questo carica leggermente di
+    più il "100 parole". È un piccolo effetto, ma in prompt dove i vincoli contano, si sente.
+  </p>
+
+  <h3>Le parentesi: l'inciso come zona protetta</h3>
+  <p>
+    Le parentesi sono interessanti perché creano una struttura che il modello tratta come
+    <strong>subordinata e laterale</strong>. Il materiale dentro parentesi non viene ignorato —
+    il modello lo legge come tutto il resto — ma viene trattato come "informazione di contorno",
+    non come parte del flusso principale del discorso.
+  </p>
+
+  <p>
+    Da dove viene questo comportamento? Dalla statistica dei testi reali. Nelle parentesi gli
+    autori mettono note, precisazioni, riferimenti, esempi opzionali, traduzioni. Sono materiale
+    che chiarisce ma non guida. Il modello ha imparato questa funzione, e le teste di attenzione
+    che si sono specializzate sulle parentesi tendono a creare un piccolo "isolamento" intorno al
+    contenuto interno: i token dentro hanno connessioni forti tra loro, ma le loro connessioni
+    con i token fuori (oltre l'apertura e la chiusura) sono leggermente attenuate.
+  </p>
+
+  <div class="callout callout-amber">
+    <h4>Conseguenza pratica per il prompting</h4>
+    <p>
+      Se vuoi dare al modello un'informazione di contorno — un esempio illustrativo, una
+      precisazione, un riferimento — metterla tra parentesi è un buon modo per dire "tieni a
+      mente questo, ma non lasciarlo dominare la tua risposta". Se invece quella informazione è
+      centrale per quello che vuoi, le parentesi sono <strong>controproducenti</strong>: stai
+      dicendo al modello di considerarla marginale.
+    </p>
+    <p>
+      C'è anche un caso speciale degli incisi tra virgole, che funzionano in modo simile alle
+      parentesi ma con un legame leggermente più stretto al flusso principale. "Marco, che era
+      arrivato in ritardo, era stanco" e "Marco (che era arrivato in ritardo) era stanco" sono
+      molto simili nel comportamento del modello, ma le virgole tengono l'inciso più "dentro" la
+      frase, mentre le parentesi lo spingono più "fuori".
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">03 — Il segnale più potente</div>
+  <h2>L'accapo: la barriera attentiva forte</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>L'accapo è probabilmente lo strumento più potente e più sottovalutato per organizzare un prompt. Vediamo come funziona meccanicamente, perché l'accapo doppio è particolarmente efficace, e come si compone con gli altri segni di punteggiatura per formare un sistema di barriere attentive graduate.</p>
+  </div>
+
+  <p>
+    Adesso arriviamo al segnale strutturale più potente, e probabilmente il più sottovalutato.
+    L'accapo — il semplice ritorno a capo — è uno degli strumenti più efficaci per organizzare
+    un prompt, e per ragioni meccaniche molto specifiche.
+  </p>
+
+  <p>
+    Quando vai a capo, stai introducendo nel testo un token speciale (a seconda dei tokenizer si
+    chiama <code>\n</code> o ha un proprio ID). Questo token è uno dei più frequenti nei dati di
+    training, e il modello ha imparato un pattern molto chiaro: <strong>quando appare un accapo,
+    soprattutto se doppio, comincia una nuova unità di contenuto</strong>.
+  </p>
+
+  <p>
+    Pensa a dove gli accapo doppi appaiono nei testi reali. Tra un paragrafo e l'altro di un
+    articolo. Tra una sezione e l'altra di un documento. Tra un punto e l'altro di una lista in
+    formato libero. Tra una domanda e una risposta in un'intervista. In tutti questi casi,
+    l'accapo doppio segnala un <strong>cambio di unità semantica</strong>.
+  </p>
+
+  <p>
+    Il modello ha imparato che, dopo un accapo doppio, le connessioni di attenzione con quello
+    che c'era prima si attenuano in modo molto più marcato di quanto succeda con un semplice
+    punto. È come passare da una "barriera morbida" (il punto) a una "barriera media" (l'accapo
+    singolo) a una "barriera forte" (l'accapo doppio).
+  </p>
+
+  <div class="barriers-diagram">
+    <div class="barriers-label">Le barriere attentive graduate</div>
+
+    <div class="barriers-row">
+      <div class="barrier-name">virgola ,</div>
+      <div class="barrier-bar b1"></div>
+      <div class="barrier-desc">Quasi assente — il modello tiene attive le connessioni tra prima e dopo. Funziona come "ponte".</div>
+    </div>
+
+    <div class="barriers-row">
+      <div class="barrier-name">punto .</div>
+      <div class="barrier-bar b2"></div>
+      <div class="barrier-desc">Barriera morbida — separa due unità sintattiche, ma il modello mantiene legami concettuali nel paragrafo.</div>
+    </div>
+
+    <div class="barriers-row">
+      <div class="barrier-name">accapo</div>
+      <div class="barrier-bar b3"></div>
+      <div class="barrier-desc">Barriera media — segnala cambio di sotto-unità (lista, blocco, riga). Le connessioni si attenuano sensibilmente.</div>
+    </div>
+
+    <div class="barriers-row">
+      <div class="barrier-name">accapo ×2</div>
+      <div class="barrier-bar b4"></div>
+      <div class="barrier-desc">Barriera forte — segnala cambio netto di unità. Il modello quasi "ricomincia" la costruzione del contesto locale.</div>
+    </div>
+  </div>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora del paesaggio sonoro</div>
+    <p>
+      Voglio fissare un'immagine che ti aiuta a tenere insieme tutto questo livello. Pensa al
+      prompt come a un <strong>paesaggio sonoro</strong>: ci sono note (i token semantici), ci
+      sono pause (la punteggiatura), e ci sono silenzi più lunghi (gli accapo). Le pause non sono
+      assenza di musica — sono parte della musica. Sono quello che dà ritmo e struttura, e quello
+      che permette di distinguere una frase melodica dalla successiva.
+    </p>
+    <p>
+      Un prompt senza pause adeguate è una sequenza confusa di note. Un prompt con le pause
+      giuste è una composizione che il modello può "leggere" come architettura, non solo come
+      sequenza di parole. E nota una cosa: questo paesaggio sonoro non è un'analogia astratta.
+      È letteralmente come funziona. Le teste di attenzione, leggendo i token di punteggiatura,
+      <em>calibrano le loro distanze attentive</em> — quanto strettamente legare quello che viene
+      dopo a quello che è venuto prima.
+    </p>
+  </div>
+
+  <div class="callout callout-orange">
+    <h4>Una conseguenza pratica molto importante</h4>
+    <p>
+      Da qui discende un principio operativo che vale davvero la pena fissare: <strong>se in un
+      prompt fai colare tutto in un blocco unico, stai costringendo il modello a tenere insieme
+      con l'attenzione cose che dovrebbero stare separate</strong>. Se invece organizzi il prompt
+      in blocchi separati da accapo doppio, stai dicendo al modello "qui c'è una cosa, qui c'è
+      un'altra cosa, qui c'è un'altra ancora". Le sue teste di attenzione lavorano meglio perché
+      trovano i confini già preparati.
+    </p>
+    <p>
+      È un principio che ti vedrai applicato in tutti i prompt scritti bene: istruzioni separate
+      da contesto, contesto separato da esempi, esempi separati dalla richiesta finale. Non è una
+      convenzione stilistica — è uno sfruttamento mirato del modo in cui il modello segmenta il
+      suo input.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">04 — Mappa di sintesi</div>
+  <h2>Il sistema completo dei segnali strutturali</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Prima di passare al livello superiore — l'organizzazione delle frasi — fermiamoci a mettere in fila tutti i segnali di punteggiatura che abbiamo visto. Ognuno con la sua funzione attentiva e la sua eredità statistica. È una mappa di riferimento utile da tenere a mente quando si scrive.</p>
+  </div>
+
+  <div class="punct-list">
+    <div class="punct-row">
+      <div class="punct-symbol">,</div>
+      <div class="punct-content">
+        <h4>Virgola — il ponte</h4>
+        <p>Mantiene attive le connessioni di attenzione. Lega quello che viene dopo a quello che è venuto prima. Usata per tenere unite informazioni strettamente correlate dentro la stessa unità sintattica.</p>
+      </div>
+    </div>
+
+    <div class="punct-row">
+      <div class="punct-symbol">.</div>
+      <div class="punct-content">
+        <h4>Punto — la barriera morbida</h4>
+        <p>Attenua le connessioni attentive con quello che c'era prima. Segnala la fine di un'unità e l'apertura di un'altra. Usato per presentare informazioni come distinte ma adiacenti.</p>
+      </div>
+    </div>
+
+    <div class="punct-row">
+      <div class="punct-symbol">;</div>
+      <div class="punct-content">
+        <h4>Punto e virgola — la firma del registro</h4>
+        <p>Separazione intermedia tra virgola e punto, ma soprattutto porta un'eredità statistica di scrittura curata. Usarlo inclina lievemente il modello verso un registro più sofisticato. Da usare con misura.</p>
+      </div>
+    </div>
+
+    <div class="punct-row">
+      <div class="punct-symbol">:</div>
+      <div class="punct-content">
+        <h4>Due punti — l'annunciatore</h4>
+        <p>Crea un'aspettativa attentiva su quello che viene dopo. Statisticamente è seguito da informazione rilevante (spiegazioni, liste, vincoli). Usato per focalizzare l'attenzione del modello su una porzione specifica del prompt.</p>
+      </div>
+    </div>
+
+    <div class="punct-row">
+      <div class="punct-symbol">( )</div>
+      <div class="punct-content">
+        <h4>Parentesi — l'inciso laterale</h4>
+        <p>Isola il contenuto interno come "informazione di contorno". Il modello lo legge ma lo tratta come marginale rispetto al flusso principale. Da usare per note, precisazioni, esempi opzionali — non per contenuti che devono essere centrali.</p>
+      </div>
+    </div>
+
+    <div class="punct-row">
+      <div class="punct-symbol">↵</div>
+      <div class="punct-content">
+        <h4>Accapo singolo — la barriera media</h4>
+        <p>Segnala cambio di sotto-unità: una riga di lista, un elemento successivo, un nuovo punto in una sequenza. Le connessioni si attenuano in modo più marcato rispetto al punto.</p>
+      </div>
+    </div>
+
+    <div class="punct-row">
+      <div class="punct-symbol">↵↵</div>
+      <div class="punct-content">
+        <h4>Accapo doppio — la barriera forte</h4>
+        <p>Lo strumento più potente di segmentazione. Il modello quasi "ricomincia" la costruzione del contesto locale. Usato per separare blocchi a tema diverso (istruzioni, contesto, esempi, richiesta finale).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">05 — Salendo di un livello</div>
+  <h2>Subordinate annidate vs frasi brevi: il problema reale</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Dopo aver capito i segnali strutturali, saliamo al livello dell'organizzazione delle frasi. Le subordinate annidate e le frasi brevi non sono solo scelte stilistiche: producono carichi attentivi diversi sul modello. Il principio è quello della subordinazione moderata.</p>
+  </div>
+
+  <p>Considera queste due versioni di uno stesso contenuto.</p>
+
+  <div class="annotated-sentence">
+    <div class="annotated-label">Versione A — Subordinate annidate</div>
+    <div class="annotated-text">
+      Il modello, <span class="frame-sub">dopo aver elaborato il prompt che gli viene fornito dall'utente, il quale può contenere istruzioni esplicite oltre a esempi,</span> costruisce una rappresentazione interna che, <span class="frame-sub">attraverso gli strati di attenzione,</span> viene progressivamente raffinata.
+    </div>
+    <p class="annotated-note">Soggetto e verbo principale ("il modello" e "costruisce") separati da diciotto parole interposte. L'attenzione deve tracciare dipendenze a lunga distanza attraverso due subordinate annidate.</p>
+  </div>
+
+  <div class="annotated-sentence">
+    <div class="annotated-label">Versione B — Frasi brevi</div>
+    <div class="annotated-text">
+      <span class="frame-soggetto">L'utente</span> fornisce un prompt al modello. <span class="frame-soggetto">Il prompt</span> può contenere istruzioni esplicite ed esempi. <span class="frame-soggetto">Il modello</span> elabora il prompt. <span class="frame-soggetto">Costruisce</span> una rappresentazione interna. <span class="frame-soggetto">Gli strati di attenzione</span> raffinano progressivamente questa rappresentazione.
+    </div>
+    <p class="annotated-note">Cinque frasi brevi, ognuna con dipendenze locali soggetto-verbo-oggetto. L'attenzione lavora in modalità rilassata, una piccola unità alla volta.</p>
+  </div>
+
+  <p>
+    Per un lettore umano, la versione A è più elegante ma più faticosa; la versione B è più
+    telegrafica ma più chiara. Ti aspetteresti, intuitivamente, che il modello — essendo "più
+    intelligente" di noi nel processare il testo — non avesse problemi con nessuna delle due.
+    E invece le due versioni producono effetti diversi, e capire perché è importante.
+  </p>
+
+  <h3>Cosa succede con le subordinate annidate</h3>
+  <p>
+    Quando il modello incontra una frase come la versione A, le sue teste di attenzione devono
+    fare un lavoro complesso: tracciare <strong>dipendenze a lunga distanza</strong>. Il soggetto
+    della frase principale è "il modello", e il verbo principale è "costruisce". Ma tra questi
+    due elementi ci sono — letteralmente — diciotto parole e due subordinate annidate.
+    L'attenzione deve mantenere attivo il legame tra "modello" e "costruisce" attraverso tutto
+    quel materiale interposto.
+  </p>
+
+  <p>
+    Il modello <em>ce la fa</em> — sono task che fa milioni di volte al giorno — ma c'è un costo.
+    Più la dipendenza è lunga, più il vettore contestualizzato del soggetto deve "viaggiare"
+    attraverso strati di attenzione mantenendo la sua identità intatta. E nel mentre, altre
+    dipendenze (chi è "che", chi è "il quale", a cosa si riferisce "rappresentazione") competono
+    per la stessa attenzione. Le teste si trovano a dover gestire un grafo complesso di legami
+    sintattici annidati.
+  </p>
+
+  <p>
+    Il risultato pratico è che il modello, leggendo una frase con tante subordinate, <strong>ha
+    meno "capacità attentiva libera"</strong> da dedicare al contenuto. È un po' come tu che
+    leggi una frase di Proust: la capisci, ma se subito dopo ti chiedo di farne un riassunto, te
+    lo ricordi peggio di una frase semplice — non perché tu non l'abbia capita, ma perché lo
+    sforzo di tenerla insieme ha consumato risorse.
+  </p>
+
+  <h3>Cosa succede con le frasi brevi</h3>
+  <p>
+    Adesso pensa alla versione B. Ogni frase è breve, le dipendenze sintattiche sono tutte locali
+    (soggetto-verbo-oggetto, vicini), e tra una frase e l'altra c'è un punto. Cosa succede
+    meccanicamente? Le teste di attenzione lavorano in modalità "rilassata". Le dipendenze locali
+    si chiudono rapidamente — "il modello elabora il prompt" è un'unità che si risolve in pochi
+    token. Poi arriva il punto, che funziona come barriera morbida, e ricominciamo da capo con
+    un'unità nuova. Ogni frase è una piccola unità completa, e il modello può dedicare le sue
+    risorse attentive a costruire bene ogni mattone, uno alla volta.
+  </p>
+
+  <p>
+    C'è però un effetto collaterale: con le frasi brevi, <strong>i legami tra le informazioni
+    sono impliciti</strong>. Nella versione A, "il quale può contenere" lega esplicitamente il
+    prompt all'utente. Nella versione B, lo stesso legame deve essere ricostruito dal modello
+    inferendolo dal contesto. Il modello lo fa, ma se le frasi brevi diventano troppe e
+    disconnesse, il modello può perdere i legami logici tra di loro.
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Il principio della subordinazione moderata</h4>
+    <p>
+      Non c'è una risposta unica, ma c'è un principio: <strong>subordinazione moderata</strong>.
+      Le frasi devono avere abbastanza struttura da rendere espliciti i legami logici importanti,
+      ma non così tanta da costringere il modello a tracciare dipendenze attraverso lunghi tratti
+      di materiale interposto.
+    </p>
+    <p>
+      In pratica: una frase con una subordinata principale (relativa, causale, temporale) è quasi
+      sempre processata bene. Una frase con due subordinate annidate comincia a richiedere più
+      sforzo. Una frase con tre o più subordinate annidate è territorio in cui il modello può
+      cominciare a perdere precisione, specialmente se ci sono pronomi che richiedono risoluzione
+      di referenza ("il quale", "che", "questo" senza referente chiaro).
+    </p>
+    <p>
+      C'è anche un'altra cosa importante. Le subordinate sono molto meno problematiche quando
+      <em>seguono</em> la frase principale, e molto più problematiche quando si <strong>incastrano
+      in mezzo</strong> a essa. "Il modello costruisce una rappresentazione, che viene raffinata
+      dagli strati di attenzione" è una frase facile. "Il modello, attraverso gli strati di
+      attenzione che lavorano in parallelo, costruisce una rappresentazione" è più difficile,
+      anche se contiene meno parole.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">06 — Architettura del prompt</div>
+  <h2>L'organizzazione dei paragrafi: il pattern temi-blocchi</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Una volta capito come funzionano le frasi, dobbiamo capire come organizzare l'insieme. Il principio è semplice da enunciare: una unità deve contenere una cosa. Un paragrafo, un blocco separato da accapo, una sezione — ogni unità testuale dovrebbe avere un tema dominante, e le frasi al suo interno dovrebbero contribuire a quel tema.</p>
+  </div>
+
+  <p>
+    Passiamo al livello successivo. Una volta che abbiamo capito come ragionare sulle frasi,
+    dobbiamo capire come organizzare l'insieme di frasi che compongono un paragrafo o, più
+    ampiamente, un prompt. Qui il principio fondamentale è semplice da enunciare ma profondo:
+    <strong>una unità deve contenere una cosa</strong>. Sembra ovvio, ma vediamo perché è
+    meccanicamente importante.
+  </p>
+
+  <h3>Cosa succede quando un blocco contiene una cosa sola</h3>
+  <p>
+    Immagina un prompt strutturato in questo modo:
+  </p>
+
+  <div class="prompt-compare">
+    <div class="prompt-card good">
+      <div class="prompt-tag">Tre frasi, un tema dominante</div>
+      <div class="prompt-text">Voglio che tu mi scriva una mail per il mio capo. La mail deve essere breve e cortese. Il tema è la richiesta di una settimana di ferie a luglio.</div>
+      <p class="prompt-note">I vettori contestualizzati dei token convergono in una regione coesa dello spazio. Il modello "sa di cosa stiamo parlando" perché tutto il segnale punta nella stessa direzione.</p>
+    </div>
+    <div class="prompt-card bad">
+      <div class="prompt-tag">Una sola frase, tre temi</div>
+      <div class="prompt-text">Voglio che tu mi scriva una mail per il mio capo per richiedere una settimana di ferie a luglio, ma prima dimmi anche se è meglio mandarla via mail o di persona, e già che ci siamo spiegami se devo motivare la richiesta o no.</div>
+      <p class="prompt-note">Il vettore di contesto è tirato in tre direzioni operativamente diverse (produrre, consigliare, spiegare). Il modello probabilmente risponderà male a una o due delle tre richieste.</p>
+    </div>
+  </div>
+
+  <p>
+    Tre frasi, un solo tema dominante (la mail). Quando il modello legge questo blocco, le sue
+    teste di attenzione costruiscono un vettore di contesto coerente: tutti i token convergono
+    su una rappresentazione unificata di "una mail al capo, breve e cortese, sulle ferie". Le
+    frasi si rinforzano a vicenda — ognuna aggiunge un attributo allo stesso oggetto centrale.
+    Geometricamente, sta succedendo qualcosa di preciso: i vettori contestualizzati dei token
+    convergono in una regione coesa dello spazio.
+  </p>
+
+  <h3>Cosa succede quando un blocco mescola cose diverse</h3>
+  <p>
+    Nella versione con i tre temi mischiati, le sue teste di attenzione devono costruire un
+    vettore di contesto che è di fatto <strong>tirato in tre direzioni</strong>. Non c'è un tema
+    dominante chiaro: ce ne sono tre che competono. Il modello dovrà comunque produrre un output,
+    ma probabilmente farà uno di questi due errori: o cercherà di rispondere a tutto e tre
+    malamente, dando una risposta superficiale per ciascuna; o si concentrerà su uno
+    (probabilmente l'ultimo, per ragioni che vedremo nella prossima sezione) e ignorerà gli
+    altri.
+  </p>
+
+  <h3>La riorganizzazione</h3>
+  <p>
+    Da qui discende il principio operativo: <strong>se hai più cose da chiedere, dividile in
+    blocchi separati da accapo doppio</strong>. Stiamo combinando il principio dell'accapo come
+    barriera attentiva forte con il principio del paragrafo come unità a tema unico. L'idea è
+    creare blocchi dove ognuno ha un solo tema, separati nettamente, in modo che il modello
+    possa elaborarli uno alla volta senza confusione.
+  </p>
+
+  <div class="prompt-card good" style="margin: 28px 0;">
+    <div class="prompt-tag">Lo stesso contenuto, ben organizzato</div>
+    <div class="prompt-text">Devo richiedere una settimana di ferie a luglio al mio capo.
+
+Prima cosa: secondo te è meglio fare la richiesta via mail o di persona?
+
+Seconda cosa: è opportuno motivare la richiesta o no?
+
+Terza cosa: se via mail, scrivimi una bozza breve e cortese.</div>
+    <p class="prompt-note">Stessa informazione di prima, ma organizzata in modo che ogni blocco abbia un tema chiaro. Il modello può elaborarli in sequenza, dedicare a ciascuno la sua attenzione, e produrre una risposta che li affronti tutti senza farli collidere.</p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">07 — La versione microscopica</div>
+  <h2>La salienza posizionale dentro la frase e dentro il blocco</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Il "lost in the middle" che abbiamo visto nel punto 4B del percorso precedente ha una versione microscopica: anche dentro una singola frase o un singolo paragrafo, le posizioni di apertura e chiusura sono più "udibili" della metà. Le ragioni sono strutturali e statistiche insieme, e si rinforzano a vicenda.</p>
+  </div>
+
+  <p>
+    L'ultimo aspetto del Report C riguarda qualcosa di più sottile: <strong>dove dentro un'unità
+    conviene mettere l'informazione importante</strong>. Mi ricollego per un momento al Report 4B
+    del percorso precedente — quello sul <em>lost in the middle</em>. Lì abbiamo visto che, in un
+    prompt lungo, le informazioni messe all'inizio e alla fine vengono ricordate meglio di quelle
+    messe nel mezzo. È un fenomeno macroscopico, che riguarda l'intero documento.
+  </p>
+
+  <p>
+    Ma c'è una versione <strong>microscopica</strong> dello stesso fenomeno, che riguarda ogni
+    singola unità: la frase, il paragrafo, il blocco. Anche dentro una singola frase, le
+    posizioni iniziali e finali sono più "udibili" della metà. E anche dentro un singolo
+    paragrafo, la prima frase e l'ultima frase hanno peso maggiore di quelle in mezzo.
+  </p>
+
+  <div class="salience-diagram">
+    <svg class="salience-svg" viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="salgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#c94a1a" stop-opacity="0.85"/>
+          <stop offset="20%" stop-color="#c94a1a" stop-opacity="0.55"/>
+          <stop offset="50%" stop-color="#c94a1a" stop-opacity="0.2"/>
+          <stop offset="80%" stop-color="#c94a1a" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#c94a1a" stop-opacity="0.85"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Curva di salienza -->
+      <path d="M 60 60 Q 200 60 250 150 L 650 150 Q 700 60 840 60" fill="none" stroke="#c94a1a" stroke-width="2.5" stroke-dasharray="5,3"/>
+
+      <!-- Area sotto curva -->
+      <path d="M 60 60 Q 200 60 250 150 L 650 150 Q 700 60 840 60 L 840 200 L 60 200 Z" fill="url(#salgrad)"/>
+
+      <!-- Asse orizzontale -->
+      <line x1="60" y1="200" x2="840" y2="200" stroke="#1e2a5e" stroke-width="1.5"/>
+
+      <!-- Etichette posizioni -->
+      <text x="80" y="225" font-family="Outfit" font-size="13" fill="#1e2a5e" font-weight="600">apertura</text>
+      <text x="450" y="225" font-family="Outfit" font-size="13" fill="#6b7280" text-anchor="middle">corpo</text>
+      <text x="820" y="225" font-family="Outfit" font-size="13" fill="#1e2a5e" font-weight="600" text-anchor="end">chiusura</text>
+
+      <!-- Asse verticale: salienza -->
+      <text x="40" y="65" font-family="Outfit" font-size="11" fill="#6b7280" text-anchor="end">alta</text>
+      <text x="40" y="155" font-family="Outfit" font-size="11" fill="#6b7280" text-anchor="end">bassa</text>
+      <text x="25" y="135" font-family="JetBrains Mono" font-size="10" fill="#1e2a5e" text-anchor="middle" font-weight="600" transform="rotate(-90 25 135)">salienza</text>
+
+      <!-- Marcatori di posizione -->
+      <circle cx="80" cy="60" r="6" fill="#c94a1a"/>
+      <circle cx="820" cy="60" r="6" fill="#c94a1a"/>
+      <circle cx="450" cy="150" r="5" fill="#6b7280"/>
+
+      <!-- Etichette descrittive sopra -->
+      <text x="80" y="40" font-family="Outfit" font-size="12" fill="#c94a1a" font-weight="600" text-anchor="middle">tema</text>
+      <text x="820" y="40" font-family="Outfit" font-size="12" fill="#c94a1a" font-weight="600" text-anchor="end">enfasi</text>
+
+      <!-- Titolo -->
+      <text x="450" y="260" font-family="Outfit" font-size="13" fill="#1e2a5e" text-anchor="middle" font-weight="600">La curva di salienza posizionale dentro un'unità</text>
+    </svg>
+    <p class="salience-caption">Le posizioni di apertura e chiusura sono "udibili" con peso maggiore. La metà è zona di passaggio: viene processata, ma non gode di privilegi attentivi particolari.</p>
+  </div>
+
+  <h3>Perché succede questo</h3>
+  <p>
+    Le ragioni sono due, e si rinforzano a vicenda.
+  </p>
+
+  <p>
+    La prima è <strong>strutturale</strong>. Le teste di attenzione, leggendo un'unità nuova
+    (una frase nuova, un paragrafo nuovo), tendono a dare peso alto al primo token incontrato —
+    è quello che "apre" l'unità e ne stabilisce il tema. Quando arrivano alla fine dell'unità,
+    danno peso alto all'ultimo token perché è quello che "chiude" e su cui devono basare la
+    transizione all'unità successiva. La metà, in mezzo, è materiale di passaggio: viene
+    processata, ma non gode di privilegi attentivi particolari.
+  </p>
+
+  <p>
+    La seconda è <strong>statistica</strong>. Negli scritti reali, gli autori tendono a mettere
+    l'informazione importante all'inizio (perché vogliono che venga colta subito) o alla fine
+    (perché vogliono che resti impressa). Le frasi e i paragrafi reali sono <em>costruiti con la
+    salienza ai bordi</em>. Il modello ha letto miliardi di esempi e ha interiorizzato questo
+    pattern: quando legge un'unità, si aspetta che le posizioni di apertura e chiusura portino
+    il contenuto principale, e il mezzo porti elaborazione e supporto.
+  </p>
+
+  <p>
+    I due fenomeni si rinforzano: il modello dà più peso ai bordi sia perché architetturalmente
+    le sue teste di attenzione lo fanno, sia perché statisticamente ha imparato che è lì che si
+    trova il segnale importante.
+  </p>
+
+  <h3>Cosa significa in pratica</h3>
+  <p>
+    Significa che, quando scrivi un blocco, devi pensare a cosa mettere in apertura e a cosa
+    mettere in chiusura. L'apertura stabilisce <strong>il tema</strong> — è quella che dice al
+    modello "di cosa stiamo parlando". La chiusura stabilisce <strong>l'enfasi</strong> — è
+    quella che resta più impressa e che condiziona la transizione a quello che viene dopo.
+  </p>
+
+  <p>
+    Per esempio, se vuoi che il modello produca una risposta breve, e stai scrivendo un prompt
+    di cinque frasi, hai due posizioni privilegiate per il vincolo "breve": la prima frase del
+    blocco, o l'ultima. Mettere "rispondi brevemente" nel mezzo è meno efficace. Spesso il
+    pattern migliore è metterlo all'inizio (così stabilisce il quadro) e ripeterlo in forma
+    compatta alla fine (così resta impresso al momento della transizione all'output).
+  </p>
+
+  <p>
+    Stesso discorso dentro la singola frase. Se in una frase importante c'è un termine che il
+    modello deve assolutamente cogliere, vale la pena metterlo all'inizio o alla fine, non
+    sepolto nel mezzo.
+  </p>
+
+  <div class="compare-pair">
+    <div class="compare-card var-b">
+      <div class="compare-tag">Salienza bassa</div>
+      <div class="compare-text">Scrivimi una sintesi, <span class="highlight-b">breve e formale</span>, del documento allegato.</div>
+      <p class="compare-note">Il vincolo "breve e formale" è sepolto nel mezzo della frase. Posizione meno attentivamente favorevole.</p>
+    </div>
+    <div class="compare-card var-a">
+      <div class="compare-tag">Salienza alta</div>
+      <div class="compare-text">Scrivimi una sintesi <span class="highlight-a">breve e formale</span> del documento allegato.</div>
+      <p class="compare-note">Stessa frase, ma il vincolo è in posizione più saliente: vicino alla chiusura, dove l'attenzione è più alta.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">08 — Il principio unificante</div>
+  <h2>Quando la struttura sintattica coincide con la struttura logica</h2>
+
+  <p>
+    A questo punto possiamo unire i tre temi che abbiamo visto nel Report C — la punteggiatura,
+    l'organizzazione di frasi e paragrafi, la salienza posizionale — in un principio operativo
+    unificato.
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Il principio unificante del Report C</div>
+    <p>
+      <strong>Scrivere un prompt non è scrivere bene in senso letterario. È scrivere in modo che
+      la struttura sintattica e tipografica del testo coincida con la struttura logica di quello
+      che vuoi chiedere.</strong>
+    </p>
+    <p>
+      Quando coincidono, il modello legge il prompt e la sua attenzione si distribuisce
+      naturalmente nei posti giusti: i blocchi separati corrispondono a temi separati, le pause
+      forti corrispondono a transizioni concettuali, le posizioni di apertura e chiusura ospitano
+      l'informazione importante, le subordinate restano controllate.
+    </p>
+    <p>
+      Quando non coincidono, il modello deve fare lavoro extra per ricostruire la struttura
+      logica nonostante quella sintattica — e quel lavoro extra è proprio quello che produce
+      <em>risposte imprecise, parziali, o fuori bersaglio</em>.
+    </p>
+  </div>
+
+  <p>
+    Questo è anche un principio che spiega perché molti prompt scritti "in fretta" funzionano
+    meno bene di prompt scritti con cura: non perché siano più ambigui semanticamente, ma perché
+    la loro struttura sintattica non aiuta il modello a segmentare correttamente l'input. La
+    differenza tra un prompt "scritto in fretta" e uno "scritto con cura" non è una questione di
+    eleganza stilistica — è una questione di <strong>coincidenza tra forma e contenuto</strong>.
+    E questa coincidenza non è un fatto estetico: è uno sfruttamento mirato delle barriere
+    attentive che il modello applica leggendo il testo.
+  </p>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">Sintesi finale</div>
+  <h2>Sette cose da portarsi via dal Report C</h2>
+
+  <div class="takeaways">
+    <h3>I punti da fissare</h3>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">01</div>
+      <div class="takeaway-text">
+        <strong>La punteggiatura è un sistema di barriere attentive graduate.</strong> Virgola
+        (ponte), punto (barriera morbida), accapo (barriera media), accapo doppio (barriera
+        forte). Ogni segno calibra quanto strettamente le teste di attenzione legano quello che
+        viene dopo a quello che è venuto prima.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">02</div>
+      <div class="takeaway-text">
+        <strong>Il punto e virgola porta una firma di registro.</strong> Statisticamente è raro
+        e appare in contesti di scrittura curata. Usarlo inclina lievemente il modello verso un
+        registro più sofisticato. Da usare con misura, non come trucco da abusare.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">03</div>
+      <div class="takeaway-text">
+        <strong>I due punti funzionano come annunciatore.</strong> Il modello ha imparato che
+        dopo i due punti arriva informazione importante. Usali per focalizzare l'attenzione su
+        vincoli, definizioni, contenuti specifici che vuoi siano colti con peso.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">04</div>
+      <div class="takeaway-text">
+        <strong>Le parentesi isolano il contenuto come marginale.</strong> Sono utili per note di
+        contorno e precisazioni opzionali, ma sono controproducenti se contengono informazione
+        centrale: stai dicendo al modello di considerarla laterale.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">05</div>
+      <div class="takeaway-text">
+        <strong>Subordinate moderate, non annidate.</strong> Una subordinata principale per frase
+        è quasi sempre ben processata. Da due in poi, e soprattutto se sono incastrate in mezzo
+        invece che in coda, il carico attentivo cresce e la precisione può calare.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">06</div>
+      <div class="takeaway-text">
+        <strong>Un blocco = un tema.</strong> Le unità testuali separate da accapo doppio devono
+        avere un tema dominante chiaro. Se devi chiedere più cose, organizzale in blocchi
+        separati invece che mischiarle in un'unica frase tirata in più direzioni.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">07</div>
+      <div class="takeaway-text">
+        <strong>La salienza vive ai bordi.</strong> Dentro ogni unità — frase, paragrafo, blocco
+        — apertura e chiusura sono posizioni privilegiate. Per ragioni sia strutturali (come
+        funzionano le teste di attenzione) sia statistiche (come gli autori scrivono nei dati
+        reali). Metti lì l'informazione che deve pesare.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section style="border-bottom: none; padding-bottom: 60px;">
+  <div class="bridge">
+    <div class="bridge-label">Verso il Report D</div>
+    <h3>L'ordine delle informazioni e la ridondanza intelligente</h3>
+    <p>
+      Nel Report C abbiamo visto come la struttura sintattica e tipografica influenza l'attenzione
+      a livello di frase, paragrafo, blocco. Abbiamo anche toccato la "salienza ai bordi" dentro
+      ogni singola unità. Resta da affrontare la stessa dinamica al livello macroscopico
+      dell'intero prompt: dove conviene mettere le diverse parti (istruzione, contesto, esempi,
+      richiesta) e perché.
+    </p>
+    <p>
+      Il Report D approfondisce proprio questo. Riprenderemo il <em>lost in the middle</em> dal
+      punto 4B applicandolo con dettaglio, parleremo di ridondanza intelligente (quando ripetersi
+      paga, quando no), di posizioni privilegiate nel prompt, e di come l'ordine relativo dei
+      pezzi cambia il modo in cui il modello costruisce la sua risposta.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Report C — Punteggiatura, capoversi, struttura</p>
+  <p>Approfondimenti sulla struttura del prompt · Documento 3 di 5</p>
+</footer>
+
+</body>
+</html>

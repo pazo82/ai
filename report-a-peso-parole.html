@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report A — Il peso meccanico delle parole</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: var(--indigo);
+    padding: 72px 48px 88px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -100px; right: -80px;
+    width: 540px; height: 540px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.30) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -100px; left: 10%;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-overline {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 19px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 44px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 76px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.35;
+    color: var(--indigo);
+    margin: 0 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  /* Section arc */
+  .section-arc {
+    background: var(--indigo-faint2);
+    border-left: 3px solid var(--indigo-light);
+    padding: 22px 28px;
+    margin: 0 0 40px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .section-arc-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .section-arc p {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15.5px;
+    color: var(--indigo-mid);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* Callouts */
+  .callout {
+    margin: 32px 0;
+    padding: 28px 32px;
+    border-radius: 8px;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 12px;
+    letter-spacing: 0;
+  }
+
+  .callout p {
+    font-size: 15.5px;
+    line-height: 1.72;
+    margin-bottom: 12px;
+  }
+
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-indigo {
+    background: var(--indigo-faint);
+    border-color: var(--indigo-light);
+  }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout-orange {
+    background: var(--orange-faint);
+    border-color: var(--orange);
+  }
+  .callout-orange h4 { color: var(--orange); }
+
+  .callout-teal {
+    background: var(--teal-faint);
+    border-color: var(--teal);
+  }
+  .callout-teal h4 { color: var(--teal); }
+
+  .callout-amber {
+    background: var(--amber-faint);
+    border-color: var(--amber);
+  }
+  .callout-amber h4 { color: var(--amber); }
+
+  .callout-purple {
+    background: var(--purple-faint);
+    border-color: var(--purple);
+  }
+  .callout-purple h4 { color: var(--purple); }
+
+  /* Metaphor */
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--indigo-border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 32px 0;
+    position: relative;
+  }
+
+  .metaphor::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px; height: 100%;
+    background: var(--orange);
+    border-radius: 8px 0 0 8px;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .metaphor p {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.72;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  /* Insight box */
+  .insight {
+    background: var(--indigo);
+    color: white;
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+  .insight strong { color: white; font-weight: 600; }
+  .insight em { color: var(--orange-light); }
+
+  /* Esempi affiancati - frasi a confronto */
+  .compare-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 28px 0;
+  }
+
+  .compare-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+  }
+
+  .compare-card.var-a { border-top: 3px solid var(--teal); }
+  .compare-card.var-b { border-top: 3px solid var(--orange); }
+
+  .compare-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .compare-card.var-a .compare-tag { color: var(--teal); }
+  .compare-card.var-b .compare-tag { color: var(--orange); }
+
+  .compare-text {
+    font-family: var(--serif);
+    font-size: 16.5px;
+    color: var(--ink);
+    line-height: 1.55;
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+
+  .compare-text .highlight-a { color: var(--teal); font-weight: 600; font-style: normal; }
+  .compare-text .highlight-b { color: var(--orange); font-weight: 600; font-style: normal; }
+
+  .compare-note {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Table-like categorical list */
+  .cat-list {
+    margin: 32px 0;
+  }
+
+  .cat-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 28px;
+    padding: 22px 0;
+    border-bottom: 1px dashed var(--border);
+    align-items: start;
+  }
+
+  .cat-row:last-child { border-bottom: none; }
+
+  .cat-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--indigo);
+  }
+
+  .cat-name .cat-examples {
+    display: block;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--orange);
+    margin-top: 6px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  .cat-desc {
+    font-size: 15.5px;
+    color: var(--ink-mid);
+    line-height: 1.72;
+  }
+
+  /* Diagramma SVG container */
+  .diagram-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  .diagram-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .diagram-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .diagram-caption {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    margin-top: 18px;
+    text-align: center;
+    font-style: italic;
+    padding: 0 20px;
+  }
+
+  /* Categorie di potenza - card grandi */
+  .potenza-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin: 32px 0;
+  }
+
+  .potenza-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    border-left: 4px solid;
+  }
+
+  .potenza-card.cat-1 { border-left-color: var(--teal); }
+  .potenza-card.cat-2 { border-left-color: var(--amber); }
+  .potenza-card.cat-3 { border-left-color: var(--orange); }
+
+  .potenza-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .potenza-card.cat-1 .potenza-tag { color: var(--teal); }
+  .potenza-card.cat-2 .potenza-tag { color: var(--amber); }
+  .potenza-card.cat-3 .potenza-tag { color: var(--orange); }
+
+  .potenza-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 19px;
+    color: var(--indigo);
+    margin-bottom: 12px;
+  }
+
+  .potenza-desc {
+    font-size: 15.5px;
+    color: var(--ink-mid);
+    line-height: 1.72;
+    margin: 0;
+  }
+
+  .potenza-desc strong { color: var(--ink); }
+
+  /* Recap teste box */
+  .recap-box {
+    background: linear-gradient(135deg, var(--indigo-faint) 0%, var(--orange-faint) 100%);
+    border: 1px solid var(--indigo-border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 28px 0;
+  }
+
+  .recap-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .recap-box p {
+    font-size: 15.5px;
+    line-height: 1.72;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .recap-box p:last-child { margin-bottom: 0; }
+
+  /* Takeaways finali */
+  .takeaways {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px 40px;
+    margin: 32px 0;
+  }
+
+  .takeaways h3 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: var(--orange);
+    font-size: 22px;
+  }
+
+  .takeaway-item {
+    padding: 18px 0;
+    border-bottom: 1px dashed var(--border);
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 18px;
+  }
+
+  .takeaway-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .takeaway-item:first-child { padding-top: 0; }
+
+  .takeaway-num {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  .takeaway-text {
+    font-size: 15.5px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  .takeaway-text strong { color: var(--indigo); }
+
+  /* Bridge to next */
+  .bridge {
+    background: var(--indigo);
+    color: white;
+    border-radius: 8px;
+    padding: 36px 40px;
+    margin-top: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bridge::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(240,112,64,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .bridge h3 {
+    color: white;
+    font-family: var(--serif);
+    font-size: 26px;
+    margin: 0 0 16px;
+    font-weight: 500;
+  }
+
+  .bridge p {
+    color: rgba(255,255,255,0.88);
+    font-size: 16px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  footer {
+    background: var(--bg3);
+    padding: 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 36px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .compare-pair { grid-template-columns: 1fr; }
+    .cat-row { grid-template-columns: 1fr; gap: 8px; }
+    .insight { padding: 28px 24px; }
+    .takeaways { padding: 28px 24px; }
+    .bridge { padding: 28px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <div class="hero-inner">
+    <div class="hero-overline">Report A · La struttura del prompt</div>
+    <h1>Il <em>peso</em> meccanico delle parole</h1>
+    <p class="hero-sub">
+      Perché certe parole pesano molto e altre poco, anche quando sembrano simili. La risposta passa
+      attraverso la geometria degli embedding, il concetto di surprisal, e la specializzazione delle
+      teste di attenzione. Non c'è un sistema di ponderazione esterno: il peso emerge dal meccanismo.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Tema</div>
+        <div class="meta-value">Peso semantico delle parole</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Concetto chiave</div>
+        <div class="meta-value">Surprisal e ruolo strutturale</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Posizione nel percorso</div>
+        <div class="meta-value">Approfondimenti — Report A</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 1 — APERTURA -->
+<section>
+  <div class="section-num">01 — La domanda iniziale</div>
+  <h2>Esiste un sistema di ponderazione delle parole?</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Apriamo con un esempio concreto — il "non" che ribalta una frase — per mostrare che certe parole hanno un effetto sproporzionato sul significato. Da lì ricaviamo la domanda di fondo: come funziona davvero il "peso" di una parola? E anticipiamo che la risposta non è un sistema di pesi predefiniti, ma un meccanismo emergente che combina geometria, sorpresa e ruolo strutturale.</p>
+  </div>
+
+  <p class="lead">
+    Tieni in mente questa coppia di frasi:
+  </p>
+
+  <div class="compare-pair">
+    <div class="compare-card var-a">
+      <div class="compare-tag">Frase A</div>
+      <div class="compare-text">Mario è andato al cinema.</div>
+      <p class="compare-note">Afferma un fatto: c'è stato un movimento, c'è stata una destinazione, c'è stata un'azione compiuta.</p>
+    </div>
+    <div class="compare-card var-b">
+      <div class="compare-tag">Frase B</div>
+      <div class="compare-text">Mario <span class="highlight-b">non</span> è andato al cinema.</div>
+      <p class="compare-note">Nega lo stesso fatto: il movimento non c'è stato. Il significato è opposto.</p>
+    </div>
+  </div>
+
+  <p>
+    Per te, lettore umano, queste due frasi dicono cose opposte. Una afferma un fatto, l'altra lo nega.
+    Ti aspetteresti che, all'interno del modello, ci sia da qualche parte un meccanismo che "interpreta"
+    la presenza del <em>non</em> e ribalta il significato della frase. Magari un modulo dedicato alla
+    negazione, o una regola che dice "se trovi <em>non</em>, inverti".
+  </p>
+
+  <p>
+    <strong>Niente di tutto questo.</strong> Quello che succede è molto più sottile e, in un certo
+    senso, più sorprendente: il modello tratta <em>non</em> come un altro token qualsiasi — gli
+    associa un vettore embedding, lo passa attraverso gli strati di attenzione esattamente come
+    ogni altro token. Non c'è nessuna regola speciale per la negazione. Eppure il comportamento
+    finale del modello rispetto a queste due frasi è radicalmente diverso. Come è possibile?
+  </p>
+
+  <p>
+    La risposta apre un fenomeno generale che è il cuore di questo report: il "peso" di una parola
+    in una frase non è una proprietà fissa, attribuita da un sistema di ponderazione esterno. È un
+    fenomeno <strong>emergente</strong>, che nasce dalla combinazione di tre fattori meccanicamente
+    precisi che vedremo uno per uno. Il primo passo è capire cosa rende il vettore di <em>non</em>
+    geometricamente speciale.
+  </p>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 2 — IL CASO DEL "NON" -->
+<section>
+  <div class="section-num">02 — Anatomia di una piccola parola che ribalta tutto</div>
+  <h2>Come fa "non" a ribaltare una frase, senza una regola dedicata</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Esaminiamo nel dettaglio cosa succede quando il modello processa "Mario non è andato al cinema". Vediamo due idee complementari: la posizione geometrica peculiare di <em>non</em> nello spazio degli embedding, e il modo in cui le teste di attenzione lo ascoltano con priorità. La metafora delle onde chiude il quadro.</p>
+  </div>
+
+  <h3>Prima idea: "non" occupa una posizione molto particolare nello spazio degli embedding</h3>
+  <p>
+    Ricorda quanto detto nel punto 2 del percorso: lo spazio degli embedding ha una geometria
+    appresa. Parole con significato simile finiscono vicine, parole con ruoli grammaticali simili
+    finiscono vicine, ed esistono delle <strong>direzioni</strong> che corrispondono a proprietà
+    semantiche.
+  </p>
+
+  <p>
+    Una di queste direzioni è quella che potremmo chiamare <em>polarità</em>: l'asse che separa
+    l'affermazione dalla negazione, il sì dal no, il vero dal falso. Tutto lo spazio degli embedding
+    è strutturato in modo che lungo questo asse si distinguano le parole che "spostano verso il
+    negativo": <em>non</em>, <em>mai</em>, <em>nessuno</em>, <em>niente</em>, <em>senza</em>,
+    <em>no</em>. Il vettore embedding di <em>non</em> è un vettore che, in alcune dimensioni
+    cruciali, ha valori molto specifici — è "puntato" lungo l'asse della negazione.
+  </p>
+
+  <p>
+    E qui sta il punto importante. Il vettore di <em>non</em> è anche, geometricamente,
+    <strong>molto diverso da tutto il resto</strong>. La maggior parte dei token che il modello
+    incontra — articoli, sostantivi, verbi, avverbi normali — vivono in una regione dello spazio
+    molto popolata. <em>Non</em> vive in una regione meno popolata, occupata da pochi token che
+    fanno tutti più o meno lo stesso lavoro semantico. È come una boa nel mare: pochi oggetti come
+    quello, ma molto visibili.
+  </p>
+
+  <!-- Recap teste di attenzione -->
+  <div class="recap-box">
+    <div class="recap-label">Recap utile prima di proseguire — Le teste di attenzione</div>
+    <p>
+      Prima di andare avanti, ti rinfresco brevemente cosa fanno le <strong>teste di attenzione</strong>,
+      perché tra poco diventano protagoniste. In ogni strato del modello, l'attenzione costruisce per
+      ogni token un nuovo vettore che è una combinazione pesata dei vettori degli altri token, dove i
+      pesi riflettono "quanto è rilevante quel token per me adesso". È il meccanismo Q-K-V della
+      metafora della biblioteca: ogni token formula una <em>query</em>, espone una <em>key</em>,
+      contiene un <em>value</em>.
+    </p>
+    <p>
+      Il problema è che un solo "tipo" di rilevanza non basta — la rilevanza sintattica è diversa
+      da quella semantica, da quella referenziale, da quella di polarità. La soluzione: dentro ogni
+      strato, <strong>molte attenzioni in parallelo</strong>, tipicamente da 8 a oltre 100. Ognuna
+      è una "testa" e lavora su un proprio sottospazio. È come avere molti lettori che leggono lo
+      stesso testo simultaneamente, ognuno con un paio di occhiali diversi.
+    </p>
+    <p>
+      Durante l'addestramento, le teste si <strong>specializzano spontaneamente</strong>: nessuno
+      gli dice cosa fare, ma quando si va a guardare il modello finito si scoprono pattern ricorrenti
+      — una testa attiva pesi alti tra pronomi e antecedenti, un'altra tra negazioni e ciò che
+      negano, un'altra tra soggetti e verbi anche distanti. È un'orchestra che si è auto-organizzata.
+      Quando dico "le teste specializzate sui rapporti di polarità", parlo proprio di questo.
+    </p>
+  </div>
+
+  <h3>Seconda idea: l'attenzione ascolta i token "speciali" con priorità</h3>
+  <p>
+    Adesso entriamo nel cuore. Quando il modello processa la frase "Mario non è andato al cinema",
+    ogni token, in ogni strato di attenzione, sta facendo l'operazione che hai studiato: confronta
+    la sua query con le key di tutti gli altri token, calcola pesi di rilevanza, e mescola i value
+    dei più rilevanti nel proprio nuovo vettore.
+  </p>
+
+  <p>
+    Pensa al token <em>andato</em>. Il suo significato di base è qualcosa come "movimento compiuto
+    verso un luogo". Ma <em>andato</em> ha bisogno di sapere se quel movimento è stato compiuto
+    davvero o se non è stato compiuto. È un'informazione cruciale per il significato della frase.
+    Quindi le query di <em>andato</em> — derivate dal suo embedding e dai pesi del modello —
+    sono "puntate" in modo da cercare key che dicano "io sono un modificatore di polarità".
+  </p>
+
+  <p>
+    E indovina chi ha esattamente quel tipo di key? Il token <em>non</em>. Il suo embedding (che
+    è la materia prima da cui derivano le sue key) ha una firma geometrica che dice: "io modifico
+    la polarità di quello che mi sta accanto". Le teste di attenzione che si sono specializzate
+    sui rapporti di polarità producono, per il legame <em>andato → non</em>, un peso di rilevanza
+    altissimo.
+  </p>
+
+  <p>
+    Cosa significa concretamente? Significa che, quando <em>andato</em> costruisce il suo nuovo
+    vettore contestualizzato, una grossa fetta del suo contenuto viene da <em>non</em>. Il vettore
+    di <em>andato</em> dopo gli strati di attenzione <strong>non rappresenta più semplicemente
+    "l'azione di andare compiuta"</strong>: rappresenta "l'azione di andare compiuta, ma negata".
+    È un vettore diverso, in una regione diversa dello spazio.
+  </p>
+
+  <!-- Diagramma polarità -->
+  <div class="diagram-box">
+    <div class="diagram-label">Lo spazio degli embedding e l'asse della polarità</div>
+    <svg class="diagram-svg" viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#c94a1a"/>
+        </marker>
+      </defs>
+
+      <!-- Asse polarità -->
+      <line x1="80" y1="190" x2="820" y2="190" stroke="#1e2a5e" stroke-width="2" stroke-dasharray="6,4"/>
+      <text x="80" y="180" font-family="JetBrains Mono" font-size="11" fill="#1e2a5e" font-weight="600">— NEGAZIONE</text>
+      <text x="820" y="180" font-family="JetBrains Mono" font-size="11" fill="#1e2a5e" font-weight="600" text-anchor="end">AFFERMAZIONE +</text>
+
+      <!-- Nuvola popolata "neutra" -->
+      <ellipse cx="500" cy="190" rx="180" ry="80" fill="#1e2a5e" fill-opacity="0.05" stroke="#1e2a5e" stroke-opacity="0.2" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="500" y="120" font-family="Outfit" font-size="12" fill="#6b7280" text-anchor="middle" font-style="italic">regione "popolata" — articoli, sostantivi, verbi normali</text>
+
+      <!-- Punti nella nuvola -->
+      <circle cx="430" cy="180" r="4" fill="#6b7280" opacity="0.5"/>
+      <circle cx="470" cy="200" r="4" fill="#6b7280" opacity="0.5"/>
+      <circle cx="510" cy="170" r="4" fill="#6b7280" opacity="0.5"/>
+      <circle cx="540" cy="210" r="4" fill="#6b7280" opacity="0.5"/>
+      <circle cx="580" cy="180" r="4" fill="#6b7280" opacity="0.5"/>
+      <circle cx="450" cy="220" r="4" fill="#6b7280" opacity="0.5"/>
+      <circle cx="500" cy="195" r="4" fill="#6b7280" opacity="0.5"/>
+      <circle cx="600" cy="195" r="4" fill="#6b7280" opacity="0.5"/>
+      <text x="465" y="186" font-family="Outfit" font-size="11" fill="#374151">cinema</text>
+      <text x="495" y="225" font-family="Outfit" font-size="11" fill="#374151">andato</text>
+      <text x="555" y="178" font-family="Outfit" font-size="11" fill="#374151">Mario</text>
+
+      <!-- Boe negative -->
+      <circle cx="160" cy="180" r="9" fill="#c94a1a"/>
+      <text x="160" y="160" font-family="Outfit" font-size="13" fill="#c94a1a" text-anchor="middle" font-weight="700">non</text>
+      <circle cx="200" cy="220" r="7" fill="#c94a1a" opacity="0.8"/>
+      <text x="200" y="245" font-family="Outfit" font-size="11" fill="#c94a1a" text-anchor="middle" font-weight="600">mai</text>
+      <circle cx="120" cy="225" r="6" fill="#c94a1a" opacity="0.7"/>
+      <text x="120" y="250" font-family="Outfit" font-size="11" fill="#c94a1a" text-anchor="middle" font-weight="600">senza</text>
+      <circle cx="240" cy="170" r="6" fill="#c94a1a" opacity="0.7"/>
+      <text x="240" y="155" font-family="Outfit" font-size="11" fill="#c94a1a" text-anchor="middle" font-weight="600">nessuno</text>
+
+      <!-- Etichetta zona neg -->
+      <text x="180" y="290" font-family="Outfit" font-size="12" fill="#c94a1a" text-anchor="middle" font-style="italic" font-weight="500">regione "rada": pochi token,</text>
+      <text x="180" y="306" font-family="Outfit" font-size="12" fill="#c94a1a" text-anchor="middle" font-style="italic" font-weight="500">geometricamente distintivi</text>
+
+      <!-- Onda di attenzione -->
+      <path d="M 160 180 Q 280 100 495 218" fill="none" stroke="#c94a1a" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#ar)"/>
+      <text x="320" y="120" font-family="Outfit" font-size="12" fill="#c94a1a" font-style="italic">peso di attenzione altissimo</text>
+      <text x="320" y="138" font-family="Outfit" font-size="11" fill="#c94a1a" font-style="italic">"andato" cerca polarità → trova "non"</text>
+
+      <!-- Titolo -->
+      <text x="450" y="345" font-family="Outfit" font-size="13" fill="#1e2a5e" text-anchor="middle" font-weight="600">L'asse della polarità nello spazio degli embedding</text>
+      <text x="450" y="362" font-family="Lora" font-size="12" fill="#6b7280" text-anchor="middle" font-style="italic">i token di negazione sono pochi, isolati, e per questo "udibili da lontano" dalle teste specializzate</text>
+    </svg>
+  </div>
+
+  <p>
+    E questa differenza si propaga. Quando, alla fine del processo, il modello deve predire il
+    prossimo token sulla base del vettore di contesto finale, quella differenza geometrica produce
+    una distribuzione di probabilità completamente diversa. Le continuazioni naturali di "Mario è
+    andato al cinema" (probabilità alta su <em>ieri</em>, <em>con Lucia</em>, <em>a vedere</em>)
+    sono diverse dalle continuazioni naturali di "Mario non è andato al cinema" (probabilità alta
+    su <em>perché</em>, <em>neanche</em>, <em>anche se</em>). Il vettore di contesto è caduto in
+    un punto diverso, e il punto diverso "tira" verso predizioni diverse.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora delle onde nel fluido</div>
+    <p>
+      Pensa al prompt come a un fluido in cui si propagano onde. Ogni token che aggiungi crea
+      un'onda che si espande nel resto del prompt attraverso gli strati di attenzione. La maggior
+      parte dei token crea onde piccole — sono "rumore di fondo" relativamente prevedibile. Ma
+      certi token — le negazioni, i connettivi forti come <em>eppure</em> o <em>perché</em>, i
+      pronomi quando hanno un referente carico — <strong>creano onde grosse</strong>, che si fanno
+      sentire lontano e che ridisegnano la forma generale del fluido.
+    </p>
+    <p>
+      Il <em>non</em> non è un comando logico che inverte un bit. È un'onda forte che attraversa
+      il prompt e sposta tutti i vettori vicini in una regione diversa dello spazio.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 3 — SURPRISAL -->
+<section>
+  <div class="section-num">03 — Il concetto generale</div>
+  <h2>Surprisal: cosa rende un token "carico"</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Il caso del <em>non</em> era un esempio particolare di un fenomeno più ampio. Introduciamo qui il concetto di <em>surprisal</em> — quanto un token è inaspettato dato il contesto — e mostriamo perché coincide con il "peso" di una parola. È il principio che unifica tutti gli esempi che vedremo.</p>
+  </div>
+
+  <p class="lead">
+    Voglio partire da un'osservazione semplice. Considera queste due frasi:
+  </p>
+
+  <div class="compare-pair">
+    <div class="compare-card var-a">
+      <div class="compare-tag">Banale</div>
+      <div class="compare-text">Il gatto beve il <span class="highlight-a">latte</span>.</div>
+      <p class="compare-note">Il contesto già "tirava" verso questa parola. Surprisal basso. Cliché.</p>
+    </div>
+    <div class="compare-card var-b">
+      <div class="compare-tag">Inattesa</div>
+      <div class="compare-text">Il gatto beve il <span class="highlight-b">caffè</span>.</div>
+      <p class="compare-note">Inaspettato, divertente, memorabile. Surprisal alto. Porta più informazione.</p>
+    </div>
+  </div>
+
+  <p>
+    Per un parlante italiano, la prima è banale — il gatto che beve il latte è quasi un cliché. La
+    seconda è strana, divertente, memorabile. Se io ti chiedessi di ripeterle dopo cinque minuti,
+    è molto più probabile che ricorderesti la seconda. Perché?
+  </p>
+
+  <p>
+    Perché <em>latte</em>, in quella posizione, era prevedibile — il contesto "Il gatto beve il"
+    già "tirava" verso quella parola. <em>Caffè</em>, invece, era inatteso. Aveva poca probabilità
+    a priori, e il fatto che sia comparso davvero porta molta più informazione.
+  </p>
+
+  <p>
+    Questa è la nozione di <strong>surprisal</strong>: quanto è "sorprendente" un token dato il
+    contesto che lo precede. Tecnicamente, è il logaritmo negativo della probabilità che il modello
+    assegnerebbe a quel token in quel punto. Ma il modo intuitivo di pensarci è proprio quello:
+    surprisal alto = token che il contesto non si aspettava; surprisal basso = token che il
+    contesto già "tirava".
+  </p>
+
+  <p>
+    E adesso il punto, perché qui si chiude il cerchio con quello che ho detto prima sul <em>non</em>:
+    <strong>i token con surprisal alto sono i token che pesano di più nel determinare il senso
+    della frase</strong>.
+  </p>
+
+  <h3>Perché il surprisal coincide col peso</h3>
+  <p>
+    Questo non è una coincidenza, è una proprietà profonda. Pensaci: se un token è altamente
+    prevedibile dal contesto, vuol dire che il contesto da solo bastava a "indovinarlo". Quel
+    token aggiunge poco — è quasi ridondante. Se invece un token è inaspettato, vuol dire che apre
+    una direzione che il contesto da solo non avrebbe scelto. Sta dicendo qualcosa di nuovo,
+    qualcosa che cambia il significato.
+  </p>
+
+  <p>
+    Le teste di attenzione, durante l'addestramento, hanno imparato esattamente questo: i token
+    informativi vanno ascoltati con priorità, perché contengono il segnale; i token prevedibili
+    possono essere "scontati" perché aggiungono poco. Non c'è nessuna regola esplicita che lo dica
+    al modello — è emerso da solo, perché un modello che ascolta i token informativi predice meglio
+    di un modello che li ignora, e quindi è stato selezionato durante l'addestramento.
+  </p>
+
+  <div class="callout callout-indigo">
+    <h4>Il peso è relazionale, non assoluto</h4>
+    <p>
+      Il "peso" di una parola in una frase non è una proprietà fissa della parola — è una proprietà
+      <strong>relazionale</strong>, che dipende dal contesto. Lo stesso token può avere surprisal
+      alto in un contesto e basso in un altro. Non esiste un dizionario di "parole pesanti": esiste
+      una geometria contestuale che, momento per momento, decide quanto un token sta contribuendo.
+    </p>
+  </div>
+
+  <h3>Un esempio per fissare l'idea</h3>
+  <p>
+    Confronta queste due frasi:
+  </p>
+
+  <div class="compare-pair">
+    <div class="compare-card var-a">
+      <div class="compare-tag">Surprisal basso su "caffè"</div>
+      <div class="compare-text">Il <span class="highlight-a">caffè</span> di stamattina mi ha tenuto sveglio fino a tardi.</div>
+      <p class="compare-note">Dopo "tenuto sveglio fino a tardi", la presenza del caffè era ampiamente prevedibile. La parola aggiunge poco al significato.</p>
+    </div>
+    <div class="compare-card var-b">
+      <div class="compare-tag">Surprisal alto su "allergico"</div>
+      <div class="compare-text">Il caffè di stamattina mi ha messo <span class="highlight-b">allergico</span>.</div>
+      <p class="compare-note">"Messo allergico" è inaspettato — apre uno spazio semantico inusuale. Il modello deve riorganizzare il significato dell'intera frase.</p>
+    </div>
+  </div>
+
+  <p>
+    In entrambe c'è la parola <em>caffè</em>, ma il suo peso è molto diverso. Nella prima, dopo
+    "stamattina mi ha tenuto sveglio fino a tardi", il caffè era ampiamente prevedibile: la frase
+    ne aveva già fortemente suggerito la presenza. Surprisal basso, poco peso.
+  </p>
+
+  <p>
+    Nella seconda, "messo allergico" è inaspettato — il caffè non causa tipicamente allergia, e
+    quindi il modello <em>non</em> aveva fortemente predetto "messo allergico" dopo "il caffè di
+    stamattina mi ha". Quando arriva, sorprende, e il modello dovrà incorporarla con peso alto
+    perché sta riorganizzando il significato dell'intera frase.
+  </p>
+
+  <p>
+    E questo si vede negli output: se chiedi al modello di continuare la prima frase, le sue
+    continuazioni saranno prevedibili (parla di insonnia, di lavoro notturno, di errori di
+    dosaggio). Se gli chiedi di continuare la seconda, le sue continuazioni saranno più "esitanti"
+    e variegate, perché la frase ha aperto uno spazio semantico inusuale.
+  </p>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 4 — I FATTORI DEL PESO -->
+<section>
+  <div class="section-num">04 — Da dove viene davvero il peso</div>
+  <h2>I due fattori sovrapposti che determinano il peso di un token</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Adesso possiamo rispondere in modo unificato alla domanda iniziale. Il "peso" emerge dalla combinazione di due fattori: la geometria intrinseca del token (la sua firma nello spazio degli embedding) e il surprisal contestuale (quanto è inaspettato qui e ora). Da questa combinazione ricaviamo una gerarchia di tipologie tipicamente cariche.</p>
+  </div>
+
+  <p>
+    Il "peso" di un token è un fenomeno emergente che dipende da due fattori sovrapposti.
+  </p>
+
+  <p>
+    Il primo fattore è la <strong>geometria intrinseca del token nello spazio degli embedding</strong>.
+    Alcuni token vivono in regioni dello spazio molto specifiche, occupate da pochi vicini, e le
+    loro firme geometriche sono "uniche". <em>Non</em>, <em>mai</em>, <em>eppure</em>, <em>invece</em>,
+    <em>però</em> — sono tutti token che vivono in regioni distintive. Questo è un fattore intrinseco:
+    vale a prescindere dal contesto.
+  </p>
+
+  <p>
+    Il secondo fattore è il <strong>surprisal contestuale</strong>: quanto quel token è inaspettato
+    dato ciò che lo precede. È un fattore relazionale: cambia da contesto a contesto.
+  </p>
+
+  <p>
+    I due fattori si combinano. Una parola comune come <em>gatto</em> in un contesto neutro ha
+    surprisal medio e geometria poco distintiva — peso normale. La stessa parola <em>gatto</em> in
+    un contesto inaspettato ("Ho aperto il frigo e c'era un gatto") ha surprisal alto e quindi peso
+    alto, anche se la sua geometria intrinseca non è particolarmente distintiva. Una parola come
+    <em>non</em> in qualsiasi contesto ha geometria molto distintiva, e il suo surprisal tende a
+    essere medio-alto perché aggiunge sempre informazione (la negazione cambia sempre la frase).
+    Quindi il suo peso è quasi sempre alto.
+  </p>
+
+  <h3>Una gerarchia di tipologie tipicamente cariche</h3>
+  <p>
+    Da qui ricaviamo una gerarchia approssimativa di token "tipicamente carichi", che ti torna utile
+    come intuizione operativa quando scrivi un prompt.
+  </p>
+
+  <div class="cat-list">
+    <div class="cat-row">
+      <div class="cat-name">
+        Connettivi logici
+        <span class="cat-examples">perché · eppure · invece · infatti · quindi · però · allora</span>
+      </div>
+      <div class="cat-desc">
+        Sono quasi sempre carichi. Marcano relazioni logiche tra pezzi della frase, e il modello ha
+        imparato a ascoltarli con priorità perché segnalano la struttura del ragionamento. La frase
+        "ho studiato perché volevo il dieci" è diversa da "ho studiato eppure volevo il dieci", e
+        quel cambio di connettivo ribalta la logica. Le teste di attenzione si attivano forte sui
+        connettivi, e l'embedding del connettivo si propaga ampiamente nel vettore di contesto.
+      </div>
+    </div>
+
+    <div class="cat-row">
+      <div class="cat-name">
+        Modificatori di polarità e modalità
+        <span class="cat-examples">non · mai · sempre · forse · sicuramente · probabilmente</span>
+      </div>
+      <div class="cat-desc">
+        Carichi per ragioni simili al <em>non</em>: vivono in regioni geometricamente distintive e
+        modificano l'asse veridico-modale di tutto quello che gli sta intorno. Cambiare "Mario è
+        bravo" in "Mario è sempre bravo" o "Mario è forse bravo" o "Mario non è bravo" produce ogni
+        volta una traiettoria diversa, perché ognuno di questi modificatori sposta il vettore di
+        contesto lungo dimensioni distinte (intensità, certezza, polarità).
+      </div>
+    </div>
+
+    <div class="cat-row">
+      <div class="cat-name">
+        Pronomi nelle posizioni ambigue
+        <span class="cat-examples">lui · lei · me · te · questo · quello · noi · voi</span>
+      </div>
+      <div class="cat-desc">
+        Sono carichi quando il loro referente è in tensione. Se scrivi "Mario ha visto Luca al parco.
+        Lui era stanco", il pronome <em>lui</em> attiva fortemente le teste di attenzione che cercano
+        antecedenti, perché il modello deve risolvere un'ambiguità referenziale. Più l'ambiguità è
+        marcata, più il pronome pesa nel determinare la traiettoria del resto della frase.
+      </div>
+    </div>
+
+    <div class="cat-row">
+      <div class="cat-name">
+        Avverbi di intensificazione e focalizzazione
+        <span class="cat-examples">soprattutto · anche · persino · solo · esattamente · approssimativamente</span>
+      </div>
+      <div class="cat-desc">
+        Carichi perché modulano il modo in cui un altro token va inteso. "Ho mangiato la torta" e
+        "Ho mangiato anche la torta" non dicono la stessa cosa: il secondo presuppone che ci fossero
+        altre cose, e quindi il modello, leggendo <em>anche</em>, riorganizza la rappresentazione
+        della frase per includere questa presupposizione.
+      </div>
+    </div>
+
+    <div class="cat-row">
+      <div class="cat-name">
+        Vincoli quantitativi
+        <span class="cat-examples">al massimo · almeno · esattamente · circa · non più di</span>
+      </div>
+      <div class="cat-desc">
+        Particolarmente potenti quando il modello sta seguendo un'istruzione, perché spostano il
+        vettore di contesto in una regione dove certe continuazioni (numeri, quantità precise) hanno
+        probabilità altissima e altre (numeri vaghi, quantità sfumate) hanno probabilità bassa.
+        Riprenderemo questo tema nel Report E quando affronteremo il modo in cui il modello segue
+        le istruzioni.
+      </div>
+    </div>
+
+    <div class="cat-row">
+      <div class="cat-name">
+        Token rari o tecnici in contesto comune
+        <span class="cat-examples">termini di dominio · jargon · nomi propri specifici</span>
+      </div>
+      <div class="cat-desc">
+        Hanno surprisal alto per definizione — il modello "non se li aspettava" — e quindi pesano
+        molto. Inserire un termine tecnico preciso in un prompt è uno dei modi più efficaci per
+        "ancorare" il modello a un dominio specifico. Una sola parola tecnica può inclinare la
+        traiettoria di un'intera risposta.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 5 — PRONOMI E REFERENTI -->
+<section>
+  <div class="section-num">05 — Un secondo meccanismo</div>
+  <h2>"Me" vs "te": cosa cambia, e perché conta</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>I pronomi nascondono un meccanismo specifico, diverso da quello del <em>non</em>. Non aggiungono informazione semantica nuova: spostano un'ancora referenziale, e siccome la geometria della scena dipende dalle ancore, spostare un'ancora ridisegna l'intera scena. È un caso di leva corta con braccio lungo.</p>
+  </div>
+
+  <p class="lead">
+    Considera queste due frasi:
+  </p>
+
+  <div class="compare-pair">
+    <div class="compare-card var-a">
+      <div class="compare-tag">Destinatario = io</div>
+      <div class="compare-text">Marco ha detto a <span class="highlight-a">me</span> che il progetto era in ritardo.</div>
+      <p class="compare-note">Il narratore è il destinatario. Le continuazioni naturali parlano di sue reazioni e azioni.</p>
+    </div>
+    <div class="compare-card var-b">
+      <div class="compare-tag">Destinatario = tu</div>
+      <div class="compare-text">Marco ha detto a <span class="highlight-b">te</span> che il progetto era in ritardo.</div>
+      <p class="compare-note">Il narratore è osservatore. Le continuazioni naturali interrogano il destinatario.</p>
+    </div>
+  </div>
+
+  <p>
+    A livello di vocabolario, è cambiata una sola lettera. A livello di tokenizzazione, è cambiato
+    un solo token. Surprisal? Probabilmente simile — sono entrambi pronomi comuni, e il contesto
+    "ha detto a..." apre uno spazio di candidati in cui <em>me</em> e <em>te</em> sono entrambi
+    plausibili. E allora perché ti senti, intuitivamente, che queste due frasi vivono in mondi
+    diversi?
+  </p>
+
+  <p>
+    Perché il pronome non è solo una parola: è un <strong>puntatore</strong>. Indica un'entità nella
+    scena che il modello sta costruendo. E cambiare il puntatore non aggiunge informazione nuova —
+    sposta un riferimento, e quel riferimento è agganciato a una rete di altre informazioni.
+  </p>
+
+  <h3>La scena come rappresentazione interna</h3>
+  <p>
+    Quando il modello processa un prompt, costruisce una rappresentazione contestuale dei token.
+    In quei vettori contestualizzati c'è anche, di fatto, una <strong>rappresentazione delle entità
+    presenti nella scena</strong> e delle loro relazioni. Non è una struttura simbolica esplicita —
+    non c'è un grafo di relazioni con nodi e archi — ma è una struttura <em>implicita</em> che vive
+    nella geometria.
+  </p>
+
+  <p>
+    Pensa al prompt "Marco ha detto a me che il progetto era in ritardo". Quando il modello arriva
+    alla fine della frase, certe teste di attenzione si saranno specializzate nel tenere traccia di
+    "chi è Marco", "chi è il destinatario del messaggio", "qual è l'oggetto del discorso". I vettori
+    finali dei token portano dentro queste relazioni: il vettore di <em>ritardo</em> sa di essere
+    collegato a <em>progetto</em>, il vettore di <em>progetto</em> sa di essere oggetto di una
+    comunicazione, il vettore di <em>detto</em> sa che Marco è il soggetto e <em>me</em> è il
+    destinatario.
+  </p>
+
+  <p>
+    Adesso cambia <em>me</em> in <em>te</em>. Il vettore embedding di partenza è diverso, certo. Ma
+    il cambiamento più importante è che hai cambiato chi è il destinatario nella scena. Tutta la
+    rete di relazioni che si costruisce intorno a quel destinatario cambia.
+  </p>
+
+  <h3>Perché le conseguenze a valle sono grandi</h3>
+  <p>
+    Pensa a cosa succede quando il modello deve generare la continuazione della frase. Se la frase
+    è "Marco ha detto a me che il progetto era in ritardo", una continuazione naturale potrebbe
+    essere "e io ho cercato di capire come accelerare". Il modello, leggendo <em>me</em>, ha
+    costruito un vettore di contesto in cui "io" (chi parla) è il destinatario dell'informazione,
+    ed è quindi l'agente naturale delle azioni successive nella narrazione.
+  </p>
+
+  <p>
+    Se la frase è "Marco ha detto a te che il progetto era in ritardo", la continuazione naturale è
+    diversa: "e tu cosa pensi di fare?". Il vettore di contesto ora ha "tu" come destinatario, e
+    questo apre uno spazio narrativo dove il modello "interroga" il destinatario sulla sua reazione,
+    perché non è lui (chi parla) ad essere coinvolto.
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>Leve corte con bracci lunghi</h4>
+    <p>
+      I pronomi sono <strong>leve corte con bracci lunghi</strong>. Cambi pochissimi caratteri, ma
+      sposti tutta una rete di relazioni, e la rete di relazioni determina lo spazio delle
+      continuazioni. È per questo che, quando rileggi un tuo prompt e ti accorgi di aver scritto
+      <em>lui</em> dove serviva <em>lei</em>, o <em>noi</em> dove serviva <em>voi</em>, o
+      <em>questo</em> dove serviva <em>quello</em>, spesso scopri che il modello ha capito qualcosa
+      di diverso da quello che intendevi: non perché si sia "confuso", ma perché aveva dietro
+      un'ancora diversa.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 6 — TRE CATEGORIE DI POTENZA -->
+<section>
+  <div class="section-num">06 — Una mappa operativa</div>
+  <h2>Tre categorie di "potenza" di una parola</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>I due meccanismi visti — il <em>non</em> che agisce sull'asse semantico, il pronome che agisce sull'asse referenziale — sono due esempi di una classificazione più generale. Mettendo insieme tutto, possiamo ordinare il "peso" delle parole in tre categorie di potenza crescente. È uno strumento operativo per capire dove dedicare attenzione quando rileggi un prompt.</p>
+  </div>
+
+  <p>
+    Abbiamo visto due meccanismi diversi attraverso cui una parola può "pesare" molto.
+  </p>
+
+  <p>
+    Il primo, quello del <em>non</em>, agisce sull'<strong>asse semantico</strong>: aggiunge una
+    dimensione di significato (la negazione, la modalità, l'intensità) che modifica trasversalmente
+    il significato di tutto ciò che le sta intorno.
+  </p>
+
+  <p>
+    Il secondo, quello dei pronomi, agisce sull'<strong>asse referenziale</strong>: non aggiunge
+    una dimensione di significato — sposta un'ancora. Cambia chi è il soggetto, l'oggetto, il
+    destinatario, il punto di vista.
+  </p>
+
+  <p>
+    Sono due tipi diversi di "peso", ma entrambi rispondono allo stesso principio: piccole modifiche
+    alla forma del prompt possono produrre grandi modifiche alla geometria del vettore di contesto,
+    se quelle modifiche toccano elementi strutturali della rappresentazione. Mettendo insieme tutto,
+    possiamo ordinare il peso delle parole secondo tre categorie di potenza crescente.
+  </p>
+
+  <div class="potenza-grid">
+    <div class="potenza-card cat-1">
+      <div class="potenza-tag">Categoria 1 — La meno potente</div>
+      <div class="potenza-name">Peso semantico</div>
+      <p class="potenza-desc">
+        Quanto una parola, da sola, porta significato. Termini tecnici, parole rare, scelte
+        lessicali precise. Cambiare <em>casa</em> in <em>abitazione</em> o <em>domicilio</em>
+        sposta il vettore in regioni vicine ma distinte. <strong>È un peso reale ma relativamente
+        locale</strong>: cambia la sfumatura del significato di una parte della frase, senza
+        toccare la struttura generale.
+      </p>
+    </div>
+
+    <div class="potenza-card cat-2">
+      <div class="potenza-tag">Categoria 2 — Più potente</div>
+      <div class="potenza-name">Peso operatoriale</div>
+      <p class="potenza-desc">
+        Sono le parole che operano <em>su</em> altre parole. Negazioni, modificatori di modalità,
+        intensificatori, focalizzatori — <em>non</em>, <em>forse</em>, <em>anche</em>,
+        <em>soltanto</em>, <em>soprattutto</em>. Cambiare una di queste parole non sposta il
+        significato di una porzione della frase: <strong>lo trasforma trasversalmente</strong>.
+        È un peso sistemico.
+      </p>
+    </div>
+
+    <div class="potenza-card cat-3">
+      <div class="potenza-tag">Categoria 3 — La più potente</div>
+      <div class="potenza-name">Peso strutturale</div>
+      <p class="potenza-desc">
+        Sono le parole che cambiano l'architettura della rappresentazione. Pronomi, connettivi
+        logici, riferimenti spaziali e temporali, marcatori di soggettività — <em>me/te</em>,
+        <em>perché/eppure</em>, <em>qui/lì</em>, <em>ora/allora</em>. Cambiare una di queste
+        parole sposta le ancore della scena, e tutto il resto si riorganizza intorno alle nuove
+        ancore. <strong>È il peso più profondo</strong>.
+      </p>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">Lo strumento operativo</div>
+    <p>
+      Questa classificazione ti dà uno strumento operativo molto utile quando rileggi un prompt:
+      <strong>chiediti quali parole sono di terza categoria</strong>, e dedica loro più attenzione
+      che alle altre. Spesso una piccola revisione strutturale (cambiare un connettivo,
+      riassegnare un pronome, spostare un riferimento temporale) cambia molto di più dell'output
+      di una grande revisione semantica (cercare il sinonimo perfetto).
+    </p>
+    <p>
+      Le parole che ti servono per essere preciso non sono quelle che scrivi automaticamente, sono
+      <em>quelle su cui ti fermi a pensare</em>.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 7 — IMPLICAZIONI PRATICHE -->
+<section>
+  <div class="section-num">07 — Conseguenze pratiche</div>
+  <h2>Cosa cambia per chi scrive prompt</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Tutto quello che abbiamo visto si traduce in un principio operativo molto netto: scegliere consapevolmente le parole strutturali e operatoriali è il modo più efficace per controllare la traiettoria del modello, mentre limare le parole semantiche di superficie produce effetti modesti. Vediamo come applicarlo concretamente quando si scrive.</p>
+  </div>
+
+  <p>
+    Da tutto questo discende un'osservazione che vale la pena fissare. <strong>Quando scrivi un
+    prompt, non tutte le parole che scrivi pesano allo stesso modo.</strong> Alcune sono inevitabili
+    (articoli, ausiliari, congiunzioni di base) e contribuiscono poco al senso. Altre — quelle che
+    hai scelto consapevolmente per dire la cosa giusta — sono i veri vettori del tuo intento.
+  </p>
+
+  <p>
+    Questo ha una conseguenza diretta: <strong>scegliere bene queste parole conta enormemente,
+    mentre limare le altre conta poco</strong>. Vediamo qualche esempio concreto.
+  </p>
+
+  <h3>Tre revisioni a confronto</h3>
+
+  <div class="compare-pair">
+    <div class="compare-card var-a">
+      <div class="compare-tag">Revisione di superficie</div>
+      <div class="compare-text">"Voglio una risposta dettagliata"<br>vs<br>"Voglio una risposta che sia dettagliata"</div>
+      <p class="compare-note">La differenza per il modello è minima: <em>che sia</em> è materiale prevedibile, surprisal basso, peso basso. Quasi nessun cambiamento di traiettoria.</p>
+    </div>
+    <div class="compare-card var-b">
+      <div class="compare-tag">Revisione semantica</div>
+      <div class="compare-text">"Voglio una risposta dettagliata"<br>vs<br>"Voglio una risposta esaustiva"</div>
+      <p class="compare-note">La differenza è significativa: <em>dettagliata</em> ed <em>esaustiva</em> sono in regioni vicine ma distinte. La prima inclina verso ricchezza di dettagli, la seconda verso copertura completa.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-teal">
+    <h4>La revisione strutturale (quella che paga di più)</h4>
+    <p>
+      Se invece scrivi "Voglio una risposta dettagliata" oppure "Voglio una risposta
+      <strong>non superficiale</strong>", hai cambiato strategia: stai usando un modificatore di
+      polarità su un attributo, e questo crea un'onda diversa nella geometria del prompt. Il
+      modello costruisce la sua risposta partendo da "evita la superficialità" invece che da
+      "punta al dettaglio" — sono traiettorie diverse, anche se le destinazioni sembrano simili.
+    </p>
+  </div>
+
+  <h3>Le quattro domande da farsi quando rileggi un prompt</h3>
+  <p>
+    Quando scrivi un prompt e vuoi che il modello faccia una cosa precisa, non chiederti se hai
+    usato il sinonimo migliore. Chiediti queste quattro cose, in ordine.
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>Le domande, in ordine di importanza</h4>
+    <p><strong>1. Ho scelto i connettivi giusti per la logica che voglio?</strong> "Spiegami X
+    perché serve a Y" è diverso da "Spiegami X anche se serve a Y": il primo orienta il modello
+    sulla causalità, il secondo sull'opposizione.</p>
+    <p><strong>2. Ho usato i modificatori di modalità e di polarità che servono?</strong> "Dammi
+    una soluzione" è diverso da "Dammi <em>la</em> soluzione" o da "Dammi <em>una possibile</em>
+    soluzione". I modificatori cambiano il livello di pretesa epistemica della risposta.</p>
+    <p><strong>3. I miei pronomi e riferimenti puntano dove voglio?</strong> "Qui", "questo",
+    "loro", "noi" sono ancore che il modello deve risolvere: se il referente è ambiguo, l'output
+    sarà ambiguo a sua volta.</p>
+    <p><strong>4. I termini tecnici precisi che ancorano il dominio sono presenti?</strong> Una
+    sola parola di dominio — "incidence", "kanban", "softmax", "ablativo" — può cambiare
+    radicalmente la regione dello spazio in cui il modello cerca le risposte.</p>
+  </div>
+
+  <p>
+    Se le risposte a queste quattro domande sono sì, la traiettoria del modello sarà già fortemente
+    inclinata verso quello che vuoi. Se le risposte sono no, nessuna sostituzione di sinonimi
+    salverà il prompt. Il punto operativo del Report A è esattamente questo: <strong>il controllo
+    sul modello passa dalle parole strutturali, non da quelle di superficie</strong>.
+  </p>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- TAKEAWAYS -->
+<section>
+  <div class="section-num">Sintesi finale</div>
+  <h2>Sette cose da portarsi via dal Report A</h2>
+
+  <div class="takeaways">
+    <h3>I punti da fissare</h3>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">01</div>
+      <div class="takeaway-text">
+        <strong>Non esiste un sistema di ponderazione esplicito.</strong> Il modello tratta ogni
+        token allo stesso modo: lo embedding-izza e lo passa attraverso gli strati di attenzione.
+        Il "peso" delle parole è un fenomeno emergente, non una regola codificata.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">02</div>
+      <div class="takeaway-text">
+        <strong>Il "non" ribalta una frase per due ragioni geometriche.</strong> Vive in una regione
+        rada e distintiva dello spazio degli embedding (geometria intrinseca), e le teste di
+        attenzione si sono specializzate sui rapporti di polarità — quindi i token vicini
+        "ascoltano" il <em>non</em> con peso altissimo e il loro vettore contestualizzato finisce
+        in una regione opposta.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">03</div>
+      <div class="takeaway-text">
+        <strong>Il surprisal è il concetto unificante.</strong> Token con surprisal alto (inattesi
+        dato il contesto) portano molta informazione e vengono incorporati con peso alto dai
+        vicini. Token con surprisal basso (prevedibili) aggiungono poco e vengono "scontati".
+        È una proprietà <em>relazionale</em>: cambia da contesto a contesto.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">04</div>
+      <div class="takeaway-text">
+        <strong>Il peso emerge da due fattori sovrapposti.</strong> Geometria intrinseca del token
+        (dove vive nello spazio degli embedding) e surprisal contestuale (quanto è inaspettato qui
+        e ora). I due fattori si sommano: alcuni token sono carichi quasi sempre (es. <em>non</em>),
+        altri lo diventano solo in certi contesti (es. <em>gatto</em> nel frigo).
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">05</div>
+      <div class="takeaway-text">
+        <strong>I tipi di token tipicamente carichi sono pochi e identificabili.</strong>
+        Connettivi logici, modificatori di polarità e modalità, pronomi in posizione ambigua,
+        avverbi di intensificazione e focalizzazione, vincoli quantitativi, termini tecnici rari.
+        Sono le categorie su cui vale la pena fermarsi a pensare quando si scrive.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">06</div>
+      <div class="takeaway-text">
+        <strong>I pronomi agiscono in modo diverso dalle negazioni.</strong> Non aggiungono
+        informazione semantica: spostano un'ancora referenziale. Cambiare <em>me</em> in
+        <em>te</em> riorganizza tutta la scena che il modello sta costruendo, e il vettore di
+        contesto cade in una regione molto diversa. Sono leve corte con bracci lunghi.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">07</div>
+      <div class="takeaway-text">
+        <strong>Esistono tre categorie di potenza, in ordine crescente.</strong> Peso
+        <em>semantico</em> (sinonimi, scelte lessicali — locale), peso <em>operatoriale</em>
+        (modificatori che operano su altre parole — sistemico), peso <em>strutturale</em>
+        (parole che spostano ancore o connessioni logiche — architetturale). Le revisioni
+        strutturali pagano molto più di quelle semantiche.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- BRIDGE -->
+<section style="border-bottom: none; padding-bottom: 60px;">
+  <div class="bridge">
+    <div class="bridge-label">Verso il Report B</div>
+    <h3>La forma come materiale tokenizzato</h3>
+    <p>
+      Nel Report A abbiamo visto che le <em>parole</em> hanno peso diverso. Ma "parole" è già
+      un'astrazione: il modello vede token, e i token cambiano quando cambia la forma del testo.
+      Maiuscole, grassetto, corsivo, virgolette — tutti questi non sono "decorazioni" che il modello
+      "interpreta" come fa un lettore umano: sono <strong>materiale tokenizzato che cambia gli
+      ID dei token</strong> e quindi i loro embedding di partenza.
+    </p>
+    <p>
+      Nel prossimo report apriremo questo livello: cosa succede davvero quando scrivi una parola in
+      maiuscolo, perché il grassetto "funziona" come segnale di importanza, e quanto pesa la scelta
+      tra virgolette diritte e virgolette tipografiche. Il filo che lega tutto è statistico: questi
+      segnali "funzionano" perché hanno appreso correlazioni nei dati di addestramento — non perché
+      il modello li "capisca" come fa un essere umano.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Report A — Il peso meccanico delle parole</p>
+  <p>Approfondimenti sulla struttura del prompt · Documento 1 di 5</p>
+</footer>
+
+</body>
+</html>

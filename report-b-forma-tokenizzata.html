@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report B — La forma come materiale tokenizzato</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: var(--indigo);
+    padding: 72px 48px 88px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -100px; right: -80px;
+    width: 540px; height: 540px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(13,122,110,0.28) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -100px; left: 10%;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-overline {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 19px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 44px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 76px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.35;
+    color: var(--indigo);
+    margin: 0 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  /* Section arc */
+  .section-arc {
+    background: var(--indigo-faint2);
+    border-left: 3px solid var(--indigo-light);
+    padding: 22px 28px;
+    margin: 0 0 40px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .section-arc-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .section-arc p {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15.5px;
+    color: var(--indigo-mid);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* Callouts */
+  .callout {
+    margin: 32px 0;
+    padding: 28px 32px;
+    border-radius: 8px;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 12px;
+    letter-spacing: 0;
+  }
+
+  .callout p {
+    font-size: 15.5px;
+    line-height: 1.72;
+    margin-bottom: 12px;
+  }
+
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-indigo {
+    background: var(--indigo-faint);
+    border-color: var(--indigo-light);
+  }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout-orange {
+    background: var(--orange-faint);
+    border-color: var(--orange);
+  }
+  .callout-orange h4 { color: var(--orange); }
+
+  .callout-teal {
+    background: var(--teal-faint);
+    border-color: var(--teal);
+  }
+  .callout-teal h4 { color: var(--teal); }
+
+  .callout-amber {
+    background: var(--amber-faint);
+    border-color: var(--amber);
+  }
+  .callout-amber h4 { color: var(--amber); }
+
+  .callout-purple {
+    background: var(--purple-faint);
+    border-color: var(--purple);
+  }
+  .callout-purple h4 { color: var(--purple); }
+
+  /* Metaphor */
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--indigo-border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 32px 0;
+    position: relative;
+  }
+
+  .metaphor::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px; height: 100%;
+    background: var(--orange);
+    border-radius: 8px 0 0 8px;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .metaphor p {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.72;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  /* Insight box */
+  .insight {
+    background: var(--indigo);
+    color: white;
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+  .insight strong { color: white; font-weight: 600; }
+  .insight em { color: var(--orange-light); }
+
+  /* Token visualization box */
+  .token-box {
+    background: var(--white);
+    border: 1px solid var(--indigo-border);
+    border-radius: 8px;
+    padding: 26px 30px;
+    margin: 28px 0;
+  }
+
+  .token-box-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .token-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .token-row:last-child { margin-bottom: 0; }
+
+  .token-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-light);
+    min-width: 80px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .token-chip {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .token-chip.single {
+    background: var(--teal);
+    color: white;
+  }
+
+  .token-chip.frag {
+    background: var(--orange-faint);
+    color: var(--orange);
+    border: 1px solid var(--orange-border);
+  }
+
+  .token-chip.delim {
+    background: var(--purple);
+    color: white;
+  }
+
+  .token-chip.normal {
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    border: 1px solid var(--indigo-border);
+  }
+
+  .token-arrow {
+    color: var(--ink-light);
+    font-size: 14px;
+  }
+
+  /* Confronto frasi (riuso dal Report A) */
+  .compare-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 28px 0;
+  }
+
+  .compare-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+  }
+
+  .compare-card.var-a { border-top: 3px solid var(--teal); }
+  .compare-card.var-b { border-top: 3px solid var(--orange); }
+
+  .compare-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .compare-card.var-a .compare-tag { color: var(--teal); }
+  .compare-card.var-b .compare-tag { color: var(--orange); }
+
+  .compare-text {
+    font-family: var(--serif);
+    font-size: 16.5px;
+    color: var(--ink);
+    line-height: 1.55;
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+
+  .compare-text .highlight-a { color: var(--teal); font-weight: 600; font-style: normal; }
+  .compare-text .highlight-b { color: var(--orange); font-weight: 600; font-style: normal; }
+  .compare-text .highlight-b strong { color: var(--orange); }
+
+  .compare-note {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Tabella convenzioni */
+  .conv-list {
+    margin: 28px 0;
+  }
+
+  .conv-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 24px;
+    padding: 22px 0;
+    border-bottom: 1px dashed var(--border);
+    align-items: start;
+  }
+
+  .conv-row:last-child { border-bottom: none; }
+
+  .conv-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--indigo);
+  }
+
+  .conv-name .conv-syntax {
+    display: block;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--orange);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  .conv-desc {
+    font-size: 15.5px;
+    color: var(--ink-mid);
+    line-height: 1.72;
+  }
+
+  /* Principi card */
+  .principi-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin: 32px 0;
+  }
+
+  .principio-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    border-left: 4px solid;
+  }
+
+  .principio-card.p-1 { border-left-color: var(--indigo); }
+  .principio-card.p-2 { border-left-color: var(--teal); }
+  .principio-card.p-3 { border-left-color: var(--orange); }
+
+  .principio-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .principio-card.p-1 .principio-tag { color: var(--indigo); }
+  .principio-card.p-2 .principio-tag { color: var(--teal); }
+  .principio-card.p-3 .principio-tag { color: var(--orange); }
+
+  .principio-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--indigo);
+    margin-bottom: 12px;
+  }
+
+  .principio-desc {
+    font-size: 15.5px;
+    color: var(--ink-mid);
+    line-height: 1.72;
+    margin: 0;
+  }
+
+  .principio-desc strong { color: var(--ink); }
+
+  /* Takeaways */
+  .takeaways {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px 40px;
+    margin: 32px 0;
+  }
+
+  .takeaways h3 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: var(--orange);
+    font-size: 22px;
+  }
+
+  .takeaway-item {
+    padding: 18px 0;
+    border-bottom: 1px dashed var(--border);
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 18px;
+  }
+
+  .takeaway-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .takeaway-item:first-child { padding-top: 0; }
+
+  .takeaway-num {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  .takeaway-text {
+    font-size: 15.5px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  .takeaway-text strong { color: var(--indigo); }
+
+  /* Bridge to next */
+  .bridge {
+    background: var(--indigo);
+    color: white;
+    border-radius: 8px;
+    padding: 36px 40px;
+    margin-top: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bridge::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(240,112,64,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .bridge h3 {
+    color: white;
+    font-family: var(--serif);
+    font-size: 26px;
+    margin: 0 0 16px;
+    font-weight: 500;
+  }
+
+  .bridge p {
+    color: rgba(255,255,255,0.88);
+    font-size: 16px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  /* Quirks - nota laterale */
+  .quirk-box {
+    background: var(--amber-faint);
+    border-left: 4px solid var(--amber);
+    border-radius: 0 6px 6px 0;
+    padding: 22px 28px;
+    margin: 26px 0;
+  }
+
+  .quirk-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .quirk-box p {
+    font-size: 15px;
+    line-height: 1.72;
+    color: var(--ink-mid);
+    margin-bottom: 12px;
+  }
+
+  .quirk-box p:last-child { margin-bottom: 0; }
+
+  footer {
+    background: var(--bg3);
+    padding: 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 36px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .compare-pair { grid-template-columns: 1fr; }
+    .conv-row { grid-template-columns: 1fr; gap: 8px; }
+    .insight { padding: 28px 24px; }
+    .takeaways { padding: 28px 24px; }
+    .bridge { padding: 28px 24px; }
+    .token-row { gap: 8px; }
+    .token-label { min-width: auto; flex-basis: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <div class="hero-inner">
+    <div class="hero-overline">Report B · La struttura del prompt</div>
+    <h1>La <em>forma</em> come materiale tokenizzato</h1>
+    <p class="hero-sub">
+      Maiuscole, grassetto, corsivo, virgolette: per il modello non sono "decorazioni" da
+      interpretare, sono materia prima testuale che cambia gli ID dei token e quindi i loro
+      embedding di partenza. Funzionano per ragioni statistiche, non logiche.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Tema</div>
+        <div class="meta-value">Forma e formattazione del testo</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Concetto chiave</div>
+        <div class="meta-value">Tracce statistiche apprese</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Posizione nel percorso</div>
+        <div class="meta-value">Approfondimenti — Report B</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 1 — IL CASO DEL MAIUSCOLO -->
+<section>
+  <div class="section-num">01 — Aprendo dal caso più comune</div>
+  <h2>Quando metti una parola in MAIUSCOLO, cosa succede davvero?</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Cominciamo da un esempio noto: il maiuscolo come trucco di enfasi. Usandolo come caso pilota, scopriamo il meccanismo per cui qualsiasi convenzione di forma "funziona" sul modello — non per interpretazione, ma per la combinazione tra tokenizzazione diversa ed eredità statistica dei pattern visti durante l'addestramento.</p>
+  </div>
+
+  <p class="lead">
+    Immagina di scrivere queste due richieste al modello:
+  </p>
+
+  <div class="compare-pair">
+    <div class="compare-card var-a">
+      <div class="compare-tag">Versione neutra</div>
+      <div class="compare-text">Per favore, scrivimi un riassunto breve.</div>
+      <p class="compare-note">Il vincolo "breve" è espresso normalmente. Il modello lo registra come una preferenza, ma il peso è quello standard.</p>
+    </div>
+    <div class="compare-card var-b">
+      <div class="compare-tag">Versione enfatica</div>
+      <div class="compare-text">Per favore, scrivimi un riassunto <span class="highlight-b">BREVE</span>.</div>
+      <p class="compare-note">Il vincolo è in maiuscolo. Per esperienza, il modello tende a rispettarlo in modo più stringente.</p>
+    </div>
+  </div>
+
+  <p>
+    Sai per esperienza che la seconda funziona meglio della prima: il modello rispetta il "breve"
+    in modo più stringente quando lo metti in maiuscolo. È una tecnica nota, quasi un trucco. Ma
+    se ti chiedessi <strong>perché funziona</strong>, cosa risponderesti? Probabilmente qualcosa
+    del tipo "perché il modello capisce che è un'istruzione enfatica". Ma questa risposta è
+    insoddisfacente, perché "capisce" è la parola che non vogliamo usare — vogliamo capire il
+    meccanismo.
+  </p>
+
+  <h3>Il tokenizer vede stringhe diverse</h3>
+  <p>
+    Il primo fatto, il più importante, è che il tokenizer non sa nulla di "case insensitivity".
+    Per lui, le stringhe <code>breve</code> e <code>BREVE</code> sono <strong>due stringhe diverse
+    di caratteri</strong>. Il tokenizer BPE che il modello usa ha imparato sui dati di addestramento
+    quali sequenze di caratteri ricorrono spesso abbastanza da meritare un token proprio. E
+    siccome <em>breve</em> minuscolo ricorre molto più spesso di <em>BREVE</em> maiuscolo nei testi
+    italiani, le due stringhe vengono tokenizzate in modo completamente diverso.
+  </p>
+
+  <div class="token-box">
+    <div class="token-box-label">Come il tokenizer vede le due versioni</div>
+    <div class="token-row">
+      <div class="token-label">breve →</div>
+      <span class="token-chip single">breve</span>
+      <span class="token-arrow">un solo token, frequente</span>
+    </div>
+    <div class="token-row">
+      <div class="token-label">BREVE →</div>
+      <span class="token-chip frag">BR</span>
+      <span class="token-chip frag">EV</span>
+      <span class="token-chip frag">E</span>
+      <span class="token-arrow">tre token raramente combinati così</span>
+    </div>
+  </div>
+
+  <p>
+    Dove prima avevi <strong>un solo token con un solo embedding</strong>, ora hai <strong>tre
+    token con tre embedding diversi</strong>, ognuno con la propria firma geometrica nello spazio.
+    Il modello sta letteralmente vedendo materia prima diversa. Ma questo, da solo, non basta a
+    spiegare l'effetto. Il fatto che il tokenizer produca token diversi è la condizione abilitante,
+    non ancora la spiegazione del perché il maiuscolo funzioni come enfasi.
+  </p>
+
+  <h3>Il maiuscolo "porta con sé" un'eredità di contesti</h3>
+  <p>
+    La vera spiegazione sta nel secondo livello: <strong>cosa hanno imparato a significare quei
+    token, statisticamente, nei dati di addestramento</strong>.
+  </p>
+
+  <p>
+    Pensa a dove si trovano, nei testi reali, le parole scritte tutte in maiuscolo. Compaiono in
+    pochi posti specifici: nei TITOLI, nei CARTELLI di emergenza, nei messaggi UPPERCASE delle
+    chat dove qualcuno sta urlando, nelle istruzioni IMPORTANTI di manuali tecnici, negli ACRONIMI,
+    nei messaggi enfatici. Sono tutti contesti in cui la parola in maiuscolo segnala qualcosa:
+    importanza, urgenza, enfasi, salienza.
+  </p>
+
+  <p>
+    Il modello, leggendo miliardi di esempi durante l'addestramento, ha imparato questa
+    correlazione. Non gli è stato detto "le maiuscole indicano enfasi". Ha imparato che,
+    statisticamente, quando appare una sequenza di token corrispondente a una parola in maiuscolo,
+    il contesto circostante tende ad avere certe caratteristiche: è più probabile che siano
+    istruzioni operative, che siano avvisi, che siano enfasi, che siano comandi forti.
+  </p>
+
+  <p>
+    E qui sta il punto sottile. Quei token frammenti del maiuscolo hanno <strong>embedding di
+    partenza che sono già "inclinati" verso queste regioni dello spazio</strong>. Non perché il
+    modello "capisca" che sono maiuscolo, ma perché durante l'addestramento, ogni volta che ha
+    visto quei pattern di token, ha aggiornato i loro embedding per posizionarli vicini ai contesti
+    dove apparivano. E quei contesti erano titoli, avvisi, comandi enfatici.
+  </p>
+
+  <div class="callout callout-indigo">
+    <h4>Il principio fondante del Report B</h4>
+    <p>
+      <strong>La forma del testo "funziona" sul modello non perché il modello la "interpreti" come
+      fa un lettore umano, ma perché le scelte di forma producono token specifici che hanno
+      imparato a correlarsi con contesti specifici durante l'addestramento.</strong>
+    </p>
+    <p>
+      Cambiare la forma del testo significa cambiare i token. Cambiare i token significa cambiare
+      gli embedding di partenza. E quegli embedding portano con sé tutta l'eredità statistica di
+      dove sono apparsi nei dati di addestramento. Le maiuscole funzionano come enfasi perché
+      <em>negli umani</em> sono usate come enfasi, e il modello ha letto a sufficienza per averlo
+      notato.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 2 — IL GRASSETTO -->
+<section>
+  <div class="section-num">02 — Il grassetto</div>
+  <h2>Il caso più studiato e più potente</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Il grassetto markdown è probabilmente il segnale di forma più potente disponibile. Vediamo cosa fa il tokenizer con i caratteri <code>**</code>, cosa hanno imparato a significare per il modello, e perché il grassetto agisce come modificatore strutturale dell'attenzione — non come modificatore semantico — con una conseguenza pratica importante sulla rarità.</p>
+  </div>
+
+  <p>
+    Quando scrivi <code>**importante**</code> in un prompt, il tokenizer non vede una "parola
+    importante in grassetto". Vede una sequenza di caratteri che include due asterischi doppi
+    all'inizio e due alla fine. Quei due asterischi doppi vengono tokenizzati in modo specifico —
+    tipicamente come un token unico <code>**</code>, perché ricorre così tante volte nei dati di
+    training (markdown è ovunque) che ha guadagnato un proprio ID nel vocabolario.
+  </p>
+
+  <div class="token-box">
+    <div class="token-box-label">Come viene tokenizzato il grassetto</div>
+    <div class="token-row">
+      <div class="token-label">**importante** →</div>
+      <span class="token-chip delim">**</span>
+      <span class="token-chip normal">important</span>
+      <span class="token-chip normal">e</span>
+      <span class="token-chip delim">**</span>
+      <span class="token-arrow">quattro token, due dei quali sono delimitatori identici</span>
+    </div>
+  </div>
+
+  <p>
+    Adesso il punto interessante. Cosa ha imparato il modello sui token <code>**</code> durante
+    l'addestramento? Ha imparato che quei token compaiono <strong>in posizione di apertura e
+    chiusura intorno a materiale importante</strong>. Le teste di attenzione hanno imparato due
+    cose contemporaneamente: primo, che <code>**</code> viene quasi sempre in coppia, quindi
+    quando ne vedono uno cercano l'altro; secondo, che il materiale tra i due <code>**</code> ha
+    caratteristiche statistiche specifiche — è più probabile che sia un termine chiave,
+    un'istruzione cruciale, un nome proprio, una conclusione importante.
+  </p>
+
+  <p>
+    Questo significa che, in pratica, quando il modello elabora <code>**importante**</code>,
+    succedono due cose simultaneamente. Da un lato, il token <em>importante</em> riceve i suoi
+    soliti pesi di attenzione dal contesto generale della frase. Dall'altro, certe teste di
+    attenzione che si sono specializzate sui marcatori di markdown attivano un peso aggiuntivo su
+    quel token, perché lo riconoscono come "contenuto dentro un delimitatore di enfasi". Il
+    vettore contestualizzato di <em>importante</em> esce più "carico" di quanto sarebbe stato
+    senza i <code>**</code>.
+  </p>
+
+  <h3>Una sottigliezza che vale la pena vedere</h3>
+  <p>
+    C'è un dettaglio importante che voglio mettere in evidenza. Il grassetto <strong>non aggiunge
+    nuovo significato semantico</strong> alla parola — non ne cambia l'intensione. Quello che fa
+    è cambiare il <em>peso relativo</em> della parola nel computo dell'attenzione. La parola
+    "importante" significa la stessa cosa con o senza grassetto, ma con il grassetto viene
+    ascoltata di più dai token che ne devono tenere conto.
+  </p>
+
+  <p>
+    È un punto sottile che si lega al Report A: il grassetto agisce come un <strong>modificatore
+    strutturale</strong> sulle dinamiche dell'attenzione, non come un modificatore semantico. È
+    più simile, nel suo ruolo, a un cambio di posizione (mettere una parola all'inizio piuttosto
+    che in mezzo) che a un cambio di significato (sostituire una parola con un'altra).
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>La regola della parsimonia</h4>
+    <p>
+      Da qui discende una conseguenza pratica importante: <strong>il grassetto funziona se è usato
+      con parsimonia</strong>. Se metti in grassetto metà delle parole di un prompt, hai diluito
+      il segnale — le teste di attenzione che si erano specializzate a riconoscere "ciò che sta
+      tra <code>**</code> è importante" si trovano davanti a così tanto materiale "importante"
+      che non possono più distinguere il segnale dal rumore.
+    </p>
+    <p>
+      La forza del grassetto è proporzionale alla sua rarità all'interno del documento. È un
+      principio che ha senso anche statisticamente: nei testi reali il grassetto è raro, e quindi
+      il modello ha imparato che la sua presenza è informativa proprio <em>perché eccezionale</em>.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 3 — IL CORSIVO -->
+<section>
+  <div class="section-num">03 — Il corsivo</div>
+  <h2>Parente del grassetto, ma con un suo carattere distinto</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Il corsivo segue lo stesso meccanismo del grassetto ma con un'eredità statistica diversa: nei dati di training appare in contesti di demarcazione semantica (titoli, termini tecnici, parole straniere) più che di urgenza. È un parente più sfumato del grassetto, e funziona bene per scopi diversi.</p>
+  </div>
+
+  <p>
+    In markdown il corsivo si scrive con asterischi singoli <code>*parola*</code> o con underscore
+    singoli <code>_parola_</code>. Il tokenizer vede quei caratteri come token (l'asterisco
+    singolo e l'underscore sono entrambi token nei vocabolari moderni), e il modello ha imparato
+    a riconoscerli come delimitatori di corsivo.
+  </p>
+
+  <p>
+    Ma cosa ha imparato statisticamente sul corsivo? Pensa a dove appare il corsivo nei testi
+    reali. Compare in posti tipici: titoli di opere ("ho letto <em>La Coscienza di Zeno</em>"),
+    termini tecnici introdotti per la prima volta ("la <em>surprisal</em> è una misura..."),
+    parole straniere ("ho un certo <em>je ne sais quoi</em>"), enfasi delicata ("non è
+    <em>quello</em> che intendevo"). Il pattern statistico è diverso da quello del grassetto: il
+    corsivo segnala <strong>specificità o demarcazione</strong>, non urgenza o importanza.
+  </p>
+
+  <p>
+    Questo si traduce in un effetto diverso sul modello. Il corsivo "carica" il token con una
+    sfumatura di <em>demarcazione semantica</em>: questa parola va trattata come un'unità a sé,
+    distinta dal flusso normale del testo. È meno potente del grassetto come strumento di enfasi
+    forte, ma è più adatto a marcare termini tecnici, citazioni, distinzioni delicate.
+  </p>
+
+  <p>
+    C'è anche un fenomeno secondario che vale la pena nominare. Asterischi singoli in italiano (e
+    in molte lingue) ricorrono in molti contesti diversi nei dati: oltre al markdown, vengono
+    usati per note a piè di pagina, per indicare correzioni nei messaggi di chat ("intendevo dire
+    *quello"), per scrivere parolacce censurate, e così via. Quindi il segnale del corsivo è
+    statisticamente più "rumoroso" del grassetto, e l'effetto è meno netto.
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Quando usare il grassetto, quando il corsivo</h4>
+    <p>
+      In pratica: se vuoi un'enfasi forte, usa il <strong>grassetto</strong> — segnala importanza,
+      urgenza, comandi cruciali da rispettare. Se vuoi marcare un termine specifico o creare una
+      piccola pausa attentiva, usa il <em>corsivo</em> — segnala demarcazione, specificità,
+      pertinenza tecnica. Sono strumenti diversi per scopi diversi, e spesso convivono nello
+      stesso prompt senza interferire, perché lavorano su tipi di "carica" diversi.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 4 — LE VIRGOLETTE -->
+<section>
+  <div class="section-num">04 — Le virgolette</div>
+  <h2>Marcatori di compattezza semantica</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Le virgolette agiscono in modo diverso da grassetto e corsivo: non enfatizzano e non demarcano una singola parola, ma "imbustano" un blocco di parole in modo che il modello lo tratti come un'unità semantica compatta. Vediamo perché funzionano così, e una nota sul sottocaso delle virgolette diritte vs tipografiche.</p>
+  </div>
+
+  <p>
+    Le virgolette meritano un discorso a parte perché agiscono in modo diverso dal grassetto e dal
+    corsivo. Considera questa frase: <code>Mi ha detto di "fare la cosa giusta"</code>. Le
+    virgolette intorno a "fare la cosa giusta" non stanno enfatizzando quella frase — stanno
+    facendo qualcosa di diverso. Stanno dicendo al modello: "tratta questo blocco di parole come
+    un'unità a sé, perché è una citazione, o una formula, o un termine convenzionale".
+  </p>
+
+  <p>
+    Da dove viene questo comportamento? Dalla statistica dei dati di training. Le virgolette nei
+    testi reali sono usate per: citazioni dirette ("disse: 'andiamo'"), titoli ("ho letto
+    'Cent'anni di solitudine'"), termini tecnici introdotti ("definiamo la 'surprisal' come..."),
+    ironia o distanza ("questa è la sua 'soluzione'"). In tutti questi casi, il materiale tra
+    virgolette è una <strong>unità semantica compatta</strong> che ha un significato leggermente
+    diverso dal materiale fuori dalle virgolette.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora dell'involucro</div>
+    <p>
+      Il modello ha imparato a trattare il materiale tra virgolette come un blocco. Le teste di
+      attenzione che si sono specializzate sulle virgolette tendono a creare un <strong>"involucro"
+      intorno al contenuto</strong>, dove i token interni sono più strettamente collegati tra
+      loro che ai token esterni. È come se le virgolette dicessero al modello: "questo è un
+      oggetto, non smontarlo". Il blocco interno mantiene una propria coesione semantica che si
+      vede nel modo in cui i suoi vettori contestualizzati restano più vicini tra loro che ai
+      vicini esterni.
+    </p>
+  </div>
+
+  <p>
+    Una conseguenza pratica molto utile: se in un prompt vuoi citare un termine, un nome, un
+    esempio, mettendolo tra virgolette aiuti il modello a riconoscerlo come tale. Se scrivi
+    <code>spiegami il concetto di entropia</code>, il modello potrebbe avere una certa traiettoria;
+    se scrivi <code>spiegami il concetto di "entropia"</code>, hai aggiunto un piccolo segnale
+    che dice "questo è il termine specifico di cui voglio parlare, trattalo come un'unità". È un
+    piccolo aiuto, ma in contesti ambigui può fare la differenza.
+  </p>
+
+  <div class="quirk-box">
+    <div class="quirk-label">Un sottocaso interessante — Virgolette diritte vs tipografiche</div>
+    <p>
+      C'è un dettaglio che spesso sfugge ma che è interessante. Le virgolette diritte
+      (<code>"..."</code>) sono caratteri ASCII semplici, e nei dati di training ricorrono
+      enormemente — è il default quasi ovunque nel testo digitale, specialmente sul web e nella
+      programmazione. Le virgolette tipografiche (<code>“...”</code>, le cosiddette "curly
+      quotes") sono caratteri Unicode diversi, che ricorrono in contesti più formali: libri
+      pubblicati, articoli editati professionalmente, documenti curati.
+    </p>
+    <p>
+      Il modello ha imparato entrambe come marcatori di citazione, ma le associa a registri
+      leggermente diversi. Per un prompt operativo non importa molto — le diritte vanno
+      benissimo. Ma se stai cercando un output con un registro letterario o formale, usare le
+      tipografiche è un piccolo segnale aggiuntivo che inclina il modello in quella direzione.
+      È uno di quei dettagli da artigiano del prompting.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 5 — MAIUSCOLE NEI TRE REGIMI -->
+<section>
+  <div class="section-num">05 — Tornando alle maiuscole</div>
+  <h2>I tre regimi del maiuscolo, e perché solo uno funziona come enfasi</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Le maiuscole nei dati di training compaiono in tre regimi distinti, e il modello li ha imparati come segnali diversi. Solo uno funziona davvero come enfasi forte. Capire la differenza spiega perché scrivere "Mario" non enfatizza nulla, mentre scrivere "MARIO" sì.</p>
+  </div>
+
+  <p>
+    Adesso che abbiamo visto grassetto, corsivo e virgolette, torniamo brevemente alle maiuscole
+    per capirne meglio le diverse modalità d'uso, perché ci sono delle distinzioni importanti che
+    nel primo giro avevo lasciato implicite. Le maiuscole nei dati di training compaiono in tre
+    regimi diversi, e il modello ha imparato a distinguerli.
+  </p>
+
+  <div class="conv-list">
+    <div class="conv-row">
+      <div class="conv-name">
+        Regime 1 — Maiuscola iniziale di parola
+        <span class="conv-syntax">Mario · Roma · Italia · Anthropic</span>
+      </div>
+      <div class="conv-desc">
+        È semplicemente l'indicatore standard dei nomi propri in italiano e in inglese. Il modello
+        l'ha imparata come segnale di <strong>entità nominata</strong>, non di enfasi. Se scrivi
+        "Mario", non stai enfatizzando nulla — stai usando la convenzione normale. È
+        un'informazione che il modello sfrutta per riconoscere persone, luoghi, organizzazioni,
+        ma non produce alcun effetto enfatico.
+      </div>
+    </div>
+
+    <div class="conv-row">
+      <div class="conv-name">
+        Regime 2 — Maiuscola iniziale di frase
+        <span class="conv-syntax">La prima parola dopo un punto</span>
+      </div>
+      <div class="conv-desc">
+        Anche questa è una convenzione standard, e il modello la legge come segnale di
+        <strong>confine di frase</strong> più che di enfasi. Aiuta la tokenizzazione e
+        l'attenzione a segmentare correttamente il testo in unità, ma non aggiunge peso
+        particolare al contenuto della parola.
+      </div>
+    </div>
+
+    <div class="conv-row">
+      <div class="conv-name">
+        Regime 3 — Maiuscola integrale
+        <span class="conv-syntax">BREVE · URGENTE · NON FARE QUESTO</span>
+      </div>
+      <div class="conv-desc">
+        È il regime che <strong>funziona davvero come enfasi forte</strong>. Funziona per il
+        meccanismo descritto nella sezione 1: il tokenizer produce token frammentati e rari
+        (perché le parole tutte in maiuscolo sono relativamente rare nei dati), e questi token
+        hanno embedding posizionati nelle regioni dello spazio dove il modello ha imparato che
+        si trovano comandi forti, avvisi, intestazioni di emergenza, istruzioni cruciali.
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-purple">
+    <h4>La regola sottostante</h4>
+    <p>
+      Questa distinzione spiega un fenomeno apparentemente paradossale: scrivere "Mario" non ha
+      alcun effetto enfatico, mentre scrivere "MARIO" sì. La differenza non è "ho usato la
+      maiuscola"; è <strong>"ho usato un pattern di maiuscole che il modello associa
+      statisticamente a contesti enfatici"</strong>.
+    </p>
+    <p>
+      Le convenzioni standard non producono effetto perché sono il default; le <em>deviazioni dal
+      default</em> producono effetto perché segnalano qualcosa di non-default. È un principio che
+      torna in tante altre situazioni — la salienza nasce dal contrasto con la norma, e la norma
+      è quella che il modello ha visto miliardi di volte nei dati.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 6 — I TRE PRINCIPI -->
+<section>
+  <div class="section-num">06 — La sintesi teorica</div>
+  <h2>I tre principi che governano l'uso della forma</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Da tutti gli esempi visti emergono tre principi generali che governano come la forma del testo influenza il modello. Sono i principi che ti permettono di estrapolare a casi che non abbiamo trattato, e di capire quando una convenzione "funzionerà" e quando no.</p>
+  </div>
+
+  <p>
+    Voglio fermarmi un momento per estrarre i principi generali da questi esempi, perché ne sono
+    emersi tre, e vorrei fissarli prima di passare alle quirks del tokenizer italiano. Sono
+    principi che si applicano oltre i casi specifici che abbiamo visto, e ti permettono di
+    estrapolare a convenzioni che incontrerai in futuro.
+  </p>
+
+  <div class="principi-grid">
+    <div class="principio-card p-1">
+      <div class="principio-tag">Principio 1</div>
+      <div class="principio-name">La forma agisce attraverso i token, non sopra di essi</div>
+      <p class="principio-desc">
+        Ogni convenzione di formattazione "funziona" perché cambia gli ID dei token che vengono
+        inviati al modello. Non c'è un "layer di interpretazione della formattazione" sopra il
+        modello: la formattazione è materia prima testuale come tutto il resto, e il suo effetto
+        passa attraverso la geometria appresa degli embedding. <strong>Niente è "decorazione":
+        tutto è materia tokenizzata.</strong>
+      </p>
+    </div>
+
+    <div class="principio-card p-2">
+      <div class="principio-tag">Principio 2</div>
+      <div class="principio-name">L'effetto è proporzionale alla traccia statistica nei dati</div>
+      <p class="principio-desc">
+        Convenzioni che il modello ha visto milioni di volte (markdown, maiuscole enfatiche,
+        virgolette) producono effetti netti. Convenzioni che il modello ha visto poco o in
+        contesti inconsistenti producono effetti deboli o imprevedibili. <strong>Convenzioni
+        inventate non producono effetti</strong> — non hanno tracce statistiche su cui appoggiarsi.
+        Più una convenzione è "umanamente diffusa", più potente è sul modello.
+      </p>
+    </div>
+
+    <div class="principio-card p-3">
+      <div class="principio-tag">Principio 3</div>
+      <div class="principio-name">L'effetto è proporzionale alla rarità dentro il documento</div>
+      <p class="principio-desc">
+        Un prompt con cinque parole in grassetto produce un effetto di enfasi molto più forte di
+        un prompt con cinquanta parole in grassetto. Non è solo un fatto di percezione umana: è
+        la conseguenza diretta di come le teste di attenzione hanno imparato a distribuire il
+        peso. <strong>Un segnale comune perde forza; un segnale raro la concentra.</strong> La
+        salienza nasce dal contrasto con il resto del documento.
+      </p>
+    </div>
+  </div>
+
+  <h3>Un caso al confine: la formattazione come istruzione operativa</h3>
+  <p>
+    Prima di chiudere questa sezione, voglio toccare brevemente un caso che è al confine tra il
+    Report B e il Report E: cosa succede quando la formattazione <strong>descrive</strong> quello
+    che vuoi, invece di <strong>essere</strong> quello che vuoi.
+  </p>
+
+  <p>
+    Se scrivi <code>Per favore, rispondimi in **due frasi**</code>, stai usando il grassetto per
+    evidenziare un vincolo. Il modello vede <code>**due frasi**</code> come un blocco enfatico,
+    e questo aumenta la probabilità che le teste di attenzione che monitorano i vincoli
+    quantitativi ascoltino quel blocco con peso alto. È un uso del grassetto come
+    <strong>focalizzatore di un'istruzione</strong>, e funziona bene.
+  </p>
+
+  <p>
+    Diverso è il caso in cui usi la formattazione come <em>modello</em> di quello che vuoi. Se
+    scrivi <code>Per favore, rispondimi con uno schema così: **Punto 1:** descrizione, **Punto
+    2:** descrizione</code>, qui non stai enfatizzando — stai mostrando al modello che la
+    risposta deve usare quella forma specifica. E il modello, per imitazione, tenderà a produrre
+    output con la stessa struttura tipografica. È un meccanismo diverso, più vicino al few-shot
+    prompting che alla pura enfasi, e lo riprenderemo nel Report E.
+  </p>
+
+  <p>
+    La differenza vale la pena tenerla a mente: il grassetto come <strong>focalizzatore</strong>
+    (evidenzia un pezzo di istruzione) e il grassetto come <strong>modello formale</strong>
+    (mostra come deve apparire l'output) sono usi diversi che producono effetti diversi. Spesso
+    si combinano nello stesso prompt senza che ce ne accorgiamo, ed è utile distinguerli quando
+    si scrive.
+  </p>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 7 — QUIRKS DEL TOKENIZER -->
+<section>
+  <div class="section-num">07 — Una nota sul tokenizer</div>
+  <h2>Le quirks che scopre chi scrive in italiano</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Una nota di approfondimento, non un fenomeno fondante. Tutto quello che abbiamo detto fin qui vale in modo neutro rispetto alla lingua, ma siccome scrivi prompt in italiano, ci sono alcune particolarità del tokenizer che vale la pena conoscere — non come regole, ma come consapevolezze in più.</p>
+  </div>
+
+  <h3>L'inglese è il default, l'italiano è ospite</h3>
+  <p>
+    Il primo fatto da fissare è che i tokenizer dei grandi modelli sono stati addestrati su
+    corpora dove l'inglese è dominante. Anche quando il modello "parla benissimo" italiano, il
+    tokenizer sotto è ottimizzato statisticamente per l'inglese. Questo ha una conseguenza
+    pratica: <strong>le parole italiane vengono spesso spezzate in più token di quanto succederebbe
+    per le equivalenti inglesi</strong>.
+  </p>
+
+  <div class="token-box">
+    <div class="token-box-label">Tipica asimmetria di tokenizzazione</div>
+    <div class="token-row">
+      <div class="token-label">understanding →</div>
+      <span class="token-chip single">understanding</span>
+      <span class="token-arrow">un solo token, frequente in inglese</span>
+    </div>
+    <div class="token-row">
+      <div class="token-label">comprensione →</div>
+      <span class="token-chip frag">compr</span>
+      <span class="token-chip frag">ens</span>
+      <span class="token-chip frag">ione</span>
+      <span class="token-arrow">tre o quattro frammenti</span>
+    </div>
+  </div>
+
+  <p>
+    Questo non significa che il modello "capisca peggio" l'italiano. I frammenti vengono
+    ricomposti nello spazio degli embedding attraverso l'attenzione, e il modello ha imparato che
+    certi pattern di frammenti italiani corrispondono a certi significati. Ma c'è un piccolo
+    costo: ogni parola italiana spezzata richiede più passi di attenzione per essere ricomposta,
+    occupa più posti nella context window, e produce embedding leggermente meno "concentrati"
+    rispetto a una parola che è un token unico.
+  </p>
+
+  <h3>Gli accenti: lo stesso testo, token diversi</h3>
+  <p>
+    Una quirk che vale davvero la pena conoscere riguarda gli accenti. In italiano scriviamo
+    <em>perché</em>, <em>così</em>, <em>città</em>, <em>caffè</em>, <em>università</em>. Sono
+    parole comuni, scritte correttamente. Ma cosa succede quando uno scrive <em>perche</em> senza
+    accento, oppure <em>cosi</em>, oppure <em>citta</em>?
+  </p>
+
+  <p>
+    Per il tokenizer, sono <strong>stringhe diverse, con tokenizzazioni diverse</strong>. La
+    parola <em>perché</em> (con la "é" accentata, che è un singolo carattere Unicode) potrebbe
+    essere un token unico abbastanza frequente. La parola <em>perche</em> senza accento è una
+    stringa diversa, e nei dati di training compare in contesti diversi — sostanzialmente in
+    scritture frettolose o non curate (chat informali, commenti web, messaggi rapidi), oppure
+    scritture di chi non ha la tastiera italiana e omette gli accenti per pigrizia.
+  </p>
+
+  <p>
+    Quindi gli embedding dei due <em>perché</em> — con e senza accento — sono leggermente diversi.
+    Quello con accento è più "ancorato" a contesti di scrittura curata, quello senza è più
+    ancorato a contesti informali. La differenza non è enorme, ma c'è, e per prompt in cui il
+    registro conta usare gli accenti corretti è un piccolo segnale aggiuntivo verso il registro
+    che vuoi. Vale anche al contrario: se vuoi un tono molto informale, scrivere senza accenti
+    può essere un segnale ulteriore.
+  </p>
+
+  <h3>Numeri lunghi e codici: una sorpresa</h3>
+  <p>
+    Ecco una quirk che spesso sorprende. Se nel tuo prompt scrivi un numero lungo, tipo
+    <code>1234567</code>, il tokenizer non lo vede come un singolo numero. Lo spezza in pezzi più
+    piccoli secondo regole apprese, tipicamente in cifre o gruppi di cifre.
+  </p>
+
+  <div class="token-box">
+    <div class="token-box-label">I numeri come sequenze di frammenti</div>
+    <div class="token-row">
+      <div class="token-label">1234567 →</div>
+      <span class="token-chip frag">123</span>
+      <span class="token-chip frag">4567</span>
+      <span class="token-arrow">oppure 1+234+567, a seconda del tokenizer</span>
+    </div>
+    <div class="token-row">
+      <div class="token-label">ABC-12345-XYZ →</div>
+      <span class="token-chip frag">ABC</span>
+      <span class="token-chip delim">-</span>
+      <span class="token-chip frag">123</span>
+      <span class="token-chip frag">45</span>
+      <span class="token-chip delim">-</span>
+      <span class="token-chip frag">XYZ</span>
+      <span class="token-arrow">molti frammenti</span>
+    </div>
+  </div>
+
+  <p>
+    Questo ha conseguenze pratiche. Quando chiedi al modello di fare calcoli con numeri grandi,
+    lui sta lavorando su una rappresentazione frammentata del numero, non sul numero come unità.
+    Ed è uno dei motivi per cui i modelli storicamente hanno avuto difficoltà con l'aritmetica:
+    non perché non "capiscano" la matematica, ma perché la rappresentazione tokenizzata dei
+    numeri rende difficile fare operazioni precise.
+  </p>
+
+  <p>
+    Stesso discorso per codici, ID, numeri di telefono, date in formato compatto. Se nel tuo
+    prompt c'è un codice tipo <code>ABC-12345-XYZ</code>, quello viene spezzato in molti token
+    (i caratteri speciali come <code>-</code> sono spesso token a sé), e il modello lavora su una
+    sequenza di frammenti. Per task in cui l'identità precisa di quel codice conta — copiarlo
+    esattamente, fare match con un altro — può capitare che il modello produca piccoli errori di
+    trascrizione, perché sta ricomponendo qualcosa che ha visto come pezzi. Una contromisura
+    pratica: metti gli identificativi tra virgolette o backtick per aiutare il modello a
+    riconoscerli come unità, e chiedi esplicitamente "riporta esattamente questo codice".
+  </p>
+
+  <h3>Caratteri speciali e Unicode: terreno scivoloso</h3>
+  <p>
+    Un'ultima quirk vale la pena nominarla. Caratteri Unicode insoliti — emoji, simboli
+    matematici, caratteri di altre lingue, virgolette tipografiche, lineette tipografiche
+    (<code>—</code> vs <code>-</code>) — possono essere tokenizzati in modi imprevedibili. Alcuni
+    sono token unici frequenti, altri vengono frammentati a livello di byte (perché il tokenizer
+    non ha mai visto quel carattere nei dati di training e lo gestisce con un meccanismo di
+    fallback).
+  </p>
+
+  <p>
+    Per la maggior parte dei prompt questo non è un problema — i caratteri standard del testo
+    italiano funzionano bene. Ma se ti capita di copiare-incollare testo da fonti con
+    formattazione particolare (PDF mal copiati, documenti Word con caratteri "intelligenti",
+    testo da chat con emoji), può succedere che certi caratteri introducano token "strani" che
+    disturbano l'elaborazione. Se noti comportamenti anomali, vale la pena controllare se il
+    testo che hai incollato contiene caratteri non standard.
+  </p>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- SEZIONE 8 — CONCLUSIONE OPERATIVA -->
+<section>
+  <div class="section-num">08 — Sintesi operativa</div>
+  <h2>Una conclusione sulla forma</h2>
+
+  <p>
+    Mettendo insieme tutto quello che abbiamo visto, esce un principio operativo abbastanza chiaro
+    che vale la pena fissare prima dei takeaway finali.
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Il principio operativo del Report B</div>
+    <p>
+      <strong>La forma del prompt non è cosmetica: è materia prima tokenizzata che il modello
+      legge come tutto il resto.</strong> Usare bene la forma significa sfruttare le convenzioni
+      che il modello ha imparato a riconoscere — grassetto, corsivo, virgolette, maiuscole,
+      accapo strutturali — perché producono effetti reali sui pesi di attenzione e quindi sulla
+      traiettoria della generazione.
+    </p>
+    <p>
+      Ma usare bene la forma significa anche <strong>non abusarne</strong>. Un prompt che è tutto
+      in grassetto è un prompt senza grassetto: il segnale si è diluito. Un prompt con dieci
+      convenzioni diverse di formattazione mescolate è un prompt confuso: il modello deve allocare
+      attenzione a riconoscere e bilanciare segnali che si pestano i piedi a vicenda. La forma
+      funziona quando è usata in modo <em>selettivo e consistente</em>: pochi segnali, ognuno
+      usato per uno scopo chiaro, e mantenuti coerenti in tutto il prompt.
+    </p>
+    <p>
+      E significa, infine, <strong>non inventare convenzioni proprie</strong>. Le convenzioni
+      hanno potere statistico solo se sono diffuse abbastanza nei dati da essere state apprese.
+      Una notazione personale, per quanto chiara per te, è invisibile al modello.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- TAKEAWAYS -->
+<section>
+  <div class="section-num">Sintesi finale</div>
+  <h2>Sette cose da portarsi via dal Report B</h2>
+
+  <div class="takeaways">
+    <h3>I punti da fissare</h3>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">01</div>
+      <div class="takeaway-text">
+        <strong>La forma del testo è materia prima tokenizzata.</strong> Maiuscole, grassetto,
+        corsivo, virgolette non sono "decorazioni" che il modello "interpreta": sono scelte che
+        cambiano gli ID dei token in input, e quindi cambiano gli embedding di partenza che entrano
+        nel meccanismo di attenzione.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">02</div>
+      <div class="takeaway-text">
+        <strong>Le convenzioni "funzionano" per ragioni statistiche, non logiche.</strong> Le
+        maiuscole segnalano enfasi perché negli umani sono usate per enfasi, e il modello ha letto
+        miliardi di esempi. Il grassetto, il corsivo, le virgolette funzionano per lo stesso
+        motivo: sono tracce statistiche apprese dai dati di training, non regole programmate.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">03</div>
+      <div class="takeaway-text">
+        <strong>Il grassetto è il segnale di forma più potente.</strong> Non aggiunge significato
+        semantico al token che racchiude: aumenta il suo peso relativo nell'attenzione. È un
+        modificatore strutturale, e funziona solo se è usato con parsimonia — la sua forza è
+        proporzionale alla sua rarità nel documento.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">04</div>
+      <div class="takeaway-text">
+        <strong>Corsivo e virgolette agiscono diversamente.</strong> Il corsivo segnala
+        demarcazione semantica (termini tecnici, parole straniere, distinzioni), il grassetto
+        segnala enfasi forte. Le virgolette imbustano un blocco come unità semantica compatta,
+        aiutando il modello a riconoscere citazioni, termini specifici, formule.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">05</div>
+      <div class="takeaway-text">
+        <strong>Le maiuscole hanno tre regimi distinti.</strong> Iniziale di parola (nomi propri),
+        iniziale di frase (confine sintattico), integrale (enfasi forte). Solo il terzo regime
+        produce l'effetto di "alzare il volume" perché è quello che il modello ha imparato a
+        riconoscere come deviazione dal default.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">06</div>
+      <div class="takeaway-text">
+        <strong>Tre principi governano l'uso della forma.</strong> La forma agisce attraverso i
+        token (non sopra); l'effetto è proporzionale alla traccia statistica nei dati (convenzioni
+        diffuse funzionano, convenzioni inventate no); l'effetto è proporzionale alla rarità nel
+        documento corrente (un segnale comune perde forza, uno raro la concentra).
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">07</div>
+      <div class="takeaway-text">
+        <strong>Scrivere in italiano introduce alcune quirks.</strong> Parole italiane spesso
+        frammentate in più token rispetto alle inglesi; accenti che cambiano la tokenizzazione e
+        producono embedding leggermente diversi; numeri lunghi e codici frammentati in pezzi;
+        caratteri Unicode insoliti potenzialmente problematici. Sono consapevolezze utili, non
+        regole rigide.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- BRIDGE -->
+<section style="border-bottom: none; padding-bottom: 60px;">
+  <div class="bridge">
+    <div class="bridge-label">Verso il Report C</div>
+    <h3>Punteggiatura, capoversi, struttura</h3>
+    <p>
+      Nel Report A abbiamo visto il peso delle <em>parole</em>; nel Report B il peso della
+      <em>forma</em> applicata a singole parole o blocchi. Resta un livello che abbiamo solo
+      sfiorato: come i marcatori di pausa e confine — virgola, punto, parentesi, accapo, elenchi
+      puntati — guidano il modello a costruire le dipendenze sintattiche giuste.
+    </p>
+    <p>
+      Il Report C affronta proprio questo livello, e lo collega a una questione più ampia: come è
+      organizzata la frase, quanto contano le subordinate, dove dentro un paragrafo ha senso
+      mettere l'informazione importante. Vedremo che la punteggiatura non è una convenzione
+      ortografica per il modello — è un sistema di segnali strutturali che le teste di attenzione
+      hanno imparato a leggere come confini, pause e demarcazioni.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Report B — La forma come materiale tokenizzato</p>
+  <p>Approfondimenti sulla struttura del prompt · Documento 2 di 5</p>
+</footer>
+
+</body>
+</html>

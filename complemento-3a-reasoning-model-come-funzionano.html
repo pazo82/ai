@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complemento 3A — I reasoning model: cosa sono e come funzionano</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--indigo);
+    padding: 88px 48px 96px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 580px; height: 580px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-graphic {
+    position: absolute;
+    top: 50%; right: 8%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 20px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 48px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--indigo);
+    margin: 28px 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  .callout p { font-size: 15.5px; line-height: 1.7; margin-bottom: 12px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-orange { background: var(--orange-faint); border-left-color: var(--orange); }
+  .callout-orange h4 { color: var(--orange); }
+
+  .callout-indigo { background: var(--indigo-faint); border-left-color: var(--indigo); }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout-teal { background: var(--teal-faint); border-left-color: var(--teal); }
+  .callout-teal h4 { color: var(--teal); }
+
+  .callout-amber { background: var(--amber-faint); border-left-color: var(--amber); }
+  .callout-amber h4 { color: var(--amber); }
+
+  .callout-purple { background: var(--purple-faint); border-left-color: var(--purple); }
+  .callout-purple h4 { color: var(--purple); }
+
+  /* ── METAPHOR BOX ── */
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--purple);
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .metaphor p { margin-bottom: 12px; font-size: 15.5px; line-height: 1.72; }
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  /* ── INSIGHT ── */
+  .insight {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+  .insight em { color: var(--orange-light); font-style: italic; }
+  .insight strong { color: var(--white); }
+  .insight code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── COMPARISON ── */
+  .comparison {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 32px 0;
+    overflow: hidden;
+  }
+
+  .comparison-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--indigo);
+    color: var(--white);
+  }
+
+  .comparison-header > div {
+    padding: 18px 24px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .comparison-header > div:first-child {
+    border-right: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .comparison-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .comparison-row:last-child { border-bottom: none; }
+
+  .comparison-row > div {
+    padding: 20px 24px;
+    font-size: 14.8px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+  }
+
+  .comparison-row > div:first-child {
+    border-right: 1px solid var(--border2);
+  }
+
+  .comparison-row .cmp-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  /* ── DIAGRAMMA ── */
+  .diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  .diagram-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .diagram-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .diagram-caption {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--ink-light);
+    text-align: center;
+    margin-top: 18px;
+    padding: 0 16px;
+    line-height: 1.6;
+  }
+
+  /* ── INTERVENTI STEPS ── */
+  .steps {
+    margin: 36px 0;
+    counter-reset: step-counter;
+  }
+
+  .step {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 30px 32px;
+    margin-bottom: 20px;
+    position: relative;
+    counter-increment: step-counter;
+  }
+
+  .step-tag {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .step-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    color: var(--orange);
+    line-height: 1;
+  }
+
+  .step-num::before {
+    content: counter(step-counter, decimal-leading-zero);
+  }
+
+  .step-title {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 19px;
+    color: var(--indigo);
+  }
+
+  .step-tagline {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--ink-light);
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .step p {
+    font-size: 15.5px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .step p:last-child { margin-bottom: 0; }
+
+  .step-when {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--teal-faint);
+    border-radius: 4px;
+    font-size: 14px;
+    color: var(--ink-mid);
+    border-left: 3px solid var(--teal);
+  }
+
+  .step-when strong {
+    color: var(--teal);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(13,122,110,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .takeaway-list em { color: var(--orange-light); font-style: italic; }
+  .takeaway-list strong { color: var(--white); font-weight: 600; }
+  .takeaway-list code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── BRIDGE ── */
+  .bridge {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 48px;
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .bridge h3 {
+    margin: 0 0 16px;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--indigo);
+    font-weight: 500;
+  }
+
+  .bridge p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 34px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 26px; }
+    h3 { font-size: 19px; }
+    .insight { padding: 28px 24px; }
+    .takeaways { padding: 40px 28px; }
+    .bridge { padding: 32px 24px; }
+    .diagram { padding: 22px 16px; }
+    .step { padding: 22px 22px; }
+    .comparison-header, .comparison-row { grid-template-columns: 1fr; }
+    .comparison-header > div:first-child,
+    .comparison-row > div:first-child {
+      border-right: none;
+      border-bottom: 1px solid var(--border2);
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <svg class="hero-bg-graphic" width="260" height="280" viewBox="0 0 260 280" xmlns="http://www.w3.org/2000/svg">
+    <!-- Loop di feedback con reward -->
+    <g opacity="0.9">
+      <circle cx="130" cy="60" r="38" fill="none" stroke="white" stroke-width="2" opacity="0.55"/>
+      <text x="130" y="55" font-family="Outfit" font-size="10" fill="white" text-anchor="middle" font-weight="600" letter-spacing="1">MODELLO</text>
+      <text x="130" y="70" font-family="Lora" font-style="italic" font-size="9" fill="white" text-anchor="middle" opacity="0.85">produce risposta</text>
+
+      <path d="M 168 60 Q 220 60 220 140 Q 220 220 168 220" fill="none" stroke="#f07040" stroke-width="2" stroke-dasharray="4,3"/>
+      <polygon points="166,218 172,224 174,214" fill="#f07040"/>
+
+      <circle cx="130" cy="220" r="38" fill="none" stroke="#f07040" stroke-width="2" opacity="0.7"/>
+      <text x="130" y="215" font-family="Outfit" font-size="10" fill="#f07040" text-anchor="middle" font-weight="600" letter-spacing="1">VERIFICA</text>
+      <text x="130" y="230" font-family="Lora" font-style="italic" font-size="9" fill="#f07040" text-anchor="middle">reward o no</text>
+
+      <path d="M 92 220 Q 40 220 40 140 Q 40 60 92 60" fill="none" stroke="white" stroke-width="2" stroke-dasharray="4,3" opacity="0.55"/>
+      <polygon points="94,62 88,56 86,66" fill="white" opacity="0.55"/>
+
+      <text x="22" y="145" font-family="Lora" font-style="italic" font-size="10" fill="white" opacity="0.65">aggiorna</text>
+      <text x="22" y="158" font-family="Lora" font-style="italic" font-size="10" fill="white" opacity="0.65">i pesi</text>
+    </g>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-label">Complemento 3A — Approfondimento concettuale</div>
+    <h1>I reasoning model: cosa sono e come <em>funzionano</em></h1>
+    <p class="hero-sub">
+      Perché solo i modelli reasoning hanno "scoperto" che ragionare prima di rispondere
+      aumenta le probabilità di azzeccare la risposta? La differenza è nell'obiettivo
+      di addestramento — e cambia tutto.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">Training paradigm, RL su verifiable rewards, emergenza del ragionamento</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Tipologia</div>
+        <div class="meta-value">Complemento concettuale al Tema 3</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Validità temporale</div>
+        <div class="meta-value">Lungo termine (concetti stabili)</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 — IL PUNTO DI PARTENZA -->
+<section>
+  <div class="section-num">01 — IL PUNTO DI PARTENZA</div>
+  <h2>Dalla CoT come trucco al ragionamento come capacità</h2>
+  <p class="lead">
+    Nel Tema 3 abbiamo costruito un modello mentale chiaro della Chain-of-Thought: è il
+    meccanismo che espande il budget computazionale di un LLM distribuendolo nel tempo.
+    Quando il modello "ragiona ad alta voce", ogni token generato si accoda al prompt e
+    diventa scaffolding per il successivo, e il calcolo complessivo che il modello può
+    fare diventa <code>N strati × numero di token generati</code> invece di solo
+    <code>N strati</code>.
+  </p>
+
+  <p>
+    Abbiamo anche visto, sempre nel Tema 3, che la CoT si attiva con un trucco di
+    prompting molto semplice: aggiungere "ragiona passo per passo" al prompt. Per molti
+    casi pratici funziona. Ma c'è qualcosa che non quadra in questa storia.
+  </p>
+
+  <p>
+    Se la CoT è così efficace, e se i modelli "sanno" come ragionare ad alta voce
+    (lo dimostrano facendolo bene quando glielo chiedi), <strong>perché non lo fanno
+    spontaneamente quando un problema lo richiederebbe?</strong> Perché bisogna
+    ricordarglielo? E soprattutto — questa è la domanda che apre tutto il discorso del
+    complemento — perché i modelli più recenti, i cosiddetti <em>reasoning model</em>
+    (o3, Claude con extended thinking, Gemini Deep Think, DeepSeek R1), sembrano averlo
+    "interiorizzato"? Ragionano da soli, senza essere stimolati, e con risultati
+    misurabilmente migliori. Cosa è cambiato?
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>La domanda chiave</h4>
+    <p>
+      Se i reasoning model hanno "scoperto" spontaneamente che ragionare prima di
+      rispondere aumenta le probabilità di azzeccare la risposta, <strong>perché non
+      l'hanno scoperto anche i modelli non-reasoning?</strong> Hanno visto gli stessi
+      dati, hanno la stessa architettura. Cosa li differenzia?
+    </p>
+    <p>
+      La risposta tocca il cuore di cosa significa "addestrare" un modello, e svela un
+      cambio di paradigma che è il vero salto dei reasoning model. Non sono modelli
+      "più grandi" o "diversi sotto il cofano". Sono modelli che hanno avuto
+      un'<em>esperienza di addestramento</em> diversa.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 2 — IL SALTO DI PARADIGMA -->
+<section>
+  <div class="section-num">02 — IL SALTO DI PARADIGMA</div>
+  <h2>Imitare il testo, oppure ottenere risposte corrette</h2>
+  <p>
+    Per capire la differenza tra i due tipi di modello, dobbiamo guardare nel dettaglio
+    cosa succede durante l'addestramento. E vedremo che la distinzione cruciale non sta
+    nei dati, non sta nell'architettura — sta nel <strong>tipo di feedback</strong> che
+    il modello riceve durante l'apprendimento.
+  </p>
+
+  <h3>Come si addestra un modello tradizionale</h3>
+  <p>
+    Riprendiamo cosa abbiamo costruito nei temi precedenti. Un LLM tradizionale viene
+    addestrato a predire il prossimo token. Il modello vede un pezzo di testo dal
+    corpus, e per ogni posizione cerca di predire quale token viene dopo. Sbaglia,
+    riceve un segnale di errore basato sulla differenza tra il token predetto e il
+    token vero, aggiorna i pesi. Ripeti miliardi di volte su trilioni di token. Il
+    modello impara a predire bene i prossimi token in modo da <em>imitare il testo
+    umano nel corpus</em>.
+  </p>
+
+  <p>
+    Questa formulazione è importante, perché ne deriva una conseguenza che a prima
+    vista non si nota. <strong>Tutto il segnale di addestramento si basa sull'imitare
+    token per token quello che gli umani hanno scritto.</strong> Il modello viene
+    premiato (cioè, i suoi pesi vengono aggiornati nella direzione "giusta") quando il
+    suo output assomiglia al testo originale. Viene punito quando se ne discosta.
+  </p>
+
+  <p>
+    Adesso facciamoci una domanda apparentemente innocua. In questo regime, <em>quale
+    incentivo ha il modello a "ragionare di più"?</em>
+  </p>
+
+  <p>
+    Nessuno. Se durante l'addestramento il modello, per qualche motivo, producesse
+    passaggi intermedi di ragionamento prima della risposta, il segnale di errore non
+    lo premierebbe. Anzi, lo penalizzerebbe — perché quei passaggi intermedi non
+    corrispondono al testo che doveva imitare. Il modello viene addestrato a
+    <em>imitare il testo finale che esiste nel corpus</em>, non a <em>ottenere
+    risposte verificabilmente corrette</em>. Sono due cose molto diverse.
+  </p>
+
+  <div class="callout callout-amber">
+    <h4>La conseguenza sottile</h4>
+    <p>
+      In un modello addestrato per imitazione, il "ragionare ad alta voce" è solo uno
+      dei tanti pattern testuali appresi dai dati. Il modello lo ha visto fare in
+      paper scientifici, in dimostrazioni matematiche, in spiegazioni didattiche, e
+      può <em>riprodurlo</em> quando glielo chiedi. Ma non ha mai sperimentato la
+      <strong>connessione causale</strong> tra "scrivere passaggi intermedi" e
+      "ottenere risposte corrette". Per il modello, sono solo pattern.
+    </p>
+  </div>
+
+  <h3>Il salto: reinforcement learning su esiti verificabili</h3>
+  <p>
+    Adesso vediamo cosa cambia nei reasoning model. Il salto è concettualmente semplice
+    ma operativamente rivoluzionario, e si chiama <strong>reinforcement learning con
+    verifiable rewards</strong>.
+  </p>
+
+  <p>
+    Si parte da un modello base che è già stato addestrato in modo tradizionale (predire
+    il prossimo token). Poi si fa una <em>seconda fase di addestramento</em>, di natura
+    completamente diversa. Al modello vengono dati problemi con una risposta
+    <strong>correttamente verificabile</strong>: tipicamente problemi di matematica con
+    soluzione esatta, problemi di coding con test che verificano l'output, problemi di
+    logica con risposta univoca. Il modello produce una risposta. La risposta viene
+    confrontata con la soluzione corretta. Se è giusta, il modello riceve un reward
+    positivo. Se è sbagliata, il reward è negativo o zero.
+  </p>
+
+  <p>
+    E qui sta la cosa profonda. <strong>Il modello non viene insegnato come
+    ragionare.</strong> Gli viene solo detto se la risposta finale era corretta. Tutto
+    quello che il modello scrive <em>prima</em> della risposta — il "thinking" — è
+    libero. Può essere lungo o corto, strutturato o caotico, contenere errori e
+    correzioni, tornare indietro su sé stesso. L'unica cosa che conta per il reward è
+    se la risposta finale è giusta.
+  </p>
+
+  <div class="diagram">
+    <div class="diagram-label">I due paradigmi di addestramento a confronto</div>
+    <svg class="diagram-svg" viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrTrain" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#c94a1a"/>
+        </marker>
+        <marker id="arrFeedback" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#0d7a6e"/>
+        </marker>
+      </defs>
+
+      <!-- SCENARIO A: IMITAZIONE -->
+      <g>
+        <text x="20" y="20" font-family="JetBrains Mono" font-size="10" fill="#c94a1a" letter-spacing="1.5" font-weight="600">PARADIGMA A — IMITAZIONE DEL TESTO</text>
+        <text x="20" y="38" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">"riproduci quello che hanno scritto gli umani"</text>
+
+        <!-- Input -->
+        <rect x="20" y="58" width="320" height="34" rx="3" fill="#1e2a5e" opacity="0.95"/>
+        <text x="180" y="80" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Pezzo di testo dal corpus (input)</text>
+        <line x1="180" y1="92" x2="180" y2="110" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrTrain)"/>
+
+        <!-- Modello -->
+        <rect x="60" y="112" width="240" height="50" rx="4" fill="#1e2a5e" opacity="0.85"/>
+        <text x="180" y="132" font-family="Outfit" font-size="13" fill="white" text-anchor="middle" font-weight="600">Modello predice prossimo token</text>
+        <text x="180" y="149" font-family="Lora" font-size="10.5" fill="rgba(255,255,255,0.85)" text-anchor="middle" font-style="italic">Transformer + LM head + softmax</text>
+
+        <line x1="180" y1="162" x2="180" y2="180" stroke="#c94a1a" stroke-width="2" marker-end="url(#arrTrain)"/>
+
+        <!-- Confronto -->
+        <rect x="20" y="182" width="320" height="48" rx="3" fill="#c94a1a" opacity="0.85"/>
+        <text x="180" y="203" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="600">Confronto con il token reale del corpus</text>
+        <text x="180" y="220" font-family="Lora" font-size="10.5" fill="rgba(255,255,255,0.9)" text-anchor="middle" font-style="italic">errore = differenza dal token "corretto"</text>
+
+        <!-- Loop feedback -->
+        <path d="M 20 206 Q -10 206 -10 140 Q -10 80 60 137" fill="none" stroke="#c94a1a" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrTrain)"/>
+
+        <text x="180" y="265" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280" text-anchor="middle">Il modello impara a:</text>
+        <text x="180" y="285" font-family="Outfit" font-size="13" fill="#c94a1a" text-anchor="middle" font-weight="600">riprodurre il testo umano</text>
+        <text x="180" y="305" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">Quello che c'è "prima della risposta"</text>
+        <text x="180" y="320" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">non è premiato a parte: deve solo</text>
+        <text x="180" y="335" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">assomigliare al testo originale.</text>
+      </g>
+
+      <!-- Separatore -->
+      <line x1="380" y1="40" x2="380" y2="350" stroke="#374151" stroke-width="0.5" opacity="0.3"/>
+
+      <!-- SCENARIO B: VERIFIABLE REWARDS -->
+      <g transform="translate(400, 0)">
+        <text x="20" y="20" font-family="JetBrains Mono" font-size="10" fill="#0d7a6e" letter-spacing="1.5" font-weight="600">PARADIGMA B — VERIFIABLE REWARDS</text>
+        <text x="20" y="38" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280">"arriva alla risposta corretta, comunque tu voglia"</text>
+
+        <!-- Input -->
+        <rect x="20" y="58" width="320" height="34" rx="3" fill="#1e2a5e" opacity="0.95"/>
+        <text x="180" y="80" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="500">Problema con risposta verificabile</text>
+        <line x1="180" y1="92" x2="180" y2="110" stroke="#0d7a6e" stroke-width="2" marker-end="url(#arrFeedback)"/>
+
+        <!-- Modello -->
+        <rect x="60" y="112" width="240" height="50" rx="4" fill="#1e2a5e" opacity="0.85"/>
+        <text x="180" y="132" font-family="Outfit" font-size="13" fill="white" text-anchor="middle" font-weight="600">Modello produce risposta intera</text>
+        <text x="180" y="149" font-family="Lora" font-size="10.5" fill="rgba(255,255,255,0.85)" text-anchor="middle" font-style="italic">thinking liberamente + risposta finale</text>
+
+        <line x1="180" y1="162" x2="180" y2="180" stroke="#0d7a6e" stroke-width="2" marker-end="url(#arrFeedback)"/>
+
+        <!-- Verifica -->
+        <rect x="20" y="182" width="320" height="48" rx="3" fill="#0d7a6e" opacity="0.95"/>
+        <text x="180" y="203" font-family="Outfit" font-size="12" fill="white" text-anchor="middle" font-weight="600">Verifica della risposta finale: giusta o no?</text>
+        <text x="180" y="220" font-family="Lora" font-size="10.5" fill="rgba(255,255,255,0.9)" text-anchor="middle" font-style="italic">reward = correttezza dell'output finale</text>
+
+        <!-- Loop feedback -->
+        <path d="M 20 206 Q -10 206 -10 140 Q -10 80 60 137" fill="none" stroke="#0d7a6e" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrFeedback)"/>
+
+        <text x="180" y="265" font-family="Lora" font-style="italic" font-size="12" fill="#6b7280" text-anchor="middle">Il modello impara a:</text>
+        <text x="180" y="285" font-family="Outfit" font-size="13" fill="#0d7a6e" text-anchor="middle" font-weight="600">ottenere risposte corrette</text>
+        <text x="180" y="305" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">Quello che c'è "prima della risposta"</text>
+        <text x="180" y="320" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">è libero, ma se aiuta a vincere il reward,</text>
+        <text x="180" y="335" font-family="Lora" font-style="italic" font-size="11" fill="#6b7280" text-anchor="middle">i pesi si aggiustano per favorirlo.</text>
+      </g>
+    </svg>
+    <div class="diagram-caption">
+      A sinistra, il paradigma classico dell'imitazione: il modello viene premiato per
+      assomigliare al testo del corpus. A destra, il paradigma dei reasoning model: il
+      modello viene premiato per arrivare a risposte verificabilmente corrette. Tutto
+      il cambiamento è in <strong>cosa viene misurato</strong> per dare il reward.
+    </div>
+  </div>
+</section>
+
+<!-- SEZIONE 3 — EMERGENZA DEL RAGIONAMENTO -->
+<section>
+  <div class="section-num">03 — IL RAGIONAMENTO COME STRATEGIA EMERGENTE</div>
+  <h2>Quello che il modello scopre da solo</h2>
+  <p>
+    Adesso veniamo al punto bellissimo. In questo nuovo regime di addestramento, cosa
+    succede al modello? Il modello sperimenta. Produce risposte di vario tipo — alcune
+    brevi, alcune più lunghe, alcune con passaggi intermedi, alcune senza. Per ognuna,
+    riceve un reward. E i suoi pesi si aggiustano statisticamente per favorire le
+    strategie che producono reward più alti.
+  </p>
+
+  <p>
+    Ed ecco la scoperta. <strong>Tra le strategie possibili, quelle che includono
+    passaggi intermedi di ragionamento prima della risposta finale ottengono
+    mediamente più reward</strong>. Sono più precise. Sono più affidabili nei problemi
+    difficili. Sbagliano meno. Quindi i pesi si aggiustano per favorirle, e il modello,
+    statisticamente, comincia a produrre sempre più spesso quei passaggi intermedi.
+  </p>
+
+  <p>
+    Nessuno gli ha detto di farlo. Non c'è un modulo specifico che impone il
+    ragionamento. Non c'è una regola esplicita. Il modello scopre — attraverso la
+    pressione selettiva del reward — che pensare prima di rispondere è una strategia
+    vincente. È un <strong>comportamento emergente</strong> nel senso più preciso del
+    termine.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora dello studente</div>
+    <p>
+      Pensa a uno studente valutato in due modi diversi.
+    </p>
+    <p>
+      <strong>Nel primo regime — l'imitazione</strong> — lo studente viene valutato sul
+      fatto di scrivere un compito identico a quello del compagno di banco bravo. Più
+      il suo compito assomiglia parola per parola a quello del compagno, più il voto è
+      alto. In questo regime, lo studente impara a <em>imitare</em> il compagno bravo.
+      Non importa se capisce davvero la matematica: deve riprodurre lo stesso tipo di
+      output. Se il compagno bravo a volte scrive i passaggi e a volte no, lo studente
+      imparerà a fare la stessa cosa, senza capire perché.
+    </p>
+    <p>
+      <strong>Nel secondo regime — i verifiable rewards</strong> — lo studente viene
+      valutato solo sul fatto che la risposta finale sia corretta. Può scrivere quello
+      che vuole sul foglio. In questo regime, lo studente scopre rapidamente che
+      scrivere i passaggi intermedi lo aiuta — perché lo aiuta a non sbagliare. Non lo
+      fa perché lo ha visto fare al compagno bravo: lo fa perché, sperimentalmente, gli
+      porta a più risposte corrette. È un comportamento nato dall'<em>incentivo</em>,
+      non dall'<em>imitazione</em>.
+    </p>
+  </div>
+
+  <h3>Il caso di studio: DeepSeek-R1</h3>
+  <p>
+    Il caso più trasparente di questa storia è DeepSeek-R1, il reasoning model open
+    source rilasciato a gennaio 2025 dalla startup cinese DeepSeek. È particolarmente
+    importante perché DeepSeek ha pubblicato apertamente il metodo di addestramento e
+    i pesi del modello, permettendo alla comunità di ricerca di studiare il fenomeno
+    in dettaglio.
+  </p>
+
+  <p>
+    Quello che il paper di DeepSeek mostra è notevole. Durante la fase di RL su
+    verifiable rewards, gli autori hanno tracciato la <strong>lunghezza media delle
+    risposte del modello nel corso dell'addestramento</strong>. Cosa hanno osservato?
+    La lunghezza cresce. Il modello, da solo, comincia a produrre risposte sempre più
+    articolate. Non perché qualcuno glielo abbia chiesto. Perché ha scoperto che pensare
+    di più aiuta, e quindi pensa sempre di più.
+  </p>
+
+  <p>
+    Più sorprendente ancora: nel corso dell'addestramento, il modello sviluppa
+    spontaneamente comportamenti specifici di pensiero deliberato. Comincia a scrivere
+    cose come <em>"aspetta, riflettiamo meglio"</em>, oppure <em>"no, ho sbagliato,
+    riproviamo così"</em>. Ammette errori, cambia strada, esplora alternative. Nessuna
+    di queste cose era stata insegnata esplicitamente al modello. Tutte sono emerse
+    perché statisticamente correlavano con risposte finali più corrette.
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>Perché è un risultato importante</h4>
+    <p>
+      Conferma in modo netto la tesi del Tema 3: il "ragionamento" di un LLM non è una
+      capacità misteriosa o cognitiva nel senso umano. È una <strong>strategia
+      computazionale</strong> che il modello adotta quando l'ambiente di addestramento la
+      premia. È, in un senso molto preciso, una <em>tecnica</em> — utile, efficace, e
+      acquisibile attraverso il giusto tipo di feedback.
+    </p>
+    <p>
+      I reasoning model non sono "intelligenti in un modo diverso". Sono modelli a cui
+      è stata insegnata, attraverso il giusto incentivo, una strategia di utilizzo del
+      loro budget computazionale che i modelli tradizionali non avevano motivo di
+      imparare.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 4 — DUE COSE DIVERSE -->
+<section>
+  <div class="section-num">04 — UNA DISTINZIONE OPERATIVA</div>
+  <h2>"CoT prompted" e "CoT trained": cosa cambia per l'utente</h2>
+  <p>
+    Adesso che abbiamo i due paradigmi in mano, possiamo articolare con precisione la
+    differenza tra il vecchio chain-of-thought prompting (quello che attivi con "ragiona
+    passo per passo") e il chain-of-thought trained dei reasoning model. Sono due cose
+    che <em>sembrano</em> simili dall'esterno — entrambe producono output con passaggi
+    intermedi prima della risposta finale — ma sono <strong>computazionalmente diverse</strong>.
+  </p>
+
+  <div class="comparison">
+    <div class="comparison-header">
+      <div>Chain-of-Thought prompted (modello tradizionale)</div>
+      <div>Chain-of-Thought trained (reasoning model)</div>
+    </div>
+    <div class="comparison-row">
+      <div>
+        <div class="cmp-label">Origine</div>
+        Attivato dal prompt ("ragiona passo per passo"). Senza il prompt, il modello
+        risponde direttamente.
+      </div>
+      <div>
+        <div class="cmp-label">Origine</div>
+        Interiorizzato dal modello attraverso l'addestramento. Il modello pensa
+        autonomamente quando lo ritiene utile, anche senza prompt.
+      </div>
+    </div>
+    <div class="comparison-row">
+      <div>
+        <div class="cmp-label">Natura</div>
+        Imitazione di un pattern testuale visto nei dati. Il modello "fa finta di
+        ragionare" riproducendo come scrivono le persone quando ragionano.
+      </div>
+      <div>
+        <div class="cmp-label">Natura</div>
+        Strategia computazionale appresa per massimizzare la correttezza. Il modello
+        sa, per "esperienza", che ragionare aumenta la probabilità di azzeccare.
+      </div>
+    </div>
+    <div class="comparison-row">
+      <div>
+        <div class="cmp-label">Qualità del pensiero</div>
+        Plausibile ma generica. Segue pattern di ragionamento "tipici", senza adattamento
+        sofisticato alla difficoltà del problema.
+      </div>
+      <div>
+        <div class="cmp-label">Qualità del pensiero</div>
+        Più articolata. Include backtracking, autocorrezione, esplorazione di
+        alternative. Si calibra sulla difficoltà del problema.
+      </div>
+    </div>
+    <div class="comparison-row">
+      <div>
+        <div class="cmp-label">Quanto pensa</div>
+        Dipende da quanto il prompt lo guida. Senza istruzioni specifiche, tende a
+        produrre catene relativamente brevi.
+      </div>
+      <div>
+        <div class="cmp-label">Quanto pensa</div>
+        Calibrato automaticamente (o tramite parametro "effort"). I problemi difficili
+        attivano pensiero più esteso; quelli semplici quasi nessuno.
+      </div>
+    </div>
+    <div class="comparison-row">
+      <div>
+        <div class="cmp-label">Costo</div>
+        Costo standard, paghi solo i token che vedi.
+      </div>
+      <div>
+        <div class="cmp-label">Costo</div>
+        Più alto. Paghi anche i thinking tokens (che spesso non vedi), che possono
+        essere migliaia anche per problemi singoli.
+      </div>
+    </div>
+    <div class="comparison-row">
+      <div>
+        <div class="cmp-label">Quando è meglio</div>
+        Per problemi medi, scenari di costo contenuto, applicazioni con vincoli di
+        latenza, e in generale quando il task è dentro la zona di forte competenza.
+      </div>
+      <div>
+        <div class="cmp-label">Quando è meglio</div>
+        Per problemi al confine della capacità del modello, problemi matematici o
+        logici complessi, coding difficile, decisioni che richiedono integrazione di
+        molti vincoli.
+      </div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">La saldatura concettuale</div>
+    <p>
+      I reasoning model sono un'evoluzione architetturale di portata particolare,
+      perché cambiano <em>cosa il modello ha imparato a fare</em> senza cambiare quasi
+      nulla di <em>come è costruito</em>. L'architettura del Transformer è la stessa,
+      la pipeline tokenizer-stack-LM head è la stessa, anche le dimensioni e il numero
+      di strati sono spesso paragonabili.
+    </p>
+    <p>
+      Quello che è diverso è <strong>l'esperienza di addestramento</strong>: invece di
+      essere premiati per imitare il testo umano, sono stati premiati per ottenere
+      risposte verificabilmente corrette. E in questo nuovo regime, hanno scoperto da
+      soli che ragionare prima di rispondere è una strategia vincente.
+    </p>
+    <p>
+      È un esempio elegantissimo di un principio generale: <em>il comportamento di un
+      sistema di apprendimento è determinato non solo dalla sua struttura, ma da quale
+      pressione selettiva agisce su di esso durante l'apprendimento</em>. Cambia la
+      pressione selettiva, e cambia il sistema.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 5 — SEQUENZA DI INTERVENTI -->
+<section>
+  <div class="section-num">05 — IL DISTILLATO OPERATIVO</div>
+  <h2>La sequenza di interventi per migliorare l'output</h2>
+  <p class="lead">
+    Tutto quello che abbiamo costruito ha un risvolto pratico molto concreto. Quando
+    l'output di un LLM non è soddisfacente, ci sono <strong>quattro tipologie di
+    intervento</strong> per migliorarlo, ognuna con un costo crescente. La regola
+    operativa fondamentale è: <em>tentare prima quelli più economici, e passare ai più
+    costosi solo quando i precedenti non bastano</em>.
+  </p>
+
+  <p>
+    Questa sequenza non è solo un consiglio operativo: è anche un metodo di
+    <strong>diagnosi</strong>. Capire quale intervento serve significa capire dove sta
+    davvero il problema dell'output. Attivare il reasoning come primo riflesso è una
+    over-correzione classica.
+  </p>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-tag">
+        <div class="step-num"></div>
+        <div class="step-title">Prompt engineering</div>
+      </div>
+      <div class="step-tagline">Migliorare come comunichi col modello</div>
+      <p>
+        Il primo intervento è anche il più economico. Quando un output non è
+        soddisfacente, la prima domanda da farsi è: <em>il prompt era chiaro, completo,
+        ben formulato?</em> Spesso il problema è qui.
+      </p>
+      <p>
+        Le mosse pratiche da provare in ordine: aggiungere <strong>contesto</strong> che
+        il modello potrebbe non avere (chi sei, scopo, uso finale del risultato);
+        specificare il <strong>formato</strong> desiderato (lunghezza, registro,
+        struttura, audience); fornire <strong>esempi</strong> di output che ti
+        soddisfano (one-shot o few-shot prompting, che funziona benissimo perché il
+        modello impara dai pattern degli esempi); esplicitare i <strong>vincoli</strong>
+        ("non usare gergo tecnico", "mantieni il tono formale"); e se il problema
+        richiede ragionamento, attivare il <strong>chain-of-thought prompting</strong>
+        ("ragiona passo per passo prima di rispondere") che, anche per modelli
+        non-reasoning, fa spesso una differenza enorme.
+      </p>
+      <p>
+        Un trucco meno noto ma potente: la <strong>riformulazione</strong>. Se il
+        prompt ti sembra chiaro ma il modello continua a sbagliare, prova a riformularlo
+        con linguaggio diverso, registro diverso, o in un dominio analogo. Spesso il
+        problema non è nella sostanza della domanda, ma nel fatto che la formulazione
+        fa atterrare il modello in una zona della sua competenza meno affidabile.
+        Riformulare costa quasi nulla e a volte sblocca tutto.
+      </p>
+      <div class="step-when">
+        <strong>Quando</strong> Sempre per primo. Il prompt engineering è gratuito,
+        immediato, e nella maggior parte dei casi risolve il problema senza bisogno di
+        nulla d'altro.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-tag">
+        <div class="step-num"></div>
+        <div class="step-title">Output strutturato</div>
+      </div>
+      <div class="step-tagline">Migliorare come l'output viene formato e validato</div>
+      <p>
+        Il secondo intervento è meno noto ma molto efficace. L'idea è semplice: invece
+        di lasciare al modello la libertà di rispondere in prosa libera, lo costringi a
+        rispondere in una <strong>struttura precisa</strong> — tipicamente JSON con uno
+        schema dichiarato. Tutti i provider moderni (OpenAI con Structured Outputs,
+        Anthropic con tool use, Google con response schema) supportano questa modalità
+        nativamente.
+      </p>
+      <p>
+        Funziona per due ragioni. La prima è che la <strong>struttura forzata aumenta
+        l'accuratezza</strong>. Quando il modello deve produrre, per esempio,
+        <code>{"diagnosi": "...", "confidence": 0.85, "raccomandazioni": [...]}</code>, è
+        costretto a separare i diversi aspetti della risposta in modo esplicito, e a
+        non confonderli. La seconda è che la struttura <strong>rende l'output
+        processabile</strong> da codice o comparabile attraverso più richieste — utile
+        se stai costruendo un sistema o se vuoi confrontare gli output di analisi
+        diverse.
+      </p>
+      <div class="step-when">
+        <strong>Quando</strong> Tutte le volte che l'output deve essere consumato da
+        codice (estrazione di dati, classificazione, multi-step pipelines), e quando
+        vuoi che output diversi siano confrontabili in forma strutturata.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-tag">
+        <div class="step-num"></div>
+        <div class="step-title">RAG (Retrieval-Augmented Generation)</div>
+      </div>
+      <div class="step-tagline">Cambiare cosa il modello sa</div>
+      <p>
+        Qui il salto è di natura diversa dai primi due. Il prompt engineering migliora
+        come comunichi col modello; l'output strutturato migliora come riceve la
+        risposta. Il RAG cambia <em>cosa il modello sa</em>.
+      </p>
+      <p>
+        Il principio è semplice: invece di fare affidamento solo sulla conoscenza
+        interiorizzata dal modello durante l'addestramento, recuperi documenti rilevanti
+        da una base di conoscenza esterna <em>prima</em> del prompt, e li metti nel
+        contesto. Il modello ha così accesso a fatti aggiornati, a documenti specifici
+        della tua organizzazione, a letteratura scientifica che non era nel suo training
+        set, o a qualunque altra fonte di informazione che vuoi che usi.
+      </p>
+      <p>
+        Il RAG ha molte declinazioni (vector database con embedding, ricerca testuale
+        tradizionale, knowledge graphs, web search integrata), e questo apre tutto un
+        fronte di lavoro che è parte del Tema 4 sulla gestione di documenti lunghi.
+        Costa più di un singolo prompt perché richiede una pipeline (embedding,
+        retrieval, re-ranking, iniezione nel contesto), ma è di solito molto più
+        economico dell'extended thinking, perché tipicamente paghi solo per qualche
+        migliaio di token aggiuntivi in input.
+      </p>
+      <div class="step-when">
+        <strong>Quando</strong> Il problema del tuo output non è "ragiona male", ma
+        "non sa". Se il modello inventa fatti, sbaglia citazioni, dà informazioni
+        obsolete, o non conosce documenti specifici del tuo dominio: RAG è la risposta.
+        Se invece conosce i fatti ma li combina male: RAG non risolverà nulla.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-tag">
+        <div class="step-num"></div>
+        <div class="step-title">Reasoning model / Extended thinking</div>
+      </div>
+      <div class="step-tagline">Dare al modello più tempo di calcolo</div>
+      <p>
+        L'ultimo intervento, e il più costoso. Lo attivi quando hai escluso che il
+        problema sia di formulazione (prompt engineering), di struttura (output
+        strutturato), o di informazione (RAG), e ti resta solo l'ipotesi che il
+        problema sia di <strong>ragionamento difettoso su informazioni che il modello
+        ha</strong>.
+      </p>
+      <p>
+        Una formulazione che condensa tutto: usa l'extended thinking quando il fallimento
+        è del tipo <em>"il modello ha l'informazione ma ragiona male su di essa"</em>.
+        Il modello sa tutto quello che serve sapere, ma quando deve metterlo insieme
+        per arrivare alla risposta, sbaglia. Allora gli dai più tempo di calcolo per
+        metterlo insieme meglio.
+      </p>
+      <p>
+        Quando in pratica? Problemi matematici al confine della competenza standard,
+        analisi che richiedono di tenere insieme molti vincoli, decisioni di design
+        ingegneristico complesse, debug di codice difficile, ragionamenti legali o
+        etici sfumati che richiedono di considerare molti aspetti. In tutti questi casi,
+        il modello non manca di informazioni — manca di "spazio mentale di lavoro" per
+        integrarle bene.
+      </p>
+      <p>
+        Una nota sul dosaggio. Nei sistemi che ti permettono di scegliere il "thinking
+        effort" (Claude, Gemini, OpenAI), la regola empirica è <strong>partire dal
+        livello medio</strong> e salire solo se vedi che non basta. Effort più alto non
+        è automaticamente meglio, perché può portare a "overthinking" — il modello
+        esplora alternative non rilevanti, si convince di errori, produce output meno
+        coerenti. Per la maggior parte dei task complessi, "medium" o "high" sono il
+        punto giusto. "Max" è per i casi davvero al limite.
+      </p>
+      <div class="step-when">
+        <strong>Quando</strong> Solo dopo aver escluso che il problema sia altrove. Se
+        attivato come primo riflesso, è una over-correzione costosa.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="callout callout-indigo">
+    <h4>La sequenza come metodo diagnostico</h4>
+    <p>
+      Vista da questa prospettiva, la sequenza non è solo un consiglio operativo: è
+      anche un <strong>modo di diagnosticare</strong> dove sta il problema. Davanti a
+      un output insoddisfacente, fermati e chiediti:
+    </p>
+    <p>
+      Il modello non capisce cosa voglio? <em>→ prompt engineering</em>. L'output viene
+      in una forma che non riesco a usare? <em>→ output strutturato</em>. Manca di
+      informazioni che dovrebbe avere? <em>→ RAG</em>. Ragiona male su informazioni che
+      ha? <em>→ thinking</em>.
+    </p>
+    <p>
+      Ognuna di queste diagnosi porta a un intervento diverso, e fare l'intervento
+      giusto è una questione di capire dove sta davvero il problema.
+    </p>
+  </div>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Sette cose da portarsi via dal complemento 3A</h3>
+    <ol class="takeaway-list">
+      <li>
+        I reasoning model non sono "modelli più grandi" o "diversi sotto il cofano".
+        Sono modelli che hanno avuto un'<em>esperienza di addestramento</em> diversa:
+        oltre al training tradizionale per imitazione, hanno fatto una fase di
+        <strong>reinforcement learning su risposte verificabilmente corrette</strong>.
+      </li>
+      <li>
+        Nel training tradizionale, il modello è premiato per imitare il testo umano
+        token per token. In questo regime, <strong>"ragionare di più" non porta a
+        nessuna ricompensa</strong> — il modello deve solo riprodurre quello che gli
+        umani hanno scritto.
+      </li>
+      <li>
+        Nel training con verifiable rewards, l'unica cosa che conta è la correttezza
+        della risposta finale. Tutto ciò che il modello scrive prima — il "thinking"
+        — è libero. E in questo regime, <em>scrivere passaggi intermedi diventa una
+        strategia vincente</em>, perché aumenta la probabilità di azzeccare la risposta.
+      </li>
+      <li>
+        Il ragionamento dei reasoning model è <strong>un comportamento emergente</strong>.
+        Nessuno glielo ha insegnato esplicitamente: il modello l'ha scoperto come
+        strategia per massimizzare il reward. Il caso di DeepSeek-R1 lo documenta in
+        modo trasparente: durante l'addestramento, la lunghezza media delle risposte
+        cresce, e il modello sviluppa spontaneamente comportamenti come autocorrezione,
+        backtracking, e esplorazione di alternative.
+      </li>
+      <li>
+        La distinzione operativa è tra <strong>CoT prompted</strong> (attivata dal
+        prompt "ragiona passo per passo", imitazione di un pattern) e <strong>CoT
+        trained</strong> (interiorizzata dal modello, strategia computazionale appresa).
+        La seconda è qualitativamente più affidabile, calibrata sulla difficoltà del
+        problema, ma più costosa (paghi i thinking tokens).
+      </li>
+      <li>
+        Per migliorare un output, esiste una <strong>sequenza di interventi</strong>
+        con costo crescente: <code>prompt engineering → output strutturato → RAG →
+        reasoning/extended thinking</code>. Provare prima quelli più economici è quasi
+        sempre la cosa giusta. Attivare il thinking come primo riflesso è una
+        over-correzione classica.
+      </li>
+      <li>
+        La sequenza è anche un <strong>metodo diagnostico</strong>: capire quale
+        intervento serve significa capire dove sta davvero il problema. Comunicazione
+        col modello? Struttura dell'output? Conoscenza? Capacità di ragionamento?
+        Ognuna richiede un intervento diverso, e fare quello sbagliato spreca risorse
+        senza risolvere il problema.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- BRIDGE AL 3B -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="bridge">
+    <div class="bridge-label">Prossimo passo</div>
+    <h3>Il panorama 2026 dei reasoning model</h3>
+    <p>
+      Adesso che abbiamo costruito il modello mentale generale di cosa siano i reasoning
+      model e come funzionino, possiamo passare alla parte più pratica e contingente:
+      <strong>come questa famiglia di modelli è offerta concretamente dai principali
+      provider nel maggio 2026</strong>. OpenAI, Anthropic, Google, DeepSeek hanno fatto
+      scelte filosofiche diverse — modello separato vs integrato, thinking by default
+      vs su richiesta, trasparente vs nascosto. E dentro la stessa famiglia ci sono
+      decisioni importanti da fare: per esempio, quando conviene davvero usare un
+      flagship come Claude Opus invece del workhorse Sonnet?
+    </p>
+    <p>
+      Il prossimo report — <strong>Complemento 3B</strong> — è una snapshot del panorama
+      attuale. Avrà una validità temporale più limitata di questo, perché il campo si
+      muove rapidamente. Ma è il pezzo che serve quando si tratta di scegliere
+      praticamente quale modello usare per quale task.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Complemento 3A al Tema 3 — Percorso di approfondimento su LLM e prompting (seconda chat)</p>
+  <p>I reasoning model: cosa sono e come funzionano</p>
+</footer>
+
+</body>
+</html>

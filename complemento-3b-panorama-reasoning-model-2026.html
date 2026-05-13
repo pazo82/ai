@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complemento 3B — Il panorama 2026 dei reasoning model</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--indigo);
+    padding: 88px 48px 96px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 580px; height: 580px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.32) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-graphic {
+    position: absolute;
+    top: 50%; right: 7%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 20px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 48px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--indigo);
+    margin: 28px 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── DISCLAIMER TEMPORALE ── */
+  .timestamp-banner {
+    background: var(--amber-faint);
+    border: 1px solid rgba(160,96,16,0.25);
+    border-radius: 6px;
+    padding: 20px 26px;
+    margin: 32px 0;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .timestamp-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--amber);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .timestamp-content h4 {
+    margin: 0 0 6px;
+    color: var(--amber);
+    font-family: var(--sans);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 600;
+  }
+
+  .timestamp-content p {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 6px;
+    padding: 26px 30px;
+    margin: 28px 0;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  .callout p { font-size: 15.5px; line-height: 1.7; margin-bottom: 12px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-orange { background: var(--orange-faint); border-left-color: var(--orange); }
+  .callout-orange h4 { color: var(--orange); }
+
+  .callout-indigo { background: var(--indigo-faint); border-left-color: var(--indigo); }
+  .callout-indigo h4 { color: var(--indigo); }
+
+  .callout-teal { background: var(--teal-faint); border-left-color: var(--teal); }
+  .callout-teal h4 { color: var(--teal); }
+
+  .callout-amber { background: var(--amber-faint); border-left-color: var(--amber); }
+  .callout-amber h4 { color: var(--amber); }
+
+  .callout-purple { background: var(--purple-faint); border-left-color: var(--purple); }
+  .callout-purple h4 { color: var(--purple); }
+
+  /* ── PROVIDER CARD ── */
+  .provider {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 36px;
+    margin-bottom: 26px;
+    border-left: 4px solid;
+  }
+
+  .provider-openai { border-left-color: #10a37f; }
+  .provider-anthropic { border-left-color: #c94a1a; }
+  .provider-google { border-left-color: #4285f4; }
+  .provider-deepseek { border-left-color: #5e2a7a; }
+
+  .provider-head {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .provider-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--indigo);
+  }
+
+  .provider-tag {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15.5px;
+    color: var(--ink-light);
+  }
+
+  .provider-philosophy {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-light);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .provider p {
+    font-size: 15.5px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+  }
+
+  .provider p:last-child { margin-bottom: 0; }
+
+  .provider-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border2);
+  }
+
+  .provider-meta-item {
+    font-size: 13.5px;
+  }
+
+  .provider-meta-item .pm-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .provider-meta-item .pm-value {
+    color: var(--ink-mid);
+    line-height: 1.5;
+  }
+
+  /* ── TASK CATEGORIES ── */
+  .category {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin-bottom: 22px;
+  }
+
+  .category-tag {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .category-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 24px;
+    color: var(--orange);
+    line-height: 1;
+  }
+
+  .category-title {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--indigo);
+  }
+
+  .category p {
+    font-size: 15.5px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+  }
+
+  .category-examples {
+    margin: 14px 0;
+    padding-left: 22px;
+  }
+
+  .category-examples li {
+    font-size: 14.5px;
+    color: var(--ink-mid);
+    margin-bottom: 10px;
+    line-height: 1.62;
+  }
+
+  /* ── HEURISTIC ── */
+  .heuristic {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color: var(--white);
+    padding: 40px 44px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .heuristic::before {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .heuristic-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 18px;
+    position: relative;
+  }
+
+  .heuristic-questions {
+    list-style: none;
+    counter-reset: q-counter;
+    margin: 24px 0 18px;
+    position: relative;
+  }
+
+  .heuristic-questions li {
+    padding: 16px 0 16px 50px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .heuristic-questions li:last-child { border-bottom: none; }
+
+  .heuristic-questions li::before {
+    content: counter(q-counter);
+    counter-increment: q-counter;
+    position: absolute;
+    left: 0;
+    top: 16px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 24px;
+    font-weight: 500;
+  }
+
+  .heuristic-questions li strong { color: var(--white); }
+  .heuristic-questions li em { color: var(--orange-light); font-style: italic; }
+
+  .heuristic-rule {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+    font-size: 16px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.6;
+    position: relative;
+  }
+
+  .heuristic-rule strong { color: var(--orange-light); }
+
+  /* ── PRICING TABLE ── */
+  .pricing {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 28px 0;
+  }
+
+  .pricing table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .pricing th {
+    background: var(--indigo);
+    color: var(--white);
+    text-align: left;
+    padding: 14px 18px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+  }
+
+  .pricing th:not(:first-child) {
+    text-align: right;
+  }
+
+  .pricing td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border2);
+    font-size: 14.5px;
+    color: var(--ink-mid);
+  }
+
+  .pricing td:first-child {
+    font-family: var(--sans);
+    font-weight: 500;
+    color: var(--indigo);
+  }
+
+  .pricing td:not(:first-child) {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 13.5px;
+  }
+
+  .pricing tr:last-child td { border-bottom: none; }
+
+  /* ── TAKEAWAYS ── */
+  .takeaways {
+    background: var(--indigo);
+    color: var(--white);
+    padding: 56px 48px;
+    border-radius: 8px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .takeaways::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(13,122,110,0.32) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .takeaways h3 {
+    color: var(--white);
+    font-family: var(--serif);
+    font-size: 28px;
+    margin: 0 0 28px;
+    position: relative;
+  }
+
+  .takeaway-list {
+    list-style: none;
+    position: relative;
+    counter-reset: takeaway-counter;
+  }
+
+  .takeaway-list li {
+    padding: 14px 0 14px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    font-size: 16.5px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .takeaway-list li:last-child { border-bottom: none; }
+
+  .takeaway-list li::before {
+    content: counter(takeaway-counter);
+    counter-increment: takeaway-counter;
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--orange-light);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .takeaway-list em { color: var(--orange-light); font-style: italic; }
+  .takeaway-list strong { color: var(--white); font-weight: 600; }
+  .takeaway-list code {
+    background: rgba(255,255,255,0.12);
+    color: var(--orange-light);
+  }
+
+  /* ── BRIDGE ── */
+  .bridge {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-radius: 8px;
+    padding: 48px;
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .bridge h3 {
+    margin: 0 0 16px;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--indigo);
+    font-weight: 500;
+  }
+
+  .bridge p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg3);
+    padding: 40px 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 34px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 26px; }
+    h3 { font-size: 19px; }
+    .heuristic { padding: 28px 24px; }
+    .takeaways { padding: 40px 28px; }
+    .bridge { padding: 32px 24px; }
+    .provider { padding: 22px 22px; }
+    .category { padding: 22px 22px; }
+    .provider-meta { grid-template-columns: 1fr; }
+    .pricing td, .pricing th { padding: 10px 12px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <svg class="hero-bg-graphic" width="280" height="280" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+    <!-- Tre filosofie diverse rappresentate visivamente -->
+    <g opacity="0.9">
+      <!-- Filosofia OpenAI: due cerchi separati -->
+      <circle cx="60" cy="90" r="22" fill="none" stroke="white" stroke-width="2" opacity="0.6"/>
+      <text x="60" y="95" font-family="Outfit" font-size="9" fill="white" text-anchor="middle" opacity="0.7">Instant</text>
+      <circle cx="60" cy="190" r="22" fill="none" stroke="#f07040" stroke-width="2" opacity="0.85"/>
+      <text x="60" y="195" font-family="Outfit" font-size="9" fill="#f07040" text-anchor="middle" opacity="0.95">Thinking</text>
+
+      <!-- Filosofia Anthropic: un cerchio con toggle -->
+      <circle cx="140" cy="140" r="34" fill="none" stroke="white" stroke-width="2" opacity="0.85"/>
+      <text x="140" y="138" font-family="Outfit" font-size="9" fill="white" text-anchor="middle" opacity="0.95">Claude</text>
+      <text x="140" y="151" font-family="Lora" font-style="italic" font-size="8" fill="#f07040" text-anchor="middle" opacity="0.95">+ thinking</text>
+
+      <!-- Filosofia Google: dynamic levels -->
+      <circle cx="220" cy="140" r="32" fill="none" stroke="white" stroke-width="2" opacity="0.85"/>
+      <circle cx="220" cy="140" r="22" fill="none" stroke="white" stroke-width="1.5" opacity="0.55"/>
+      <circle cx="220" cy="140" r="12" fill="none" stroke="#f07040" stroke-width="1.5" opacity="0.95"/>
+      <text x="220" y="143" font-family="Outfit" font-size="8" fill="#f07040" text-anchor="middle" opacity="0.95">auto</text>
+    </g>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-label">Complemento 3B — Panorama applicativo</div>
+    <h1>Il panorama 2026 dei <em>reasoning model</em></h1>
+    <p class="hero-sub">
+      Come i principali provider — OpenAI, Anthropic, Google, DeepSeek — hanno
+      declinato il reasoning nei loro modelli. Tre filosofie diverse, e una euristica
+      pratica per scegliere quale modello usare per quale task.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Argomento</div>
+        <div class="meta-value">Provider, modelli, scelta operativa</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Tipologia</div>
+        <div class="meta-value">Complemento applicativo al Tema 3</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Validità temporale</div>
+        <div class="meta-value">Snapshot (maggio 2026)</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- SEZIONE 1 — SNAPSHOT -->
+<section>
+  <div class="section-num">01 — UNA SNAPSHOT TEMPORALE</div>
+  <h2>Cosa questo report è e cosa non è</h2>
+  <p class="lead">
+    Questo è un report-fotografia. Cattura il panorama dei reasoning model offerti
+    dai principali provider AI nel maggio 2026. Non è una guida atemporale come gli
+    altri report del percorso: è una snapshot di un momento specifico, e questo
+    impone qualche cautela su come usarla.
+  </p>
+
+  <div class="timestamp-banner">
+    <div class="timestamp-icon">!</div>
+    <div class="timestamp-content">
+      <h4>Avvertenza sulla freschezza</h4>
+      <p>
+        Il campo dei reasoning model si muove rapidamente. Tra il momento in cui scrivo
+        e quello in cui leggi, modelli specifici potrebbero essere stati sostituiti,
+        nuove versioni potrebbero essere uscite, i pricing potrebbero essere cambiati.
+        Quello che dovrebbe restare valido nel tempo sono le <em>filosofie di
+        prodotto</em> dei principali provider e la <em>logica di scelta</em> tra
+        modelli. I numeri specifici e i nomi dei modelli vanno verificati alla data
+        in cui usi il report.
+      </p>
+    </div>
+  </div>
+
+  <p>
+    Il report risponde a tre domande pratiche. La prima: <strong>come ciascun provider
+    offre il reasoning</strong>? OpenAI, Anthropic, Google e DeepSeek hanno fatto
+    scelte filosofiche diverse, ognuna con conseguenze pratiche per chi usa quei
+    modelli. La seconda: <strong>quando vale la pena scegliere un modello flagship
+    invece del workhorse</strong> nella stessa famiglia? È la decisione operativa più
+    frequente per chi usa quotidianamente questi modelli, e merita di essere articolata
+    con esempi concreti. La terza: <strong>esiste un'euristica generale</strong> per
+    scegliere il modello giusto per il task giusto? Sì, e la formuliamo come tre
+    domande in ordine.
+  </p>
+
+  <p>
+    Premessa importante: questo non è un confronto benchmark contro benchmark. Le tabelle
+    di benchmark sono ovunque online e si aggiornano settimanalmente. Quello che proviamo
+    a fare qui è dare una mappa <em>concettuale</em> del panorama, che resti utile anche
+    quando i numeri specifici saranno superati.
+  </p>
+</section>
+
+<!-- SEZIONE 2 — LE TRE FILOSOFIE -->
+<section>
+  <div class="section-num">02 — LE TRE FILOSOFIE DI PRODOTTO</div>
+  <h2>Come ciascun provider ha declinato il reasoning</h2>
+  <p class="lead">
+    Tutti i grandi provider offrono ormai capacità di reasoning. Ma il <em>come</em> le
+    offrono riflette tre approcci filosoficamente diversi — modello separato, integrazione,
+    thinking di default — con conseguenze pratiche distinte. Vediamoli uno per uno.
+  </p>
+
+  <div class="provider provider-openai">
+    <div class="provider-head">
+      <div class="provider-name">OpenAI</div>
+      <div class="provider-tag">la specie separata</div>
+    </div>
+    <div class="provider-philosophy">Filosofia: due famiglie di modelli, una per la velocità, una per il pensiero</div>
+    <p>
+      OpenAI è stata la prima a portare sul mercato i reasoning model con la serie
+      <strong>o1</strong> nel settembre 2024, poi o3, e ora con la serie GPT-5
+      (Instant per le risposte rapide, Thinking per i problemi complessi). La filosofia
+      è di avere modelli <strong>distinti</strong> per ragionamento e risposta veloce:
+      l'utente sceglie esplicitamente dal model picker se vuole velocità o profondità.
+    </p>
+    <p>
+      In ChatGPT, i piani Pro hanno persino sotto-livelli di "thinking time"
+      (Light/Standard/Extended/Heavy), che permettono di calibrare quanto il modello
+      "pensa" prima di rispondere. Una particolarità importante: OpenAI
+      <strong>nasconde</strong> i reasoning tokens — non li vedi mai. Vedi solo un breve
+      sommario di cosa il modello sta facendo, e poi la risposta. Li paghi (vengono
+      contati come output tokens), ma il loro contenuto rimane dietro le quinte. La
+      motivazione dichiarata è di non rivelare informazioni proprietarie sul training.
+    </p>
+    <div class="provider-meta">
+      <div class="provider-meta-item">
+        <div class="pm-label">Modelli flagship per reasoning</div>
+        <div class="pm-value">GPT-5.4 Thinking, GPT-5.5 Thinking, GPT-5 Pro (massima capacità)</div>
+      </div>
+      <div class="provider-meta-item">
+        <div class="pm-label">Trasparenza del thinking</div>
+        <div class="pm-value">Nascosto — solo sommari riassunti visibili</div>
+      </div>
+      <div class="provider-meta-item">
+        <div class="pm-label">Controllo dell'utente</div>
+        <div class="pm-value">Scelta del modello + parametro <code>reasoning.effort</code> (low/medium/high/xhigh)</div>
+      </div>
+      <div class="provider-meta-item">
+        <div class="pm-label">Conseguenza per l'utente</div>
+        <div class="pm-value">Decisione esplicita per ogni task; chiarezza di intento ma più frizione</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="provider provider-anthropic">
+    <div class="provider-head">
+      <div class="provider-name">Anthropic</div>
+      <div class="provider-tag">l'integrazione</div>
+    </div>
+    <div class="provider-philosophy">Filosofia: un cervello solo, che decide quando deliberare</div>
+    <p>
+      Anthropic ha fatto una scelta dichiaratamente diversa. Con Claude 3.7 Sonnet
+      (febbraio 2025) ha introdotto l'<strong>extended thinking</strong>, dichiarando
+      esplicitamente: <em>"crediamo che il ragionamento dovrebbe essere una capacità
+      integrata dei modelli di frontiera, non un modello separato"</em>. Quindi in Claude
+      non c'è "Claude Thinking" come modello a parte: c'è Claude (Opus, Sonnet, Haiku),
+      e tu attivi o disattivi l'extended thinking sullo <em>stesso</em> modello.
+    </p>
+    <p>
+      La novità più recente, con Claude 4.6, è l'<strong>adaptive thinking</strong>: il
+      modello decide da solo quando e quanto pensare, in base alla complessità del
+      problema. Tu imposti un "effort level" (low/medium/high, e max disponibile solo
+      su Opus), ma è il modello a calibrare in concreto. Anthropic mostra il thinking
+      ai propri utenti in forma riassunta per default — generata da un modello
+      secondario — e nei piani API più alti puoi vedere il pensiero raw. È un design
+      più "umano": un solo cervello che decide quando deliberare.
+    </p>
+    <div class="provider-meta">
+      <div class="provider-meta-item">
+        <div class="pm-label">Modelli flagship per reasoning</div>
+        <div class="pm-value">Claude Opus 4.6 (massima capacità), Claude Sonnet 4.6 (workhorse), Claude Haiku 4.5 (lightweight)</div>
+      </div>
+      <div class="provider-meta-item">
+        <div class="pm-label">Trasparenza del thinking</div>
+        <div class="pm-value">Visibile in forma riassunta (default), raw negli accessi enterprise</div>
+      </div>
+      <div class="provider-meta-item">
+        <div class="pm-label">Controllo dell'utente</div>
+        <div class="pm-value">Toggle thinking on/off + effort level (adaptive); budget esplicito sui modelli più vecchi</div>
+      </div>
+      <div class="provider-meta-item">
+        <div class="pm-label">Conseguenza per l'utente</div>
+        <div class="pm-value">Meno frizione, ma una scelta in più: quando vale la pena attivare il thinking?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="provider provider-google">
+    <div class="provider-head">
+      <div class="provider-name">Google</div>
+      <div class="provider-tag">il thinking by default</div>
+    </div>
+    <div class="provider-philosophy">Filosofia: tutti pensano, l'utente regola solo il livello</div>
+    <p>
+      Google ha portato il thinking in Gemini 2.5 e poi in Gemini 3 (novembre 2025),
+      con una filosofia ancora diversa: il <strong>dynamic thinking</strong> è attivo
+      <em>di default</em> su tutti i Gemini 3, e il modello regola automaticamente
+      quanto pensare in base al task. Non c'è un "modello thinking" separato: c'è
+      Gemini 3 Pro, Flash, Flash-Lite, e tutti pensano — l'utente regola al massimo
+      il livello (minimal/low/medium/high).
+    </p>
+    <p>
+      Esiste poi una modalità separata chiamata <strong>Deep Think</strong>, riservata
+      agli abbonamenti Google AI Ultra, che è il vero corrispondente di GPT-5 Pro o di
+      Claude Opus con max effort: ragionamento parallelo che esplora più ipotesi
+      contemporaneamente prima di sintetizzare. Deep Think ha raggiunto risultati
+      impressionanti su benchmark come ARC-AGI-2 e Humanity's Last Exam, e Google la
+      posiziona esplicitamente per problemi di ricerca scientifica e ingegneristica
+      al confine della capacità degli AI attuali.
+    </p>
+    <div class="provider-meta">
+      <div class="provider-meta-item">
+        <div class="pm-label">Modelli flagship per reasoning</div>
+        <div class="pm-value">Gemini 3.1 Pro (general purpose), Gemini 3 Deep Think (specializzato per problemi al limite)</div>
+      </div>
+      <div class="provider-meta-item">
+        <div class="pm-label">Trasparenza del thinking</div>
+        <div class="pm-value">Visibile (configurabile via parametro <code>includeThoughts</code>)</div>
+      </div>
+      <div class="provider-meta-item">
+        <div class="pm-label">Controllo dell'utente</div>
+        <div class="pm-value">Parametro <code>thinkingLevel</code> (minimal/low/medium/high), opzionalmente <code>thinkingBudget</code></div>
+      </div>
+      <div class="provider-meta-item">
+        <div class="pm-label">Conseguenza per l'utente</div>
+        <div class="pm-value">Zero frizione di default, ma rischio di pagare thinking che non serve</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-indigo">
+    <h4>Una osservazione trasversale</h4>
+    <p>
+      Le tre filosofie non sono "giuste" o "sbagliate": sono compromessi diversi tra
+      <strong>controllo, trasparenza e frizione</strong>. OpenAI massimizza il controllo
+      esplicito ma aumenta la frizione (devi scegliere). Google massimizza l'assenza di
+      frizione ma rinuncia al controllo fine. Anthropic sta in mezzo, con un design
+      che cerca di essere "naturale" — un cervello che decide quando pensare, ma con
+      la possibilità di intervenire manualmente.
+    </p>
+    <p>
+      Per l'utente, la differenza pratica più rilevante è probabilmente la trasparenza
+      del thinking: OpenAI lo nasconde, Google e Anthropic lo mostrano. Se ti interessa
+      capire <em>come</em> il modello arriva alla risposta — per debug, per audit, per
+      apprendere — la trasparenza fa una differenza significativa.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 3 — DEEPSEEK E OPEN SOURCE -->
+<section>
+  <div class="section-num">03 — UNA NOTA SULL'OPEN SOURCE</div>
+  <h2>DeepSeek e l'ecosistema dei modelli aperti</h2>
+  <p>
+    Vale la pena dedicare uno spazio al panorama open source, perché ha una sua
+    rilevanza specifica per chi vuole reasoning capabilities senza dipendere da provider
+    proprietari.
+  </p>
+
+  <div class="provider provider-deepseek">
+    <div class="provider-head">
+      <div class="provider-name">DeepSeek</div>
+      <div class="provider-tag">l'open source trasparente</div>
+    </div>
+    <div class="provider-philosophy">Filosofia: pesi, training e thinking tutti aperti</div>
+    <p>
+      <strong>DeepSeek-R1</strong>, rilasciato a gennaio 2025, è stato il primo reasoning
+      model open source di livello frontier, ed è il riferimento scientifico più
+      importante della comunità. È completamente aperto: pesi pubblicati sotto licenza
+      MIT, metodo di training documentato in un paper pubblicato su Nature, e thinking
+      esplicitamente visibile in tag <code>&lt;think&gt;...&lt;/think&gt;</code>.
+    </p>
+    <p>
+      La versione successiva V4 (aprile 2026) ha portato miglioramenti notevoli su
+      coding agentico e conoscenza generale. Vale la pena notare alcuni dettagli
+      pratici: l'output è verboso (le catene di ragionamento sono spesso 3-5 volte più
+      lunghe di un equivalente GPT-5), la latency può essere significativa, e ci sono
+      filtri di contenuto su temi politicamente sensibili in contesto cinese che non
+      sono rimovibili. Per uso enterprise serio, considera anche che le API ufficiali
+      passano per server in Cina — il che è un non-issue se usi i pesi in
+      self-hosting, ma può essere un blocco per organizzazioni con requirement di data
+      residency.
+    </p>
+    <div class="provider-meta">
+      <div class="provider-meta-item">
+        <div class="pm-label">Disponibilità</div>
+        <div class="pm-value">Open source (MIT), via API ufficiale, self-hosting, varianti distillate</div>
+      </div>
+      <div class="provider-meta-item">
+        <div class="pm-label">Importanza scientifica</div>
+        <div class="pm-value">Riferimento per la comunità di ricerca, training method completamente documentato</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>I modelli distillati per il self-hosting</h3>
+  <p>
+    Una conseguenza interessante dell'apertura di DeepSeek-R1 è l'emergere di
+    <strong>modelli distillati</strong> di taglia ridotta (1.5B, 7B, 14B, 32B, 70B
+    parametri) addestrati sulle catene di ragionamento di R1. Sono modelli che girano
+    in locale anche su hardware consumer relativamente modesto, e che mantengono una
+    parte significativa delle capacità di reasoning del modello sorgente.
+  </p>
+  <p>
+    Per chi ha esigenze di privacy assoluta, di esecuzione offline, o di costi
+    completamente prevedibili, questi modelli aprono uno spazio che fino a poco fa
+    non esisteva: avere reasoning capabilities in un ambiente completamente controllato.
+    Strumenti come Ollama, vLLM e LM Studio rendono l'esecuzione accessibile.
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>Quando l'open source è davvero la scelta giusta</h4>
+    <p>
+      Onestamente: per la stragrande maggioranza degli utenti, i modelli proprietari
+      offrono un'esperienza migliore — più capaci, più veloci, integrati in interfacce
+      mature, senza il fastidio dell'infrastruttura. L'open source brilla in casi
+      specifici: <em>privacy assoluta</em> (dati che non possono uscire dall'organizzazione),
+      <em>costi prevedibili a volume elevato</em> (paghi l'hardware una volta, poi
+      l'inferenza è gratis), <em>customizzazione profonda</em> (puoi fare ulteriore
+      fine-tuning, modificare il behavior, distillare in modelli ancora più piccoli),
+      <em>ricerca</em> (puoi vedere e modificare ogni aspetto del training).
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 4 — SCELTA INTERNA: SONNET VS OPUS -->
+<section>
+  <div class="section-num">04 — LA SCELTA DENTRO LA FAMIGLIA</div>
+  <h2>Quando vale la pena scegliere il flagship invece del workhorse</h2>
+  <p class="lead">
+    Una volta scelto il provider, resta da decidere quale modello specifico usare. La
+    decisione operativa più frequente è quella tra il <strong>workhorse</strong>
+    (Sonnet, GPT-5.4, Gemini 3 Flash) e il <strong>flagship</strong> (Opus, GPT-5 Pro,
+    Gemini 3.1 Pro). Usiamo Claude come caso paradigmatico (Sonnet vs Opus), perché è
+    dove la scelta è più frequente nell'uso quotidiano, ma i principi si applicano
+    anche alle altre famiglie.
+  </p>
+
+  <h3>Una premessa di onestà</h3>
+  <p>
+    Una cosa va detta subito perché altrimenti il resto suona più netto di quanto sia.
+    <strong>Sonnet 4.6 è un modello molto forte</strong>. La narrazione "Opus è il
+    modello potente, Sonnet è il modello economico" è semplicistica. Sonnet performa nel
+    90-95% del range di Opus sulla maggior parte dei task reali. Su benchmark di coding
+    pratico, la differenza è di pochi punti percentuali. Su scrittura, analisi di
+    documenti, conversazione complessa, la differenza è spesso impercettibile.
+  </p>
+  <p>
+    Quindi la domanda "quando usare Opus" non è "quando ho bisogno di un modello buono"
+    — Sonnet <em>è</em> già un modello buono. È piuttosto: quando il problema è
+    abbastanza al limite che quei pochi punti percentuali di capacità in più diventano
+    decisivi? Sono casi specifici, e li articoliamo per categoria.
+  </p>
+
+  <h3>Categorie di task dove il flagship fa davvero la differenza</h3>
+
+  <div class="category">
+    <div class="category-tag">
+      <div class="category-num">I</div>
+      <div class="category-title">Ragionamento complesso al confine della capacità</div>
+    </div>
+    <p>
+      Sono i casi più chiari, dove la differenza è misurabile. Problemi dove il "budget
+      computazionale" — anche con extended thinking attivo — non basta se il modello
+      base è meno capace.
+    </p>
+    <ul class="category-examples">
+      <li><strong>Problemi matematici di livello olimpico o competitivo</strong>: dimostrazioni che richiedono un'inquadratura non ovvia, teoria dei numeri con passaggi sottili, integrazioni difficili dove serve scegliere bene la sostituzione.</li>
+      <li><strong>Logica formale articolata</strong>: catene di inferenze condizionali con molte premesse, problemi di pianificazione con molti vincoli, enigmi deduttivi complessi.</li>
+      <li><strong>Analisi scientifica con molti livelli</strong>: "data questa serie di esperimenti, cosa puoi inferire sul meccanismo sottostante, e quale esperimento successivo discriminerebbe tra le ipotesi rivali?" — compiti che richiedono di tenere insieme dati, costruire ipotesi, valutarle, proporre design.</li>
+    </ul>
+  </div>
+
+  <div class="category">
+    <div class="category-tag">
+      <div class="category-num">II</div>
+      <div class="category-title">Coding complesso in dominio non standard</div>
+    </div>
+    <p>
+      Il coding è un'area dove Sonnet è particolarmente forte (alimenta Cursor, Claude
+      Code, Windsurf). Per la stragrande maggioranza dei task di programmazione, Sonnet
+      è la scelta giusta. Le nicchie dove Opus fa la differenza sono specifiche.
+    </p>
+    <ul class="category-examples">
+      <li><strong>Decisioni architetturali</strong>: pensare a come strutturare un'applicazione complessa da zero, valutare trade-off tra approcci, prevedere implicazioni di lungo termine. Non scrivere codice riga per riga, ma ragionare sull'architettura.</li>
+      <li><strong>Debug profondo di sistemi complessi</strong>: bug sottili a livello di concorrenza, di interazione tra componenti, di comportamenti non documentati. Quando il bug ti ha frustrato per tre giorni, Opus ha più probabilità di vederlo.</li>
+      <li><strong>Refactoring strutturale di codebase legacy</strong>: non refactoring di una funzione, ma riorganizzazione di moduli intricati dove le dipendenze sono molte e non ovvie.</li>
+      <li><strong>Coding in linguaggi o framework di nicchia</strong>: Haskell, OCaml, Rust avanzato, Verilog. Linguaggi meno rappresentati nei dati di addestramento dove il flagship ha avuto più esposizione.</li>
+    </ul>
+  </div>
+
+  <div class="category">
+    <div class="category-tag">
+      <div class="category-num">III</div>
+      <div class="category-title">Scrittura ad alta complessità con vincoli multipli</div>
+    </div>
+    <p>
+      Su questa categoria sono particolarmente prudente, perché la differenza è meno
+      netta delle altre e dipende molto dal tipo di scrittura. Ma vale la pena
+      nominarla.
+    </p>
+    <ul class="category-examples">
+      <li><strong>Documenti tecnici o legali lunghi con coerenza terminologica</strong>: 50 pagine dove un termine deve essere usato coerentemente attraverso tutto il testo, dove le definizioni si rinforzano, dove un cambio in un punto deve essere riflesso altrove.</li>
+      <li><strong>Scrittura creativa con vincoli formali stringenti</strong>: un sonetto petrarchesco perfetto. Una poesia con metrica e schema rimico rigorosi e contenuto significativo. Vincoli formali combinati con profondità di contenuto.</li>
+      <li><strong>Analisi critica di testi complessi</strong>: un capitolo di Heidegger, una sezione tecnica di un paper di econometria. Sintesi che colgono sfumature senza appiattirle.</li>
+    </ul>
+  </div>
+
+  <div class="category">
+    <div class="category-tag">
+      <div class="category-num">IV</div>
+      <div class="category-title">Task agentici di lungo orizzonte</div>
+    </div>
+    <p>
+      Categoria importante con il maturare degli "agenti" — sistemi dove il modello
+      esegue una sequenza di passi autonomi, usa tool, prende decisioni intermedie. Per
+      agent loop semplici Sonnet va bene; per quelli più lunghi e complessi, il
+      flagship tiene meglio il filo.
+    </p>
+    <ul class="category-examples">
+      <li><strong>Agenti che operano per molte interazioni consecutive</strong> mantenendo coerenza di obiettivo. Tipo: "fai una ricerca approfondita su X usando tutti gli strumenti disponibili, e produci un report". Per loop di 20-30 interazioni, il flagship deriva meno.</li>
+      <li><strong>Agenti di coding su task complessi</strong>: "rifattorizza questo modulo, scrivi i test, aggiorna la documentazione, fai il commit". Sessioni di lavoro lunghe dove l'orientamento conta.</li>
+      <li><strong>Agenti che navigano ambienti incerti</strong> prendendo decisioni intermedie sulla base di feedback. Computer use, browser automation, interazione con sistemi complessi.</li>
+    </ul>
+  </div>
+
+  <div class="callout callout-orange">
+    <h4>Dove il flagship NON serve (la lista onesta)</h4>
+    <p>
+      Per controbilanciare, vale la pena nominare esplicitamente le categorie dove
+      <strong>non c'è motivo serio</strong> di scegliere il flagship sul workhorse.
+      Sono molte, e riconoscerle fa risparmiare soldi.
+    </p>
+    <p>
+      Conversazione generica e brainstorming. Riassunti di documenti, estrazioni di
+      informazioni, classificazioni standard. Scrittura di email, post, articoli di
+      lunghezza ragionevole. Spiegazioni didattiche di concetti ben rappresentati nei
+      dati. Coding ordinario in linguaggi mainstream. Traduzione. Generazione di
+      contenuti strutturati standard. Analisi di sentimenti o intenti.
+    </p>
+    <p>
+      In tutti questi casi, il workhorse performa al livello del flagship, costa molto
+      meno, e risponde più velocemente. Non c'è motivo serio di pagare il premio.
+    </p>
+  </div>
+</section>
+
+<!-- SEZIONE 5 — EURISTICA -->
+<section>
+  <div class="section-num">05 — UN'EURISTICA OPERATIVA</div>
+  <h2>Tre domande per scegliere il modello giusto</h2>
+  <p class="lead">
+    Mettiamo insieme tutto in una euristica pratica. Per scegliere tra workhorse e
+    flagship (Sonnet vs Opus, GPT-5 vs GPT-5 Pro, Gemini Pro vs Deep Think), fatti
+    queste tre domande in ordine.
+  </p>
+
+  <div class="heuristic">
+    <div class="heuristic-label">L'euristica delle tre domande</div>
+    <ol class="heuristic-questions">
+      <li>
+        <strong>Ho già provato il workhorse con extended thinking attivo (medium o
+        high)?</strong> Se no, prova quello prima. <em>Il workhorse con thinking è già
+        molto vicino al flagship in modalità standard</em>. Per la maggior parte dei
+        task "difficili", quella combinazione basta.
+      </li>
+      <li>
+        <strong>Il task è in una zona dove la differenza percentuale di capacità ha
+        conseguenze pratiche significative?</strong> Cioè: se ottengo l'85% di qualità
+        invece del 90%, è un problema serio? <em>Per ragionamento medico, decisioni
+        legali sottili, problemi matematici al limite — quei punti contano. Per
+        scrittura creativa o brainstorming — no, "molto buono" è già ottimo.</em>
+      </li>
+      <li>
+        <strong>Il task è abbastanza lungo o costoso che vale la pena pagare di più per
+        evitare iterazioni?</strong> <em>Per task lunghi e costosi (agent loop estesi,
+        analisi profonde di documenti grandi), un flagship che ti dà la risposta giusta
+        al primo colpo costa meno di tre workhorse che falliscono prima di azzeccarla.
+        Per task brevi e ripetibili, non vale la pena.</em>
+      </li>
+    </ol>
+    <div class="heuristic-rule">
+      <strong>La regola:</strong> se la risposta a tutte e tre è "sì", il flagship è la
+      scelta giusta. Se almeno una è "no", il workhorse — eventualmente con extended
+      thinking — è quasi sempre la scelta migliore.
+    </div>
+  </div>
+
+  <p>
+    Questa euristica si applica simmetricamente agli altri provider. Per OpenAI:
+    GPT-5.4 vs GPT-5 Pro segue la stessa logica. Per Google: Gemini 3 Flash o 3.1 Pro
+    in modalità standard vs Deep Think segue la stessa logica. La famiglia cambia, la
+    domanda di fondo no — <em>vale la pena pagare di più per quel margine di capacità
+    aggiuntivo?</em>
+  </p>
+</section>
+
+<!-- SEZIONE 6 — COSTI E LATENZA -->
+<section>
+  <div class="section-num">06 — NOTE PRATICHE SU COSTI E LATENZA</div>
+  <h2>Un riferimento numerico (con disclaimer)</h2>
+  <p>
+    Chiudo con qualche numero indicativo per dare un ordine di grandezza. <strong>I
+    pricing specifici cambiano frequentemente</strong> — questi valori riflettono il
+    pricing API pubblicato a maggio 2026 e vanno verificati alla data in cui consulti
+    il report. Quello che tende a essere più stabile sono le <em>proporzioni
+    relative</em>: il workhorse costa una frazione del flagship, e questa proporzione
+    si mantiene tra le generazioni di modelli.
+  </p>
+
+  <div class="pricing">
+    <table>
+      <thead>
+        <tr>
+          <th>Modello</th>
+          <th>Input / 1M token</th>
+          <th>Output / 1M token</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Claude Sonnet 4.6</td>
+          <td>$3</td>
+          <td>$15</td>
+        </tr>
+        <tr>
+          <td>Claude Opus 4.6</td>
+          <td>$15</td>
+          <td>$75</td>
+        </tr>
+        <tr>
+          <td>GPT-5.4 / 5.5 (Thinking)</td>
+          <td>$2.50</td>
+          <td>$15</td>
+        </tr>
+        <tr>
+          <td>Gemini 3.1 Pro</td>
+          <td>$2</td>
+          <td>$12</td>
+        </tr>
+        <tr>
+          <td>DeepSeek V4 (API ufficiale)</td>
+          <td>~$0.50–1</td>
+          <td>~$2–4</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Due osservazioni che dovrebbero invecchiare meno dei numeri specifici.
+  </p>
+  <p>
+    La prima è che <strong>i thinking tokens si pagano al rate di output</strong> in
+    tutti i provider che permettono di attivarli. Un Claude Sonnet con extended
+    thinking che genera 10.000 thinking tokens e poi 500 token di risposta finale
+    fattura su tutti e 10.500 i token. Per task semplici questa è spesa pura — il
+    thinking non aggiunge qualità ma aggiunge costo. Per task complessi può essere
+    decisivo.
+  </p>
+  <p>
+    La seconda è che <strong>la latenza dei reasoning model è significativamente più
+    alta</strong> dei modelli standard. Una risposta veloce di Sonnet potrebbe arrivare
+    in 5-10 secondi; la stessa domanda con extended thinking a budget alto può
+    richiedere 30-60 secondi o più. Per applicazioni real-time, conversazione
+    interattiva, agenti che fanno molte chiamate in serie, questa latency è una
+    considerazione importante quanto il costo.
+  </p>
+</section>
+
+<!-- TAKEAWAYS -->
+<section>
+  <div class="takeaways">
+    <h3>Sei cose da portarsi via dal complemento 3B</h3>
+    <ol class="takeaway-list">
+      <li>
+        Tutti i grandi provider offrono ormai reasoning. Le differenze stanno nelle
+        <strong>filosofie di prodotto</strong>: OpenAI usa modelli separati (Instant
+        vs Thinking), Anthropic integra il thinking nello stesso modello, Google rende
+        il thinking attivo di default.
+      </li>
+      <li>
+        La <strong>trasparenza del thinking</strong> varia molto: OpenAI lo nasconde,
+        Anthropic e Google lo mostrano. Per debug, audit, o apprendimento, questa
+        differenza è significativa.
+      </li>
+      <li>
+        L'<strong>open source</strong> (DeepSeek-R1 e successori, varianti distillate)
+        è una scelta valida per casi specifici: privacy assoluta, costi prevedibili a
+        volume elevato, customizzazione, ricerca. Per la maggior parte degli utenti,
+        i modelli proprietari restano la scelta migliore.
+      </li>
+      <li>
+        Il <strong>workhorse</strong> della famiglia (Sonnet, GPT-5 standard, Gemini
+        Pro standard) performa nel 90-95% del flagship sulla maggior parte dei task.
+        Pagare il premio del flagship vale la pena solo in casi specifici, non come
+        default.
+      </li>
+      <li>
+        Le categorie dove il flagship fa davvero la differenza sono <strong>quattro</strong>:
+        <em>ragionamento complesso al limite</em>, <em>coding complesso in dominio non
+        standard</em>, <em>scrittura ad alta complessità con vincoli multipli</em>,
+        <em>task agentici di lungo orizzonte</em>. In tutto il resto, il workhorse
+        basta e avanza.
+      </li>
+      <li>
+        L'<strong>euristica delle tre domande</strong>: <em>(1)</em> ho già provato il
+        workhorse con extended thinking? <em>(2)</em> la differenza di capacità ha
+        conseguenze pratiche? <em>(3)</em> il task è lungo abbastanza che evitare
+        iterazioni vale il costo extra? Solo se tutte e tre le risposte sono "sì", il
+        flagship è la scelta giusta.
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- BRIDGE AL TEMA 4 -->
+<section style="border-bottom: none; padding-bottom: 0;">
+  <div class="bridge">
+    <div class="bridge-label">Prossimo tema</div>
+    <h3>Gestire documenti molto lunghi</h3>
+    <p>
+      Con i due complementi sui reasoning model abbiamo chiuso il cerchio del Tema 3:
+      sappiamo cosa significa "ragionare" per un LLM, come funziona la Chain-of-Thought,
+      perché esistono i reasoning model, come scegliere quale modello usare per quale
+      task. È un patrimonio concettuale e pratico solido per chi usa quotidianamente
+      questi sistemi.
+    </p>
+    <p>
+      Il <strong>Tema 4</strong> ci porta a un caso d'uso pratico molto rilevante e
+      che chiude il percorso: <em>la gestione di documenti molto lunghi in un AI
+      assistant</em>. Caso concreto: la revisione di un romanzo. Quali strategie usare
+      quando il documento eccede la context window, o è molto più lungo di quanto sia
+      opportuno mettere in un prompt anche se entrerebbe? Chunking, RAG (di cui abbiamo
+      già messo un primo tassello nel 3A), riassunti gerarchici, mappe del documento,
+      context caching. Sarà il pezzo che mette al lavoro tutta la teoria su un problema
+      reale e operativo.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Complemento 3B al Tema 3 — Percorso di approfondimento su LLM e prompting (seconda chat)</p>
+  <p>Il panorama 2026 dei reasoning model</p>
+</footer>
+
+</body>
+</html>

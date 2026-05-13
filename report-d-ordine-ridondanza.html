@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report D — L'ordine delle informazioni e la ridondanza intelligente</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: var(--indigo);
+    padding: 72px 48px 88px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -100px; right: -80px;
+    width: 540px; height: 540px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,74,26,0.28) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -100px; left: 10%;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,42,122,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-overline {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 19px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 44px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 76px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.35;
+    color: var(--indigo);
+    margin: 0 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .section-arc {
+    background: var(--indigo-faint2);
+    border-left: 3px solid var(--indigo-light);
+    padding: 22px 28px;
+    margin: 0 0 40px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .section-arc-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .section-arc p {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15.5px;
+    color: var(--indigo-mid);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .callout {
+    margin: 32px 0;
+    padding: 28px 32px;
+    border-radius: 8px;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 12px;
+    letter-spacing: 0;
+  }
+
+  .callout p {
+    font-size: 15.5px;
+    line-height: 1.72;
+    margin-bottom: 12px;
+  }
+
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-indigo { background: var(--indigo-faint); border-color: var(--indigo-light); }
+  .callout-indigo h4 { color: var(--indigo); }
+  .callout-orange { background: var(--orange-faint); border-color: var(--orange); }
+  .callout-orange h4 { color: var(--orange); }
+  .callout-teal { background: var(--teal-faint); border-color: var(--teal); }
+  .callout-teal h4 { color: var(--teal); }
+  .callout-amber { background: var(--amber-faint); border-color: var(--amber); }
+  .callout-amber h4 { color: var(--amber); }
+  .callout-purple { background: var(--purple-faint); border-color: var(--purple); }
+  .callout-purple h4 { color: var(--purple); }
+
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--indigo-border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 32px 0;
+    position: relative;
+  }
+
+  .metaphor::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px; height: 100%;
+    background: var(--orange);
+    border-radius: 8px 0 0 8px;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .metaphor p {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.72;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  .insight {
+    background: var(--indigo);
+    color: white;
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+  .insight strong { color: white; font-weight: 600; }
+  .insight em { color: var(--orange-light); }
+
+  /* Curva a U diagramma principale */
+  .u-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  .u-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 22px;
+  }
+
+  .u-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .u-caption {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    margin-top: 18px;
+    text-align: center;
+    font-style: italic;
+    padding: 0 20px;
+  }
+
+  /* Anatomy del prompt - flow diagram */
+  .prompt-flow {
+    margin: 32px 0;
+  }
+
+  .prompt-flow-stage {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 14px;
+    padding: 18px 22px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    border-left: 4px solid;
+  }
+
+  .prompt-flow-stage.s-1 { border-left-color: var(--orange); }
+  .prompt-flow-stage.s-2 { border-left-color: var(--amber); }
+  .prompt-flow-stage.s-3 { border-left-color: var(--teal); }
+  .prompt-flow-stage.s-4 { border-left-color: var(--purple); }
+
+  .stage-number {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .prompt-flow-stage.s-1 .stage-number { color: var(--orange); }
+  .prompt-flow-stage.s-2 .stage-number { color: var(--amber); }
+  .prompt-flow-stage.s-3 .stage-number { color: var(--teal); }
+  .prompt-flow-stage.s-4 .stage-number { color: var(--purple); }
+
+  .stage-content h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .prompt-flow-stage.s-1 .stage-content h4 { color: var(--orange); }
+  .prompt-flow-stage.s-2 .stage-content h4 { color: var(--amber); }
+  .prompt-flow-stage.s-3 .stage-content h4 { color: var(--teal); }
+  .prompt-flow-stage.s-4 .stage-content h4 { color: var(--purple); }
+
+  .stage-content p {
+    font-size: 14.5px;
+    color: var(--ink-mid);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* Confronto frasi (riuso) */
+  .compare-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 28px 0;
+  }
+
+  .compare-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+  }
+
+  .compare-card.var-a { border-top: 3px solid var(--teal); }
+  .compare-card.var-b { border-top: 3px solid var(--orange); }
+
+  .compare-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .compare-card.var-a .compare-tag { color: var(--teal); }
+  .compare-card.var-b .compare-tag { color: var(--orange); }
+
+  .compare-text {
+    font-family: var(--serif);
+    font-size: 16.5px;
+    color: var(--ink);
+    line-height: 1.55;
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+
+  .compare-note {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Prompt esempi (riuso) */
+  .prompt-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 22px 0;
+    border-top: 3px solid var(--teal);
+  }
+
+  .prompt-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--teal);
+    margin-bottom: 12px;
+  }
+
+  .prompt-text {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.7;
+    background: var(--bg2);
+    padding: 14px 16px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    white-space: pre-line;
+  }
+
+  .prompt-note {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Paesaggio attentivo */
+  .landscape-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  /* Takeaways */
+  .takeaways {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px 40px;
+    margin: 32px 0;
+  }
+
+  .takeaways h3 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: var(--orange);
+    font-size: 22px;
+  }
+
+  .takeaway-item {
+    padding: 18px 0;
+    border-bottom: 1px dashed var(--border);
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 18px;
+  }
+
+  .takeaway-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .takeaway-item:first-child { padding-top: 0; }
+
+  .takeaway-num {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  .takeaway-text {
+    font-size: 15.5px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  .takeaway-text strong { color: var(--indigo); }
+
+  /* Bridge */
+  .bridge {
+    background: var(--indigo);
+    color: white;
+    border-radius: 8px;
+    padding: 36px 40px;
+    margin-top: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bridge::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(240,112,64,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .bridge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .bridge h3 {
+    color: white;
+    font-family: var(--serif);
+    font-size: 26px;
+    margin: 0 0 16px;
+    font-weight: 500;
+  }
+
+  .bridge p {
+    color: rgba(255,255,255,0.88);
+    font-size: 16px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+  }
+
+  .bridge p:last-child { margin-bottom: 0; }
+
+  footer {
+    background: var(--bg3);
+    padding: 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 36px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .compare-pair { grid-template-columns: 1fr; }
+    .prompt-flow-stage { grid-template-columns: 48px 1fr; gap: 14px; }
+    .stage-number { font-size: 22px; }
+    .insight { padding: 28px 24px; }
+    .takeaways { padding: 28px 24px; }
+    .bridge { padding: 28px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <div class="hero-inner">
+    <div class="hero-overline">Report D · La struttura del prompt</div>
+    <h1>L'<em>ordine</em> delle informazioni e la ridondanza intelligente</h1>
+    <p class="hero-sub">
+      Dove conviene mettere ogni cosa in un prompt, e perché. Il "lost in the middle" come
+      vincolo di progettazione, l'ordine canonico delle parti, la regola del richiamo finale
+      compatto. Un prompt è un paesaggio attentivo non uniforme.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Tema</div>
+        <div class="meta-value">Architettura macroscopica del prompt</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Concetto chiave</div>
+        <div class="meta-value">Posizioni privilegiate e ridondanza</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Posizione nel percorso</div>
+        <div class="meta-value">Approfondimenti — Report D</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">01 — Il fenomeno fondante</div>
+  <h2>Il "lost in the middle", rivisitato con precisione</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Hai già incontrato questo fenomeno nel punto 4B del percorso precedente: in un prompt lungo, le informazioni messe all'inizio e alla fine vengono ricordate meglio di quelle messe nel mezzo. Adesso entriamo nelle due cause sovrapposte — una architetturale, una statistica — che lo producono, e fissiamo il profilo a U come dato strutturale da cui partire.</p>
+  </div>
+
+  <p class="lead">
+    Adesso voglio capire <strong>perché</strong> il <em>lost in the middle</em> succede, perché
+    senza capire il meccanismo non possiamo usarlo bene. Non è un fenomeno unico ma il risultato
+    di due meccanismi che si sommano.
+  </p>
+
+  <h3>Prima causa: architetturale</h3>
+  <p>
+    Le teste di attenzione, soprattutto negli strati alti del modello, hanno pattern di
+    attivazione che non sono uniformi sulla lunghezza del contesto. Alcune teste sono
+    particolarmente "ancorate" all'inizio della sequenza — è dove c'è il system prompt, è dove
+    c'è il primo messaggio, è la zona dove statisticamente vivono le istruzioni di alto livello.
+    Altre teste, invece, sono ancorate alla fine — è dove c'è la query corrente, è dove sta per
+    essere generato il prossimo token, è la zona dove statisticamente vive ciò a cui bisogna
+    rispondere ora.
+  </p>
+
+  <p>
+    La parte centrale del contesto, invece, è <strong>"no man's land"</strong>: non è ancorata
+    da nessun pattern attentivo particolare. Le teste di attenzione la processano, certo, ma con
+    meno priorità delle estremità.
+  </p>
+
+  <h3>Seconda causa: statistica</h3>
+  <p>
+    I documenti reali che il modello ha letto in training — articoli, libri, conversazioni —
+    sono strutturati con il principio della salienza ai bordi (lo abbiamo visto nel Report C, a
+    livello microscopico). Le aperture introducono il tema, le chiusure tirano le somme, la
+    parte centrale elabora e supporta. Il modello ha interiorizzato questo pattern: si aspetta
+    che le informazioni cruciali siano ai bordi, e tratta la parte centrale come materiale di
+    elaborazione anche quando non lo è.
+  </p>
+
+  <p>
+    I due fenomeni si rinforzano: il modello dà più peso ai bordi sia perché architetturalmente
+    le sue teste di attenzione lo fanno, sia perché statisticamente ha imparato che è lì che si
+    trova il segnale importante.
+  </p>
+
+  <div class="u-diagram">
+    <div class="u-label">Il profilo a U della ritenzione attentiva</div>
+    <svg class="u-svg" viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ugrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#c94a1a" stop-opacity="0.85"/>
+          <stop offset="15%" stop-color="#c94a1a" stop-opacity="0.55"/>
+          <stop offset="50%" stop-color="#c94a1a" stop-opacity="0.15"/>
+          <stop offset="85%" stop-color="#c94a1a" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#c94a1a" stop-opacity="0.85"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Asse base -->
+      <line x1="60" y1="220" x2="840" y2="220" stroke="#1e2a5e" stroke-width="1.5"/>
+
+      <!-- Curva a U -->
+      <path d="M 80 60 Q 200 60 300 180 Q 450 220 600 180 Q 700 60 820 60" fill="none" stroke="#c94a1a" stroke-width="2.5"/>
+
+      <!-- Area sotto curva -->
+      <path d="M 80 60 Q 200 60 300 180 Q 450 220 600 180 Q 700 60 820 60 L 820 220 L 80 220 Z" fill="url(#ugrad)"/>
+
+      <!-- Asse verticale -->
+      <text x="40" y="65" font-family="Outfit" font-size="11" fill="#6b7280" text-anchor="end">alta</text>
+      <text x="40" y="225" font-family="Outfit" font-size="11" fill="#6b7280" text-anchor="end">bassa</text>
+      <text x="22" y="145" font-family="JetBrains Mono" font-size="10" fill="#1e2a5e" text-anchor="middle" font-weight="600" transform="rotate(-90 22 145)">ritenzione</text>
+
+      <!-- Etichette posizioni -->
+      <text x="100" y="245" font-family="Outfit" font-size="13" fill="#1e2a5e" font-weight="600">inizio</text>
+      <text x="450" y="245" font-family="Outfit" font-size="13" fill="#6b7280" text-anchor="middle">mezzo</text>
+      <text x="800" y="245" font-family="Outfit" font-size="13" fill="#1e2a5e" font-weight="600" text-anchor="end">fine</text>
+
+      <!-- Etichette descrittive sopra -->
+      <text x="100" y="40" font-family="Outfit" font-size="12" fill="#c94a1a" font-weight="600">privilegio</text>
+      <text x="100" y="54" font-family="Outfit" font-size="12" fill="#c94a1a" font-weight="600">attentivo</text>
+
+      <text x="450" y="195" font-family="Outfit" font-size="12" fill="#6b7280" text-anchor="middle" font-style="italic">no man's land</text>
+
+      <text x="800" y="40" font-family="Outfit" font-size="12" fill="#c94a1a" font-weight="600" text-anchor="end">privilegio</text>
+      <text x="800" y="54" font-family="Outfit" font-size="12" fill="#c94a1a" font-weight="600" text-anchor="end">attentivo</text>
+
+      <!-- Marcatori -->
+      <circle cx="100" cy="60" r="6" fill="#c94a1a"/>
+      <circle cx="800" cy="60" r="6" fill="#c94a1a"/>
+      <circle cx="450" cy="207" r="5" fill="#6b7280"/>
+
+      <!-- Titolo -->
+      <text x="450" y="285" font-family="Outfit" font-size="13" fill="#1e2a5e" text-anchor="middle" font-weight="600">Più il contesto è lungo, più la valle centrale si abbassa</text>
+    </svg>
+    <p class="u-caption">La curva a U è il dato strutturale di base. Nei modelli con context window molto grandi, la situazione si accentua: i bordi mantengono il privilegio, il centro diventa più sfocato.</p>
+  </div>
+
+  <p>
+    Questa curva a U è il dato strutturale di base su cui costruire tutta la strategia di
+    ordinamento del prompt. Non è una stranezza che si possa ignorare: è una proprietà
+    geometrica del modo in cui il modello legge il suo input, e va presa come <strong>vincolo
+    di progettazione</strong>.
+  </p>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">02 — Le parti del prompt</div>
+  <h2>L'anatomia di un prompt e le sue posizioni privilegiate</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Un prompt tipico contiene quattro tipi di materiale: istruzioni, contesto, esempi, richiesta finale. Ognuno con un ruolo diverso e una posizione ottimale diversa. Vediamo l'ordine canonico che funziona meglio nella stragrande maggioranza dei casi, e perché ogni pezzo sta dove sta.</p>
+  </div>
+
+  <p>
+    Adesso che abbiamo il principio, applichiamolo. Un prompt tipico contiene diversi tipi di
+    materiale, ognuno con un ruolo diverso. Le grandi categorie sono quattro.
+  </p>
+
+  <div class="prompt-flow">
+    <div class="prompt-flow-stage s-1">
+      <div class="stage-number">1</div>
+      <div class="stage-content">
+        <h4>Istruzioni</h4>
+        <p>Cosa vuoi che il modello faccia, in termini di task, formato, vincoli, tono. Sono il "contratto operativo" tra te e il modello.</p>
+      </div>
+    </div>
+    <div class="prompt-flow-stage s-2">
+      <div class="stage-number">2</div>
+      <div class="stage-content">
+        <h4>Contesto</h4>
+        <p>Informazioni di sfondo che il modello deve avere per fare bene il task. Documenti da analizzare, antefatti, riferimenti, dati.</p>
+      </div>
+    </div>
+    <div class="prompt-flow-stage s-3">
+      <div class="stage-number">3</div>
+      <div class="stage-content">
+        <h4>Esempi</h4>
+        <p>Illustrazioni concrete di come la risposta dovrebbe apparire. Particolarmente importanti per il <em>few-shot prompting</em>, ma anche in forma leggera.</p>
+      </div>
+    </div>
+    <div class="prompt-flow-stage s-4">
+      <div class="stage-number">4</div>
+      <div class="stage-content">
+        <h4>Richiesta finale</h4>
+        <p>La domanda specifica o l'input concreto su cui il modello deve agire adesso. È il "trigger" dell'output.</p>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    L'ordine canonico — istruzioni, contesto, esempi, richiesta — funziona meglio nella
+    stragrande maggioranza dei casi. Vediamo perché ogni pezzo sta dove sta.
+  </p>
+
+  <h3>Le istruzioni vanno all'inizio</h3>
+  <p>
+    Per una ragione semplice e profonda: <strong>stabiliscono il quadro entro cui tutto il resto
+    deve essere interpretato</strong>. Quando il modello legge "rispondi in modo formale e
+    conciso" all'inizio del prompt, costruisce un vettore di contesto iniziale che è già
+    "inclinato" verso quella modalità. Tutto il materiale successivo — il contesto, gli esempi,
+    la richiesta — viene processato attraverso quella lente.
+  </p>
+
+  <p>
+    Se invece mettessi le istruzioni alla fine, il modello avrebbe già elaborato il contesto e
+    gli esempi in modo "neutro", e dovrebbe fare lavoro extra per riapplicare il vincolo
+    retroattivamente. C'è anche un'altra ragione: le istruzioni godono del privilegio attentivo
+    della prima posizione. Le teste di attenzione ancorate all'inizio le "vedono bene", e questa
+    stabilità si propaga lungo tutta l'elaborazione del prompt.
+  </p>
+
+  <h3>Il contesto va in mezzo</h3>
+  <p>
+    Non perché sia la posizione privilegiata — al contrario, è la zona del <em>lost in the
+    middle</em>. Ma è qui che paradossalmente <em>deve</em> andare, per una ragione precisa: il
+    contesto è materiale che il modello deve consultare ma che <strong>non è il fulcro
+    dell'azione</strong>. Le istruzioni dicono cosa fare, la richiesta dice cosa fare adesso, e
+    tra le due c'è bisogno di mettere il materiale da consultare.
+  </p>
+
+  <p>
+    Mettere il contesto all'inizio (prima delle istruzioni) significa far processare al modello
+    una massa di informazioni senza saperle in quale modalità interpretare. Mettere il contesto
+    alla fine significa farlo scontrare con la richiesta. In mezzo è la posizione meno
+    problematica, anche se non gode di attenzione privilegiata. Su questo punto torneremo tra
+    poco con una tecnica importante: il richiamo finale compatto.
+  </p>
+
+  <h3>Gli esempi vanno dopo il contesto e prima della richiesta</h3>
+  <p>
+    Il loro ruolo è <strong>calibrare la modalità di risposta del modello</strong>. Vengono dopo
+    il contesto perché spesso fanno riferimento a esso, e vengono prima della richiesta perché
+    stabiliscono il pattern che la richiesta deve attivare. Quando il modello legge un esempio
+    del tipo "Domanda: X / Risposta: Y", costruisce un'aspettativa attentiva sulla struttura
+    "Domanda: ... / Risposta: ..." che sta per arrivare nella richiesta.
+  </p>
+
+  <h3>La richiesta finale va alla fine</h3>
+  <p>
+    Per la ragione più importante di tutte: è l'ultimo materiale che il modello vede prima di
+    iniziare a generare l'output. Ha il <strong>massimo del privilegio attentivo</strong> — le
+    teste di attenzione ancorate alla fine la "vedono" con peso altissimo — e non c'è nessun
+    rischio che venga "diluita" da materiale successivo. È la posizione di massima salienza, e va
+    riservata al pezzo più importante: quello che il modello deve fare adesso.
+  </p>
+
+  <div class="callout callout-purple">
+    <h4>Un'eccezione interessante: il documento prima dell'istruzione</h4>
+    <p>
+      C'è un caso specifico dove l'ordine canonico viene rovesciato e funziona bene: i prompt che
+      chiedono di operare su un singolo documento lungo (analizzare un articolo, riassumere una
+      conversazione, estrarre informazioni da un report).
+    </p>
+    <p>
+      In questi casi, mettere il documento all'inizio e l'istruzione alla fine ha un vantaggio:
+      il documento, una volta letto, "ancora" il vettore di contesto iniziale; l'istruzione, alla
+      fine, attiva quelle informazioni nella direzione voluta. È un pattern che funziona quando
+      l'oggetto da elaborare è ben definito e l'istruzione è semplice ("riassumi questo",
+      "rispondi a queste domande sul testo"). Non funziona bene quando l'istruzione è complessa
+      con molti vincoli — in quel caso, perdere il quadro iniziale è più costoso del guadagno
+      della salienza finale.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">03 — La tecnica controintuitiva</div>
+  <h2>La ridondanza intelligente</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Tutto quello che a scuola hanno insegnato sul "non ripetersi" non vale per i prompt. Nei prompt, una certa forma di ripetizione non è un errore stilistico — è uno strumento di rinforzo. Ma deve essere ripetizione <em>intelligente</em>, non rumore. Vediamo quando ripetere paga e quando danneggia.</p>
+  </div>
+
+  <p class="lead">
+    Adesso veniamo a un tema che è uno dei più contro-intuitivi del prompting: <strong>ripetersi</strong>.
+  </p>
+
+  <h3>Perché ripetere funziona</h3>
+  <p>
+    Quando ripeti un'informazione importante in due posizioni diverse del prompt, stai facendo
+    due cose contemporaneamente.
+  </p>
+
+  <p>
+    La prima: stai sfruttando il fatto che ogni occorrenza dell'informazione viene processata
+    separatamente dalle teste di attenzione. La seconda volta non è "ridondante" dal punto di
+    vista del modello — è un secondo input che si somma al primo, <strong>rinforzandolo
+    geometricamente</strong>. Il vettore di contesto raccoglie due segnali coerenti invece di
+    uno, e questo aumenta la stabilità con cui l'informazione viene mantenuta.
+  </p>
+
+  <p>
+    La seconda, più sottile: stai <strong>aggirando il <em>lost in the middle</em></strong>. Se
+    metti un'informazione importante solo nel mezzo del prompt, rischi che venga diluita. Se la
+    metti all'inizio <em>e</em> la richiami alla fine, hai due "ancore di salienza" che lavorano
+    insieme. Il modello riceve il segnale con priorità due volte, e il vettore di contesto
+    finale ne tiene conto in modo più stabile.
+  </p>
+
+  <h3>Quando ha senso ripetersi</h3>
+  <p>
+    La ridondanza paga in alcuni casi specifici.
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Casi in cui ripetere paga</h4>
+    <p>
+      <strong>Per i vincoli operativi importanti.</strong> Se la lunghezza, il formato, il tono
+      sono cruciali, vale la pena enunciarli sia all'inizio (come parte del quadro iniziale) sia
+      alla fine (come promemoria immediato prima della generazione). "Rispondi in massimo 100
+      parole" detto solo all'inizio in un prompt lungo può perdersi; ripetuto subito prima della
+      richiesta resta vivo.
+    </p>
+    <p>
+      <strong>Per il task quando il prompt è molto lungo.</strong> In prompt con tanto contesto,
+      vale la pena dire all'inizio "voglio che tu faccia X" e poi, dopo il contesto, ripetere
+      "ora fai X applicando le istruzioni date". Non è un'istruzione doppia — è un'istruzione una
+      volta, e un richiamo a essa una volta. Il modello non si confonde, anzi: ricorda meglio.
+    </p>
+    <p>
+      <strong>Per le definizioni di termini centrali.</strong> Se nel prompt usi un termine
+      tecnico con un significato specifico (che non è quello standard), introdurlo una volta in
+      modo esplicito e poi richiamarlo brevemente quando lo riusi aiuta il modello a tenere ferma
+      la definizione.
+    </p>
+  </div>
+
+  <h3>Quando la ridondanza è dannosa</h3>
+  <p>
+    Ma non tutte le ripetizioni sono utili. Ripetere male può peggiorare il prompt, e vale la
+    pena distinguere i casi.
+  </p>
+
+  <div class="compare-pair">
+    <div class="compare-card var-a">
+      <div class="compare-tag">Ridondanza utile</div>
+      <div class="compare-text">"Rispondi in massimo 100 parole."<br>[…contesto…]<br>"Ora produci la risposta: massimo 100 parole."</div>
+      <p class="compare-note">Stessa identica formulazione, ripetuta in due posizioni privilegiate. Il modello riceve un segnale doppio coerente che rinforza il vincolo.</p>
+    </div>
+    <div class="compare-card var-b">
+      <div class="compare-tag">Ridondanza rumorosa</div>
+      <div class="compare-text">"Rispondi in modo conciso. […]<br>Scrivimi una risposta breve. […]<br>Non dilungarti troppo."</div>
+      <p class="compare-note">Tre formulazioni leggermente diverse dello stesso concetto. Il modello deve allocare attenzione a riconciliarle, e il segnale netto si perde nel rumore.</p>
+    </div>
+  </div>
+
+  <p>
+    Ripetere lo stesso concetto in <strong>formulazioni leggermente diverse</strong> è dannoso.
+    Se scrivi "rispondi in modo conciso" e poi "scrivimi una risposta breve" e poi "non
+    dilungarti troppo", non stai rinforzando: stai creando rumore. Il modello vede tre istruzioni
+    che sono <em>quasi</em> uguali ma non identiche, e deve allocare attenzione a riconciliarle.
+    Era meglio dire una cosa sola, chiaramente.
+  </p>
+
+  <p>
+    Ripetere tutto in modo eccessivo <strong>diluisce il segnale</strong>. Se ripeti ogni cosa,
+    allora niente è enfatizzato — è lo stesso principio del grassetto nel Report B. La
+    ridondanza ha potere proporzionale alla sua selettività. E ripetere informazione opzionale
+    spreca attenzione: devi ripetere solo quello che è davvero importante.
+  </p>
+
+  <h3>La regola pratica: il richiamo finale compatto</h3>
+  <p>
+    La regola che funziona meglio è questa: <strong>ripeti una sola cosa, alla fine, in forma
+    compatta</strong>. Identifica il pezzo più importante del prompt — di solito è una
+    combinazione di task principale e vincolo critico — e mettilo, in forma sintetica,
+    immediatamente prima della richiesta finale. Una frase. Non un paragrafo.
+  </p>
+
+  <div class="prompt-card">
+    <div class="prompt-tag">Esempio del richiamo finale compatto</div>
+    <div class="prompt-text">[…istruzioni iniziali…]
+
+[…documento da analizzare, molto lungo…]
+
+Ora produci il riassunto: massimo 200 parole, tono formale.</div>
+    <p class="prompt-note">Questa singola riga ricapitola il task ("produci il riassunto") e i vincoli critici ("200 parole, tono formale") nella posizione di massima salienza. Non hai ripetuto tutto il prompt — hai concentrato l'essenziale dove conta di più.</p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">04 — Un caso a parte</div>
+  <h2>La posizione del system prompt</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>In molte interfacce di uso degli LLM, il system prompt è una sezione speciale posizionata prima di qualsiasi messaggio dell'utente. Occupa la posizione di massimo privilegio attentivo iniziale, ma ha caratteristiche specifiche che lo rendono adatto ad alcuni usi e meno ad altri. Vediamo cosa metterci e cosa no.</p>
+  </div>
+
+  <p>
+    Un caso particolare che vale la pena toccare: il <em>system prompt</em>. In molte interfacce
+    di uso degli LLM (incluse molte API), il system prompt è una sezione del documento che viene
+    posizionata prima di qualsiasi messaggio dell'utente, e che contiene istruzioni di alto
+    livello sul comportamento generale del modello.
+  </p>
+
+  <p>
+    Il system prompt occupa la posizione <strong>di massimo privilegio attentivo iniziale</strong>.
+    Le teste di attenzione ancorate all'inizio della sequenza lo trovano per primo, e i suoi
+    contenuti diventano la lente attraverso cui tutto il resto viene letto. Questo lo rende il
+    posto ideale per alcune cose, e meno adatto per altre.
+  </p>
+
+  <h3>Cosa mettere nel system prompt</h3>
+  <p>
+    Il system prompt funziona benissimo per stabilire il <strong>ruolo</strong> del modello — chi
+    è, come si comporta, qual è il suo dominio. È il posto naturale per dire "sei un assistente
+    esperto di X" oppure "ti comporti come un revisore tecnico paziente e dettagliato". Quel
+    quadro generale resta attivo per tutta la conversazione.
+  </p>
+
+  <p>
+    Funziona altrettanto bene per definire i <strong>vincoli operativi generali</strong> che
+    valgono in modo permanente: cosa fare sempre, cosa non fare mai, in quale lingua rispondere,
+    quale formato preferire di default. Sono regole che il modello applica anche quando l'utente
+    non le richiama.
+  </p>
+
+  <p>
+    È anche il posto giusto per introdurre la <strong>terminologia</strong> o il <strong>contesto
+    stabile</strong> che ricorrerà nei messaggi successivi. Se nella conversazione userai
+    ripetutamente certi termini con significati specifici, definirli nel system prompt li ancora
+    una volta per tutte.
+  </p>
+
+  <h3>Cosa NON mettere nel system prompt</h3>
+  <p>
+    Quello che invece il system prompt fa meno bene è veicolare <strong>richieste specifiche per
+    il singolo turno</strong>. Se metti una richiesta dettagliata nel system prompt, il modello
+    potrebbe non darle l'attenzione che merita al momento giusto, perché la sta processando come
+    "regola di sfondo" piuttosto che come "compito attuale". Le richieste vanno nei messaggi
+    utente — il system prompt è per il quadro generale.
+  </p>
+
+  <div class="callout callout-amber">
+    <h4>Un fenomeno interessante: la gerarchia delle istruzioni</h4>
+    <p>
+      C'è un fenomeno che vale la pena nominare: i modelli moderni hanno una <strong>gerarchia di
+      istruzioni</strong>. Le istruzioni nel system prompt hanno (di norma) priorità sopra le
+      istruzioni nei messaggi utente. Quindi se nel system prompt dici "rispondi sempre in
+      inglese" e poi nel messaggio utente l'utente chiede "rispondimi in italiano", il modello
+      tenderà a rispettare il system prompt.
+    </p>
+    <p>
+      Questa gerarchia è in parte un effetto del training (i modelli sono stati allenati a
+      obbedire alle istruzioni di sistema con priorità), e in parte un effetto posizionale (le
+      istruzioni di sistema vengono prima e ancorano il vettore di contesto iniziale). È utile
+      saperlo: se hai bisogno di un comportamento robusto e non sovrascrivibile, mettilo nel
+      system prompt.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">05 — Il principio unificante</div>
+  <h2>Il prompt come paesaggio attentivo non uniforme</h2>
+
+  <p>
+    Voglio fissare un'idea che riassume il Report D in forma unitaria. Un prompt non è un
+    documento neutro che il modello legge dall'alto in basso con uguale attenzione.
+  </p>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora del paesaggio attentivo</div>
+    <p>
+      Un prompt è un <strong>paesaggio attentivo non uniforme</strong>, in cui alcune posizioni
+      sono colline che si vedono da lontano e altre sono valli sfocate. Le posizioni di collina
+      sono l'inizio (dove vivono le istruzioni e il quadro) e la fine (dove vive la richiesta e
+      il richiamo finale). Le posizioni di valle sono il centro, dove vive il materiale di
+      consultazione che il modello deve avere a disposizione ma che non deve dominare.
+    </p>
+    <p>
+      Quando scrivi un prompt, la domanda da farsi continuamente è: <em>cosa metto sulle colline
+      e cosa metto nelle valli?</em>
+    </p>
+  </div>
+
+  <p>
+    Sulle colline mettiamo tre cose: l'<strong>istruzione iniziale</strong> che inquadra tutto,
+    la <strong>richiesta finale</strong> che attiva la generazione, e il <strong>richiamo finale
+    dei vincoli critici</strong>. Nelle valli mettiamo il contesto, il materiale di consultazione,
+    gli esempi (questi al confine, vicini alla richiesta finale, perché la calibrano).
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Il principio operativo del Report D</div>
+    <p>
+      <strong>Non mettere informazione critica nelle valli senza compensare con un richiamo.</strong>
+      Se hai un vincolo importante che per ragioni narrative deve stare nel mezzo del prompt, fai
+      in modo di richiamarlo alla fine. È un piccolo trucco di architettura, ma fa una grande
+      differenza nella qualità degli output.
+    </p>
+    <p>
+      Tutto il Report D si può riassumere in questa intuizione: la posizione di un'informazione
+      nel prompt non è neutrale. Conoscere le posizioni privilegiate, conoscere le valli, e
+      saperle compensare con la ridondanza intelligente è una buona parte della differenza tra
+      un prompt che funziona e uno che fallisce — a parità di contenuto.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">Sintesi finale</div>
+  <h2>Sette cose da portarsi via dal Report D</h2>
+
+  <div class="takeaways">
+    <h3>I punti da fissare</h3>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">01</div>
+      <div class="takeaway-text">
+        <strong>Il "lost in the middle" ha due cause sovrapposte.</strong> Una architetturale
+        (le teste di attenzione si ancorano ai bordi della sequenza) e una statistica (i
+        documenti reali sono scritti con la salienza ai bordi, e il modello ha imparato a
+        aspettarselo). Insieme producono il profilo a U della ritenzione attentiva.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">02</div>
+      <div class="takeaway-text">
+        <strong>L'ordine canonico è istruzioni → contesto → esempi → richiesta.</strong>
+        Funziona perché le istruzioni inquadrano (privilegio iniziale), il contesto fornisce
+        materiale da consultare (può stare in mezzo), gli esempi calibrano il pattern di
+        risposta, e la richiesta attiva la generazione (privilegio finale).
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">03</div>
+      <div class="takeaway-text">
+        <strong>Esiste un'eccezione: documento all'inizio per task semplici.</strong> Quando
+        l'oggetto da elaborare è un singolo documento ben definito e l'istruzione è semplice,
+        mettere il documento all'inizio e l'istruzione alla fine può funzionare meglio.
+        Non vale per istruzioni complesse con molti vincoli.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">04</div>
+      <div class="takeaway-text">
+        <strong>La ridondanza è uno strumento, non un errore.</strong> Ripetere
+        un'informazione importante in posizioni privilegiate diverse rinforza il segnale e
+        aggira il <em>lost in the middle</em>. Ma deve essere ripetizione identica, non
+        formulazioni vagamente simili che creano rumore.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">05</div>
+      <div class="takeaway-text">
+        <strong>La regola pratica è il richiamo finale compatto.</strong> Identifica il pezzo
+        più importante del prompt (task principale + vincolo critico) e mettilo in forma
+        sintetica subito prima della richiesta. Una frase, non un paragrafo. È la singola
+        tecnica che migliora più output a parità di contenuto.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">06</div>
+      <div class="takeaway-text">
+        <strong>Il system prompt è per il quadro generale.</strong> Ruolo, vincoli permanenti,
+        terminologia stabile. Non per richieste specifiche del turno. Beneficia del massimo
+        privilegio attentivo iniziale e di una gerarchia di istruzioni che gli dà priorità
+        sopra i messaggi utente.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">07</div>
+      <div class="takeaway-text">
+        <strong>Il prompt è un paesaggio attentivo non uniforme.</strong> Colline (inizio e
+        fine) e valli (centro). Sulle colline va il segnale importante; nelle valli il
+        materiale di consultazione. Se l'informazione critica deve stare in valle, compensala
+        con un richiamo sulla collina.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section style="border-bottom: none; padding-bottom: 60px;">
+  <div class="bridge">
+    <div class="bridge-label">Verso il Report E</div>
+    <h3>Come il modello "capisce" istruzioni ed esempi</h3>
+    <p>
+      Nei primi quattro report abbiamo costruito tutto il livello della <em>forma</em> del prompt:
+      peso delle parole, materiale tokenizzato, struttura sintattica, architettura macroscopica.
+      Tutto questo riguarda il modo in cui il modello legge il suo input.
+    </p>
+    <p>
+      Resta da capire come il modello fa a "fare" qualcosa: come distingue un'istruzione da una
+      descrizione, come interpreta gli esempi, come applica vincoli quantitativi come "non più di
+      10 parole". È il livello più meta del prompting, e tocca temi come il post-training, il
+      few-shot learning, e la natura pattern-matching del modo in cui il modello obbedisce alle
+      istruzioni. È il Report E che chiude il percorso.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Report D — L'ordine delle informazioni e la ridondanza intelligente</p>
+  <p>Approfondimenti sulla struttura del prompt · Documento 4 di 5</p>
+</footer>
+
+</body>
+</html>

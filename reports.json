@@ -1,0 +1,178 @@
+[
+  {
+    "id": 1,
+    "filone": 1,
+    "indice": "Punto 1",
+    "titolo": "Tokenizzazione: dal testo agli ID numerici",
+    "descrizione": "Come il testo viene segmentato in token attraverso BPE. Granularità del tokenizer, vocabolari multilingue, conseguenze pratiche per il prompting.",
+    "link": "punto1-tokenizzazione.html"
+  },
+  {
+    "id": 2,
+    "filone": 1,
+    "indice": "Punto 2",
+    "titolo": "Embedding: come il token acquisisce significato",
+    "descrizione": "Dagli ID numerici ai vettori in uno spazio semantico. La vicinanza geometrica come vicinanza semantica, le proprietà aritmetiche dello spazio, embedding statici vs contestuali.",
+    "link": "punto2-embedding.html"
+  },
+  {
+    "id": 3,
+    "filone": 1,
+    "indice": "Punto 3",
+    "titolo": "Dalla geometria semantica alla predizione del token",
+    "descrizione": "Come dal vettore di contesto nasce una distribuzione di probabilità sul prossimo token. Generazione autoregressiva, temperatura e sampling, approfondimento esteso sul Chain-of-Thought.",
+    "link": "punto3-predizione.html"
+  },
+  {
+    "id": 4,
+    "filone": 1,
+    "indice": "Punto 4A",
+    "titolo": "Attenzione e contesto dinamico: il meccanismo",
+    "descrizione": "Il cuore del Transformer. Il meccanismo Q-K-V, multi-head attention con specializzazione spontanea delle teste, stratificazione, positional encoding (RoPE).",
+    "link": "punto4a-attenzione.html"
+  },
+  {
+    "id": 5,
+    "filone": 1,
+    "indice": "Punto 4B",
+    "titolo": "Context window e implicazioni per il prompting",
+    "descrizione": "Costo computazionale quadratico, vincolo della finestra di contesto, fenomeno 'lost in the middle'. Tre conseguenze pratiche per il prompting, strutturazione del prompt, RAG.",
+    "link": "punto4b-context-window.html"
+  },
+  {
+    "id": 6,
+    "filone": 1,
+    "indice": "Punto 5",
+    "titolo": "Cosa \"vede\" effettivamente il modello",
+    "descrizione": "Le tre componenti dell'input, contenuto tipico di un system prompt, prompt injection, gestione delle conversazioni multi-turno, immagine di sé costruita dalla conversazione.",
+    "link": "punto5-cosa-vede-il-modello.html"
+  },
+  {
+    "id": 7,
+    "filone": 1,
+    "indice": "Punto 6",
+    "titolo": "Principi pratici di scrittura del prompt",
+    "descrizione": "Quattro livelli di prompting: principi base, tecniche specifiche (ruolo, few-shot, CoT, delimitatori), prompt come architettura in cinque parti, iterazione. Checklist negativa e meta-prompting.",
+    "link": "punto6-principi-prompting.html"
+  },
+  {
+    "id": 8,
+    "filone": 1,
+    "indice": "Sintesi",
+    "titolo": "Sintesi del percorso: come un LLM interpreta un prompt",
+    "descrizione": "Documento panoramico che lega tutti i sette punti in una narrazione condensata. Include uno schema visivo SVG del flusso completo e una chiusura sulla geometria del linguaggio.",
+    "link": "sintesi-percorso.html"
+  },
+  {
+    "id": 9,
+    "filone": 2,
+    "indice": "Tema 1",
+    "titolo": "Dall'attenzione alla predizione del prossimo token",
+    "descrizione": "Chiude l'anello tra meccanismo di attenzione e generazione del token. L'hidden state dell'ultima posizione, la LM head, la proiezione sul vocabolario e la trasformazione softmax in probabilità.",
+    "link": "tema1-dalla-attenzione-alla-predizione.html"
+  },
+  {
+    "id": 10,
+    "filone": 2,
+    "indice": "Tema 2",
+    "titolo": "Il Transformer come architettura completa",
+    "descrizione": "Ricompone l'architettura del Transformer aggiungendo rete feed-forward, residual connections e layer normalization. Distinzione tra attenzione (mescolamento orizzontale) e FFN (rielaborazione verticale).",
+    "link": "tema2-il-transformer-come-architettura-completa.html"
+  },
+  {
+    "id": 11,
+    "filone": 2,
+    "indice": "Tema 2 — mappa",
+    "titolo": "Mappa visiva dell'architettura completa di un LLM",
+    "descrizione": "Visualizzazione integrale dei sette moduli dell'LLM con quattro livelli di lettura sovrapposti: flusso verticale, zoom su uno strato, residual stream, annotazioni concettuali.",
+    "link": "mappa-architettura-llm.html"
+  },
+  {
+    "id": 12,
+    "filone": 2,
+    "indice": "Tema 3",
+    "titolo": "Come \"ragiona\" un LLM",
+    "descrizione": "Cosa significa davvero ragionare per un LLM. Chain-of-Thought come espansione del budget computazionale, quattro famiglie di limiti strutturali, cinque implicazioni operative per il prompting.",
+    "link": "tema3-come-ragiona-un-llm.html"
+  },
+  {
+    "id": 13,
+    "filone": 2,
+    "indice": "Tema 3 — compl. A",
+    "titolo": "I reasoning model: cosa sono e come funzionano",
+    "descrizione": "Il salto dall'imitazione del testo al reinforcement learning su verifiable rewards. Ragionamento come strategia emergente (DeepSeek-R1), distinzione CoT prompted vs trained.",
+    "link": "complemento-3a-reasoning-model-come-funzionano.html"
+  },
+  {
+    "id": 14,
+    "filone": 2,
+    "indice": "Tema 3 — compl. B",
+    "titolo": "Il panorama 2026 dei reasoning model",
+    "descrizione": "Confronto tra le tre filosofie dei provider (OpenAI, Anthropic, Google). Nota su DeepSeek e open source. Euristica delle tre domande per la scelta operativa workhorse vs flagship.",
+    "link": "complemento-3b-panorama-reasoning-model-2026.html"
+  },
+  {
+    "id": 15,
+    "filone": 2,
+    "indice": "Tema 4 — Parte 1",
+    "titolo": "Gestire documenti lunghi — Strategie testuali",
+    "descrizione": "Diagnosi dei quattro tipi di task e dei tre vincoli materiali. Full context con context caching, chunking con le tre decisioni progettuali, riassunti gerarchici come piramide a tre livelli.",
+    "link": "tema4-parte1-documenti-lunghi-strategie-testuali.html"
+  },
+  {
+    "id": 16,
+    "filone": 2,
+    "indice": "Tema 4 — Parte 2",
+    "titolo": "Gestire documenti lunghi — Strategie semantiche e strutturate",
+    "descrizione": "RAG con dettaglio su embedding e costruzione fai-da-te via MCP. Mappe strutturate (personaggi, archi narrativi, temi, cronologia) come strumento di pianificazione editabile dall'umano.",
+    "link": "tema4-parte2-strategie-semantiche-e-strutturate.html"
+  },
+  {
+    "id": 17,
+    "filone": 2,
+    "indice": "Tema 4 — Parte 3",
+    "titolo": "Gestire documenti lunghi — Ottimizzazione e sintesi",
+    "descrizione": "Context caching come ottimizzazione trasversale con matrice di impatto sulle cinque strategie. Le cinque strategie come ecosistema integrato in un workflow professionale stratificato.",
+    "link": "tema4-parte3-caching-ecosistema-chiusura.html"
+  },
+  {
+    "id": 18,
+    "filone": 3,
+    "indice": "Report A",
+    "titolo": "Il peso meccanico delle parole",
+    "descrizione": "Perché certe parole pesano molto e altre poco, anche quando sembrano simili. Geometria degli embedding, concetto di surprisal, specializzazione delle teste di attenzione.",
+    "link": "report-a-peso-parole.html"
+  },
+  {
+    "id": 19,
+    "filone": 3,
+    "indice": "Report B",
+    "titolo": "La forma come materiale tokenizzato",
+    "descrizione": "Maiuscole, grassetto, corsivo, virgolette: per il modello non sono decorazioni ma materia prima testuale che cambia gli ID dei token e i loro embedding di partenza. Funzionano per ragioni statistiche.",
+    "link": "report-b-forma-tokenizzata.html"
+  },
+  {
+    "id": 20,
+    "filone": 3,
+    "indice": "Report C",
+    "titolo": "Punteggiatura, capoversi, struttura",
+    "descrizione": "Punteggiatura e capoversi come segnali attentivi, salienza posizionale dentro la frase, organizzazione di paragrafi e subordinate con richiamo ai pattern di addestramento.",
+    "link": "report-c-punteggiatura-struttura.html"
+  },
+  {
+    "id": 21,
+    "filone": 3,
+    "indice": "Report D",
+    "titolo": "L'ordine delle informazioni e la ridondanza intelligente",
+    "descrizione": "Dove conviene mettere ogni cosa in un prompt e perché. Il 'lost in the middle' come vincolo di progettazione, l'ordine canonico delle parti, la regola del richiamo finale compatto.",
+    "link": "report-d-ordine-ridondanza.html"
+  },
+  {
+    "id": 22,
+    "filone": 3,
+    "indice": "Report E",
+    "titolo": "In costruzione",
+    "descrizione": "Differenza istruzioni/descrizioni e ruolo del post-training, esempi few-shot, vincoli quantitativi.",
+    "link": "report-e.html"
+  }
+]
