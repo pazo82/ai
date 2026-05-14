@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report F — L'asimmetria causale dell'attenzione</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --bg2: #eef0f7;
+    --bg3: #e4e7f2;
+    --white: #ffffff;
+    --indigo: #1e2a5e;
+    --indigo-mid: #2d3f8a;
+    --indigo-light: #4a5fb5;
+    --indigo-faint: rgba(30,42,94,0.06);
+    --indigo-faint2: rgba(30,42,94,0.03);
+    --indigo-border: rgba(30,42,94,0.12);
+    --orange: #c94a1a;
+    --orange-mid: #e05a22;
+    --orange-light: #f07040;
+    --orange-faint: rgba(201,74,26,0.07);
+    --orange-border: rgba(201,74,26,0.2);
+    --teal: #0d7a6e;
+    --teal-mid: #149a8a;
+    --teal-faint: rgba(13,122,110,0.07);
+    --teal-border: rgba(13,122,110,0.2);
+    --amber: #a06010;
+    --amber-faint: rgba(160,96,16,0.07);
+    --amber-border: rgba(160,96,16,0.2);
+    --purple: #5e2a7a;
+    --purple-faint: rgba(94,42,122,0.07);
+    --purple-border: rgba(94,42,122,0.2);
+    --ink: #111827;
+    --ink-mid: #374151;
+    --ink-light: #6b7280;
+    --border: rgba(17,24,39,0.08);
+    --border2: rgba(17,24,39,0.05);
+    --serif: 'Lora', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: var(--indigo);
+    padding: 72px 48px 88px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-shape {
+    position: absolute;
+    top: -100px; right: -80px;
+    width: 540px; height: 540px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(160,96,16,0.30) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-bg-shape2 {
+    position: absolute;
+    bottom: -100px; left: 10%;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(30,42,94,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-overline {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero h1 em { color: var(--orange-light); font-style: italic; }
+
+  .hero-sub {
+    font-size: 19px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 780px;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 44px;
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .meta-item .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  section {
+    padding: 76px 0;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--indigo);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--indigo);
+    margin: 40px 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.35;
+    color: var(--indigo);
+    margin: 0 0 12px;
+  }
+
+  p {
+    font-size: 16.5px;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+    line-height: 1.78;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; color: var(--indigo-mid); }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+    background: var(--indigo-faint);
+    color: var(--indigo);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .section-arc {
+    background: var(--indigo-faint2);
+    border-left: 3px solid var(--indigo-light);
+    padding: 22px 28px;
+    margin: 0 0 40px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .section-arc-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .section-arc p {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15.5px;
+    color: var(--indigo-mid);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .callout {
+    margin: 32px 0;
+    padding: 28px 32px;
+    border-radius: 8px;
+    border-left: 4px solid;
+  }
+
+  .callout h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 12px;
+    letter-spacing: 0;
+  }
+
+  .callout p {
+    font-size: 15.5px;
+    line-height: 1.72;
+    margin-bottom: 12px;
+  }
+
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout-indigo { background: var(--indigo-faint); border-color: var(--indigo-light); }
+  .callout-indigo h4 { color: var(--indigo); }
+  .callout-orange { background: var(--orange-faint); border-color: var(--orange); }
+  .callout-orange h4 { color: var(--orange); }
+  .callout-teal { background: var(--teal-faint); border-color: var(--teal); }
+  .callout-teal h4 { color: var(--teal); }
+  .callout-amber { background: var(--amber-faint); border-color: var(--amber); }
+  .callout-amber h4 { color: var(--amber); }
+  .callout-purple { background: var(--purple-faint); border-color: var(--purple); }
+  .callout-purple h4 { color: var(--purple); }
+
+  .metaphor {
+    background: var(--white);
+    border: 1px solid var(--indigo-border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 32px 0;
+    position: relative;
+  }
+
+  .metaphor::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px; height: 100%;
+    background: var(--orange);
+    border-radius: 8px 0 0 8px;
+  }
+
+  .metaphor-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .metaphor p {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.72;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .metaphor p:last-child { margin-bottom: 0; }
+
+  .insight {
+    background: var(--indigo);
+    color: white;
+    padding: 36px 40px;
+    border-radius: 8px;
+    margin: 36px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .insight::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(240,112,64,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange-light);
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p {
+    color: rgba(255,255,255,0.92);
+    font-size: 16.5px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .insight p:last-child { margin-bottom: 0; }
+  .insight strong { color: white; font-weight: 600; }
+  .insight em { color: var(--orange-light); }
+
+  /* Diagramma triangolare attenzione causale */
+  .causal-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  .causal-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--indigo-light);
+    font-weight: 600;
+    margin-bottom: 22px;
+  }
+
+  .causal-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .causal-caption {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    margin-top: 18px;
+    text-align: center;
+    font-style: italic;
+    padding: 0 20px;
+  }
+
+  /* Confronto frasi */
+  .compare-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 28px 0;
+  }
+
+  .compare-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+  }
+
+  .compare-card.var-a { border-top: 3px solid var(--teal); }
+  .compare-card.var-b { border-top: 3px solid var(--orange); }
+
+  .compare-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .compare-card.var-a .compare-tag { color: var(--teal); }
+  .compare-card.var-b .compare-tag { color: var(--orange); }
+
+  .compare-text {
+    font-family: var(--serif);
+    font-size: 16.5px;
+    color: var(--ink);
+    line-height: 1.55;
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+
+  .compare-text .highlight-a { color: var(--teal); font-weight: 600; font-style: normal; }
+  .compare-text .highlight-b { color: var(--orange); font-weight: 600; font-style: normal; }
+
+  .compare-note {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Implicazioni list */
+  .impl-list {
+    margin: 32px 0;
+  }
+
+  .impl-row {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    border-left: 4px solid;
+  }
+
+  .impl-row.i-1 { border-left-color: var(--orange); }
+  .impl-row.i-2 { border-left-color: var(--teal); }
+  .impl-row.i-3 { border-left-color: var(--amber); }
+  .impl-row.i-4 { border-left-color: var(--purple); }
+
+  .impl-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .impl-row.i-1 .impl-tag { color: var(--orange); }
+  .impl-row.i-2 .impl-tag { color: var(--teal); }
+  .impl-row.i-3 .impl-tag { color: var(--amber); }
+  .impl-row.i-4 .impl-tag { color: var(--purple); }
+
+  .impl-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--indigo);
+    margin-bottom: 10px;
+  }
+
+  .impl-desc {
+    font-size: 15px;
+    color: var(--ink-mid);
+    line-height: 1.72;
+    margin: 0;
+  }
+
+  .impl-desc strong { color: var(--ink); }
+
+  /* Diagramma strati */
+  .layers-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px 28px;
+    margin: 32px 0;
+  }
+
+  /* Takeaways */
+  .takeaways {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px 40px;
+    margin: 32px 0;
+  }
+
+  .takeaways h3 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: var(--orange);
+    font-size: 22px;
+  }
+
+  .takeaway-item {
+    padding: 18px 0;
+    border-bottom: 1px dashed var(--border);
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 18px;
+  }
+
+  .takeaway-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .takeaway-item:first-child { padding-top: 0; }
+
+  .takeaway-num {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  .takeaway-text {
+    font-size: 15.5px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  .takeaway-text strong { color: var(--indigo); }
+
+  footer {
+    background: var(--bg3);
+    padding: 48px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p { font-size: 13px; margin-bottom: 6px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .hero { padding: 56px 24px 64px; }
+    .hero h1 { font-size: 36px; }
+    .hero-sub { font-size: 16px; }
+    .container { padding: 0 24px; }
+    section { padding: 56px 0; }
+    h2 { font-size: 28px; }
+    h3 { font-size: 19px; }
+    .compare-pair { grid-template-columns: 1fr; }
+    .insight { padding: 28px 24px; }
+    .takeaways { padding: 28px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-shape2"></div>
+  <div class="hero-inner">
+    <div class="hero-overline">Report F · Approfondimento</div>
+    <h1>L'asimmetria <em>causale</em> dell'attenzione</h1>
+    <p class="hero-sub">
+      Perché l'ordine delle informazioni nel prompt conta — anche se l'ultimo token vede tutto.
+      Il fondamento meccanico sotto tutte le regole pratiche del percorso: la causalità
+      dell'attenzione, la stratificazione delle rappresentazioni, l'allocazione computazionale.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Tema</div>
+        <div class="meta-value">Causalità dell'attenzione e ordine</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Concetto chiave</div>
+        <div class="meta-value">Stratificazione e allocazione</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Posizione nel percorso</div>
+        <div class="meta-value">Approfondimento — Report F</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">01 — Il punto di partenza</div>
+  <h2>Cosa significa davvero che il modello "legge in avanti"</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Cominciamo da una formulazione comune ma fuorviante — "il modello legge in avanti" — e disambighiamola. Il modello vede tutti i token simultaneamente, ma le dipendenze di attenzione sono asimmetriche: vanno solo da un token a quelli che lo precedono. Questa asimmetria si chiama attenzione causale, ed è il vero meccanismo che governa l'ordine delle informazioni.</p>
+  </div>
+
+  <p class="lead">
+    Si dice spesso, parlando degli LLM, che "il modello legge in avanti". L'espressione coglie
+    qualcosa di reale, ma può essere fuorviante se ci si immagina un modello che processa i
+    token uno per uno in sequenza, come un essere umano che legge da sinistra a destra. La
+    realtà è diversa, ed è più precisa.
+  </p>
+
+  <p>
+    Il modello, quando elabora un prompt, <strong>vede tutti i token simultaneamente</strong>.
+    Non li legge uno alla volta: li ha tutti davanti contemporaneamente nei suoi strati di
+    attenzione. Questa è una differenza profonda con la lettura umana, e va detta.
+  </p>
+
+  <p>
+    Ma — e qui sta il punto cruciale — quando un token costruisce il suo vettore contestualizzato
+    attraverso l'attenzione, può "guardare" solo i token che vengono <strong>prima di lui</strong>
+    nella sequenza. Non quelli che vengono dopo. Questa proprietà ha un nome tecnico:
+    <strong>attenzione causale</strong> (o attenzione mascherata). Il modello processa tutti i
+    token in parallelo, ma le dipendenze di attenzione sono asimmetriche — vanno solo da un
+    token a quelli che lo precedono, mai a quelli che lo seguono.
+  </p>
+
+  <div class="causal-diagram">
+    <div class="causal-label">L'attenzione causale: dipendenze asimmetriche</div>
+    <svg class="causal-svg" viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arF" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#1e2a5e"/>
+        </marker>
+      </defs>
+
+      <!-- Token boxes -->
+      <g>
+        <rect x="80" y="140" width="80" height="50" rx="6" fill="#0d7a6e" fill-opacity="0.1" stroke="#0d7a6e" stroke-width="1.5"/>
+        <text x="120" y="170" font-family="JetBrains Mono" font-size="13" fill="#0d7a6e" text-anchor="middle" font-weight="600">T1</text>
+
+        <rect x="190" y="140" width="80" height="50" rx="6" fill="#0d7a6e" fill-opacity="0.1" stroke="#0d7a6e" stroke-width="1.5"/>
+        <text x="230" y="170" font-family="JetBrains Mono" font-size="13" fill="#0d7a6e" text-anchor="middle" font-weight="600">T2</text>
+
+        <rect x="300" y="140" width="80" height="50" rx="6" fill="#0d7a6e" fill-opacity="0.1" stroke="#0d7a6e" stroke-width="1.5"/>
+        <text x="340" y="170" font-family="JetBrains Mono" font-size="13" fill="#0d7a6e" text-anchor="middle" font-weight="600">T3</text>
+
+        <rect x="410" y="140" width="80" height="50" rx="6" fill="#a06010" fill-opacity="0.15" stroke="#a06010" stroke-width="1.5"/>
+        <text x="450" y="170" font-family="JetBrains Mono" font-size="13" fill="#a06010" text-anchor="middle" font-weight="600">T4</text>
+
+        <rect x="520" y="140" width="80" height="50" rx="6" fill="#1e2a5e" fill-opacity="0.05" stroke="#1e2a5e" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="560" y="170" font-family="JetBrains Mono" font-size="13" fill="#6b7280" text-anchor="middle" font-weight="500">T5</text>
+
+        <rect x="630" y="140" width="80" height="50" rx="6" fill="#1e2a5e" fill-opacity="0.05" stroke="#1e2a5e" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="670" y="170" font-family="JetBrains Mono" font-size="13" fill="#6b7280" text-anchor="middle" font-weight="500">T6</text>
+
+        <rect x="740" y="140" width="80" height="50" rx="6" fill="#1e2a5e" fill-opacity="0.05" stroke="#1e2a5e" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="780" y="170" font-family="JetBrains Mono" font-size="13" fill="#6b7280" text-anchor="middle" font-weight="500">T7</text>
+      </g>
+
+      <!-- Frecce permesse: T4 guarda T1, T2, T3 -->
+      <path d="M 410 165 Q 280 80 160 145" fill="none" stroke="#1e2a5e" stroke-width="2" marker-end="url(#arF)"/>
+      <path d="M 410 165 Q 330 95 270 145" fill="none" stroke="#1e2a5e" stroke-width="2" marker-end="url(#arF)"/>
+      <path d="M 410 165 Q 390 105 380 145" fill="none" stroke="#1e2a5e" stroke-width="2" marker-end="url(#arF)"/>
+
+      <!-- Frecce vietate: T4 NON può guardare T5, T6, T7 -->
+      <path d="M 490 215 Q 520 260 560 195" fill="none" stroke="#c94a1a" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+      <line x1="510" y1="225" x2="540" y2="245" stroke="#c94a1a" stroke-width="2.5"/>
+      <line x1="540" y1="225" x2="510" y2="245" stroke="#c94a1a" stroke-width="2.5"/>
+
+      <!-- Etichette descrittive -->
+      <text x="280" y="60" font-family="Outfit" font-size="13" fill="#1e2a5e" text-anchor="middle" font-weight="600">T4 può guardare i token precedenti</text>
+      <text x="280" y="78" font-family="Outfit" font-size="11" fill="#6b7280" text-anchor="middle" font-style="italic">(attenzione permessa)</text>
+
+      <text x="620" y="260" font-family="Outfit" font-size="13" fill="#c94a1a" text-anchor="middle" font-weight="600">T4 NON può guardare i token successivi</text>
+      <text x="620" y="278" font-family="Outfit" font-size="11" fill="#c94a1a" text-anchor="middle" font-style="italic">(attenzione mascherata)</text>
+
+      <!-- Sequenza -->
+      <text x="450" y="115" font-family="Outfit" font-size="11" fill="#a06010" text-anchor="middle" font-weight="600">token corrente</text>
+      <text x="450" y="225" font-family="Outfit" font-size="10" fill="#a06010" text-anchor="middle">(da contestualizzare)</text>
+    </svg>
+    <p class="causal-caption">Ogni token può costruire il proprio vettore contestualizzato guardando solo i token che lo precedono. Quelli che lo seguono restano "invisibili" per il calcolo dell'attenzione.</p>
+  </div>
+
+  <h3>Perché l'attenzione è causale</h3>
+  <p>
+    Questa asimmetria non è arbitraria: è una conseguenza diretta di come il modello è stato
+    addestrato. Nel pretraining, il modello è stato addestrato a <strong>predire il prossimo
+    token</strong> dato il contesto precedente. Per questo task, è essenziale che ogni posizione
+    possa "vedere" solo i token che vengono prima — altrimenti il modello potrebbe "barare"
+    guardando direttamente la risposta. Se la posizione 10 potesse vedere il token alla
+    posizione 11, predire quel token sarebbe banale: basterebbe copiarlo.
+  </p>
+
+  <p>
+    Quindi l'attenzione viene "mascherata" in modo che ogni posizione veda solo il passato, mai
+    il futuro. E questa mascheratura non è solo una scelta dell'addestramento — è permanente.
+    Anche quando il modello viene usato in inferenza, anche quando ha già "ricevuto" tutto il
+    prompt, le dipendenze di attenzione restano causali. È una proprietà architetturale
+    fondamentale: tutto il modello — ogni testa di attenzione in ogni strato — funziona così.
+  </p>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">02 — L'obiezione apparente</div>
+  <h2>Ma l'ultimo token non vede tutto il prompt?</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Sembra esserci un paradosso: se la generazione si basa sul vettore di contesto dell'ultimo token, e quest'ultimo può guardare tutto il prompt, perché l'ordine relativo delle informazioni dovrebbe essere un problema? L'obiezione è acuta. La risposta sta in un fenomeno che non abbiamo ancora messo a fuoco esplicitamente: la stratificazione delle rappresentazioni attraverso i molti strati del modello.</p>
+  </div>
+
+  <p>
+    A questo punto del ragionamento, è naturale sollevare un'obiezione: se la predizione del
+    prossimo token si basa sul vettore di contesto dell'<strong>ultimo</strong> token del prompt,
+    e quest'ultimo — essendo l'ultimo — può guardare tutti i token che lo precedono, allora
+    dovrebbe avere accesso a tutto. Nessuna informazione del prompt gli sarebbe preclusa. Allora
+    perché l'ordine relativo delle informazioni dovrebbe essere un problema?
+  </p>
+
+  <p>
+    L'obiezione coglie un fatto reale, e su quel fatto ha pienamente ragione: <strong>l'ultimo
+    token ha effettivamente accesso a tutto il prompt</strong>. Le sue teste di attenzione
+    possono guardare il primo token, l'ultimo, e qualsiasi cosa in mezzo. E in qualche misura,
+    questo significa che il modello riesce davvero a "leggere all'indietro" per recuperare
+    informazioni che servirebbero per chiarire pezzi del prompt iniziale.
+  </p>
+
+  <p>
+    Allora cosa c'è di sbagliato? Non c'è niente di sbagliato. C'è qualcosa di
+    <strong>incompleto</strong>. E il pezzo mancante è il modo in cui i vettori contestualizzati
+    vengono costruiti, strato dopo strato. Quando finora abbiamo parlato di "vettore di
+    contesto", abbiamo fatto come se il modello facesse una sola lettura del prompt. Non è
+    così: ne fa molte, una sopra l'altra, e capire questo è quello che chiude il cerchio.
+  </p>
+
+  <div class="callout callout-indigo">
+    <h4>Il pezzo mancante</h4>
+    <p>
+      Il modello fa <strong>molte passate</strong> sul prompt, una sopra l'altra, attraverso
+      decine di strati di attenzione (in modelli grandi, sessanta, ottanta, anche più di cento
+      strati). Ogni strato rifinisce i vettori contestualizzati. E quando l'ultimo token, al
+      sessantesimo strato, "guarda" un token precedente, non sta guardando l'embedding iniziale
+      di quel token. Sta guardando la sua rappresentazione <em>come è stata elaborata fino allo
+      strato precedente</em>. Questa stratificazione cambia tutto.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">03 — Il fenomeno chiave</div>
+  <h2>La stratificazione cristallizza le rappresentazioni</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Adesso vediamo cosa succede strato dopo strato, e perché la rappresentazione dei token iniziali viene "cristallizzata" senza poter incorporare informazioni dal futuro. È il meccanismo profondo che spiega perché l'ordine conti, e perché un prompt mal ordinato sia genuinamente diverso da uno ben ordinato.</p>
+  </div>
+
+  <p>
+    In ciascuno strato di attenzione, ogni token costruisce un nuovo vettore contestualizzato
+    combinando il proprio vettore con quelli dei token precedenti (per l'attenzione causale).
+    Il vettore che entra in uno strato è quello che è uscito dallo strato precedente. Quindi i
+    vettori si <strong>arricchiscono progressivamente</strong>: nello strato 1 sono ancora
+    vicini agli embedding iniziali, nello strato 10 hanno già incorporato relazioni locali,
+    nello strato 30 hanno relazioni più astratte, nello strato 60 sono altamente
+    contestualizzati.
+  </p>
+
+  <p>
+    Adesso è cruciale guardare cosa succede al primo token. Strato 1: il primo token guarda solo
+    se stesso, perché nessun token lo precede. Il suo vettore contestualizzato è solo una piccola
+    rifinitura del suo embedding iniziale. Strato 2: guarda di nuovo solo se stesso. Lo stesso
+    allo strato 3, allo strato 4, fino allo strato 60. <strong>Per tutta la profondità del
+    modello, il primo token elabora se stesso in isolamento</strong>. Sessanta strati di
+    rifinitura, ma sempre senza poter incorporare informazione da nessun altro token.
+  </p>
+
+  <p>
+    L'ultimo token, invece, in ogni strato può guardare tutti i token precedenti — ma li guarda
+    nella forma elaborata fino a quel punto. E qui sta il punto: <strong>quando l'ultimo token,
+    al sessantesimo strato, guarda il vettore del primo token, non sta guardando l'embedding
+    iniziale del primo token</strong>. Sta guardando il vettore del primo token <em>come è stato
+    elaborato fino al cinquantanovesimo strato</em>. Quella rappresentazione è stata costruita
+    attraverso una catena di elaborazioni che, a ogni strato, sapeva solo dei token <em>precedenti</em>
+    al primo token — cioè, di nessuno.
+  </p>
+
+  <div class="callout callout-orange">
+    <h4>Il punto che chiude il paradosso</h4>
+    <p>
+      Quando l'ultimo token guarda il primo token, sta guardando una rappresentazione che è
+      <strong>già stata cristallizzata</strong>. Quella rappresentazione riflette solo quello
+      che il modello sapeva di "quel token in isolamento, all'inizio del prompt". L'ultimo
+      token può consultarla, certo. Ma non è più malleabile. È quello che è.
+    </p>
+    <p>
+      Se nel primo token ci hai messo una parola ambigua — <em>X</em> — e poi alla fine del
+      prompt hai chiarito "X significa Y", quando l'ultimo token consulta il vettore di
+      <em>X</em>, trova una rappresentazione di <em>X</em> costruita senza l'informazione "X
+      significa Y". Quella informazione è disponibile nei token finali, ma il vettore di
+      <em>X</em> all'inizio non l'ha mai potuta incorporare.
+    </p>
+  </div>
+
+  <div class="metaphor">
+    <div class="metaphor-label">La metafora della catena di montaggio</div>
+    <p>
+      Pensa al prompt come a una catena di operai che assemblano un pezzo lungo una catena di
+      montaggio. Ogni operaio (token) prende il pezzo dall'operaio precedente, ci aggiunge le
+      sue rifiniture, e lo passa al successivo. Ogni operaio fa il suo lavoro guardando solo
+      quello che gli è stato passato — cioè, il lavoro di tutti gli operai precedenti.
+    </p>
+    <p>
+      Alla fine della catena c'è un controllore di qualità (l'ultimo token) che esamina il pezzo
+      finale per decidere "okay, ora produci il prossimo pezzo nello stesso stile". Il
+      controllore può guardare il pezzo finito in tutto il suo dettaglio. Ma c'è una cosa che
+      non può fare: <strong>non può tornare indietro e dire al primo operaio "guarda, sapendo
+      come va a finire, lavora il tuo segmento diversamente"</strong>. Il lavoro del primo
+      operaio è già stato fatto. È cristallizzato nel pezzo.
+    </p>
+    <p>
+      Le rappresentazioni dei token iniziali sono "già state lavorate" attraverso tutti gli
+      strati senza poter conoscere il futuro. Quando l'ultimo token le consulta, le trova così
+      come sono — utili, sì, ma costruite con un'informazione incompleta.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">04 — Il recupero parziale</div>
+  <h2>Come il modello può "ricostruire" — e perché il recupero è imperfetto</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Naturalmente il modello non è del tutto privo di strumenti per gestire ordini sbagliati. Esiste un meccanismo di ricostruzione retroattiva che passa attraverso i token successivi. Vediamo come funziona, perché è imperfetto, e in che senso "imperfetto" — chiarendo un punto che merita attenzione, perché c'è il rischio di fraintenderlo.</p>
+  </div>
+
+  <p>
+    Il modello, di fatto, ce la fa a gestire prompt complessi dove le informazioni si chiariscono
+    via via. Vale la pena capire <em>come</em>, perché spiega anche le sue limitazioni.
+  </p>
+
+  <p>
+    Il recupero avviene attraverso i <strong>token successivi</strong>. I token che arrivano
+    dopo nel prompt — quelli che contengono la chiarificazione — possono vedere il primo token
+    (asimmetria causale: il dopo vede il prima). Quando il modello elabora questi token
+    chiarificatori, le loro teste di attenzione possono attivare connessioni con i token
+    iniziali ambigui, e i vettori contestualizzati di questi token chiarificatori incorporano
+    una rappresentazione <em>ricostruita</em> di quei token iniziali alla luce della
+    chiarificazione.
+  </p>
+
+  <p>
+    In termini della metafora della catena di montaggio, è come se un operaio finale dicesse:
+    "Aspetta, l'operaio numero 3 ha fatto un segmento ambiguo. Adesso che vedo come va a finire,
+    ricostruisco mentalmente cosa avrebbe dovuto fare e tengo questa ricostruzione nel mio
+    pezzo." L'ultimo controllore di qualità, quando guarda l'insieme, vede sia il pezzo
+    originale del numero 3 (che resta ambiguo) sia la ricostruzione mentale dell'operaio finale
+    (che chiarisce).
+  </p>
+
+  <h3>Perché il recupero è imperfetto</h3>
+  <p>
+    Funziona, ma con limiti. E qui voglio essere preciso, perché c'è una formulazione naturale
+    ma sbagliata che vale la pena disambiguare subito.
+  </p>
+
+  <p>
+    La formulazione sbagliata sarebbe: "i token finali hanno meno strati a disposizione". <strong>Non
+    è così.</strong> Ogni token del prompt — il primo, l'ultimo, qualsiasi posizione — passa
+    attraverso lo <em>stesso identico numero di strati</em>. Se il modello ha sessanta strati,
+    ogni token ne percorre sessanta. Nessun token è "privilegiato" o "penalizzato" sul numero
+    di passaggi.
+  </p>
+
+  <p>
+    Quello che differisce, da token a token, non è il numero di strati attraversati, ma
+    <strong>quanti altri token possono guardare in ogni strato</strong>. Il primo token può
+    guardare solo se stesso. Il secondo può guardare il primo e se stesso. Il decimo può
+    guardare i primi nove e se stesso. L'ultimo può guardare l'intero prompt fino a sé.
+  </p>
+
+  <p>
+    E qui sta la vera limitazione del recupero retroattivo. I token chiarificatori, pur avendo
+    a disposizione tutti i sessanta strati come ogni altro token, devono usare quegli strati
+    per <strong>due lavori contemporaneamente</strong>: assimilare la chiarificazione che
+    stanno introducendo, e ricostruire retroattivamente quello che i token precedenti avrebbero
+    dovuto sapere. Questo doppio carico produce ricostruzioni meno nitide di quelle che si
+    avrebbero se ciascun token avesse potuto dedicare i suoi strati a un solo compito,
+    ricevendo l'informazione nell'ordine giusto.
+  </p>
+
+  <div class="callout callout-amber">
+    <h4>Due tipi di limite, una sola conseguenza</h4>
+    <p>
+      Il primo limite è di <strong>localizzazione</strong>: l'informazione ricostruita vive nei
+      vettori dei token chiarificatori, non nei vettori dei token chiariti. I token chiariti
+      restano con la loro rappresentazione ambigua originale. Quando l'ultimo token consulta il
+      prompt, riceve due segnali: uno dai token iniziali (rappresentazione ambigua) e uno dai
+      token chiarificatori (rappresentazione ricostruita).
+    </p>
+    <p>
+      Il secondo limite è di <strong>concentrazione di compiti</strong>: i token chiarificatori
+      hanno gli stessi strati di qualsiasi altro token, ma devono fare più lavoro con quelle
+      risorse. La precisione di ciascun compito ne risente.
+    </p>
+    <p>
+      La conseguenza è una sola: il modello fa quello che deve, ma con meno sicurezza, e a
+      volte con piccoli errori che derivano dal fatto che i due segnali (ambiguo e ricostruito)
+      non coincidono perfettamente.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">05 — La conseguenza profonda</div>
+  <h2>L'ordine come allocazione di computazione</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Adesso possiamo formulare il principio profondo che sta sotto tutto. Il modello ha sempre la stessa quantità di computazione disponibile, ma l'ordine del prompt determina come quella computazione viene allocata. Un prompt ben ordinato fa lavorare ogni token su un compito locale e semplice; uno mal ordinato costringe alcuni token a compiti multipli con le stesse risorse.</p>
+  </div>
+
+  <p>
+    Mettendo insieme tutto, possiamo formulare il principio profondo che sta sotto la causalità
+    dell'attenzione. Il modello ha sempre lo stesso numero di strati per ogni token, quindi ha
+    sempre la stessa quantità di computazione disponibile per ogni posizione. Ma quello che
+    cambia da prompt a prompt — e da ordinamento a ordinamento — è <strong>come quella
+    computazione deve essere allocata</strong>.
+  </p>
+
+  <p>
+    Un prompt ben ordinato lascia che ogni token usi i suoi strati per fare un lavoro semplice:
+    assimilare quello che lo precede. Un prompt mal ordinato costringe certi token a fare
+    lavori multipli con le stesse risorse. Le risorse computazionali per ogni token sono fisse;
+    sovraccaricarne alcuni significa togliere precisione a tutto il resto.
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Il principio del Report F</div>
+    <p>
+      <strong>L'ordinamento del prompt è uno strumento di allocazione della computazione.</strong>
+      Quando scrivi nell'ordine giusto, stai dicendo al modello "ogni token può concentrarsi sul
+      suo compito locale". Quando scrivi nell'ordine sbagliato, stai dicendo "alcuni token
+      dovranno fare anche il lavoro di altri token che li precedono".
+    </p>
+    <p>
+      Il prompt non è un <em>insieme di informazioni che il modello legge</em>. È una
+      <em>traiettoria di costruzione di rappresentazioni</em>, e ogni passo della traiettoria
+      viene fatto con la conoscenza disponibile fino a quel passo. Cambiare l'ordine non cambia
+      <em>cosa</em> c'è nel prompt, ma cambia <em>come</em> il modello costruisce le sue
+      rappresentazioni interne mentre lo elabora.
+    </p>
+    <p>
+      Questo è il fondamento meccanico sotto tutto il percorso. Le regole pratiche dei report
+      precedenti — definire prima di usare, dare il quadro prima del materiale, mettere le
+      istruzioni all'inizio, fare ragionare il modello per passi — sono tutti modi di
+      <strong>distribuire bene il carico computazionale lungo il prompt</strong>, perché ogni
+      token possa fare il suo lavoro senza dover fare anche quello degli altri.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">06 — Le implicazioni pratiche</div>
+  <h2>Quattro regole che derivano dalla causalità</h2>
+
+  <div class="section-arc">
+    <div class="section-arc-label">L'arco di questa sezione</div>
+    <p>Vediamo come il principio dell'allocazione computazionale si traduce in quattro indicazioni operative concrete. Sono regole che potrebbero sembrare familiari — abbiamo già visto cose simili nei report precedenti — ma adesso le vediamo nella loro fondazione meccanica, non come consigli pratici ma come conseguenze necessarie dell'architettura.</p>
+  </div>
+
+  <div class="impl-list">
+    <div class="impl-row i-1">
+      <div class="impl-tag">Implicazione 1</div>
+      <div class="impl-name">Definizioni prima dell'uso</div>
+      <p class="impl-desc">
+        Se introduci un termine, un concetto, una sigla, un nome proprio che ha un significato
+        specifico per il tuo prompt, <strong>definiscilo prima di usarlo</strong>. Non dopo. Se
+        scrivi "applica la regola X al caso Y, dove la regola X è definita come...", il modello,
+        quando elabora "applica la regola X", non sa ancora cos'è X. Il vettore di X verrà
+        costruito con un'ipotesi vaga. Se invece scrivi "Sia X la regola definita come
+        [definizione]. Adesso applica X al caso Y", il modello quando arriva ad "applica X" ha
+        già contestualizzato cosa sia X. Il vettore di contesto è geometricamente più stabile.
+      </p>
+    </div>
+
+    <div class="impl-row i-2">
+      <div class="impl-tag">Implicazione 2</div>
+      <div class="impl-name">Istruzioni complesse prima del materiale che descrivono</div>
+      <p class="impl-desc">
+        Se in un prompt vuoi dare al modello del materiale da analizzare e poi delle istruzioni
+        su come analizzarlo, la sequenza ottimale dipende da quanto è semplice l'istruzione. Per
+        istruzioni semplici ("riassumi questo"), va bene il documento all'inizio. Ma per
+        istruzioni complesse, con molti vincoli, rovesciare l'ordine crea disallineamento: i
+        vettori del documento sono stati costruiti senza sapere che andavano letti con quel
+        framework specifico. <strong>Istruzioni complesse vanno prima del materiale che
+        descrivono</strong>, anche se questo significa che il materiale finisce nella "valle"
+        del prompt.
+      </p>
+    </div>
+
+    <div class="impl-row i-3">
+      <div class="impl-tag">Implicazione 3</div>
+      <div class="impl-name">Evita i riferimenti in avanti</div>
+      <p class="impl-desc">
+        Quando in un prompt scrivi "come vedrai più sotto" o "ne riparleremo tra poco" o "tieni
+        a mente quello che dirò alla fine", stai introducendo un riferimento a materiale che
+        ancora non esiste nel contesto. Per il modello, quei token vengono elaborati nel momento
+        in cui appaiono, e i loro vettori di contesto vengono costruiti senza poter "vedere" il
+        referente. Il modello capisce che si tratta di un riferimento avanti, ma la
+        rappresentazione resta vaga. <strong>L'effetto di "preparare il terreno" che avresti su
+        un lettore umano è molto attenuato.</strong>
+      </p>
+    </div>
+
+    <div class="impl-row i-4">
+      <div class="impl-tag">Implicazione 4</div>
+      <div class="impl-name">Preferisci costruzioni anaforiche a quelle cataforiche</div>
+      <p class="impl-desc">
+        In linguistica si chiama <em>catafora</em> l'uso di un pronome il cui referente arriva
+        dopo: "Quando lui entrò, Mario era già seduto". Per un parlante italiano è normale.
+        Per il modello, è geometricamente difficile: quando elabora "lui", non può guardare
+        avanti per vedere chi è. La connessione si crea solo retroattivamente. Costruzioni
+        <strong>anaforiche</strong> (referente prima del riferimento) sono più solide:
+        "Mario entrò. Lui era già seduto". Stessa frase, ma il modello costruisce il vettore
+        di "lui" sapendo già a chi si riferisce.
+      </p>
+    </div>
+  </div>
+
+  <h3>Un esempio concreto di disallineamento</h3>
+
+  <div class="compare-pair">
+    <div class="compare-card var-b">
+      <div class="compare-tag">Ordine subottimale</div>
+      <div class="compare-text">Quando arriverai al punto giusto, dovrai applicare il <span class="highlight-b">principio di Bayes nella sua forma estesa</span>. Eccoti il problema: [...]. Il principio di Bayes nella sua forma estesa è: [formula].</div>
+      <p class="compare-note">I vettori dei token iniziali che parlano del principio sono cristallizzati prima che il principio sia stato definito. Il modello dovrà ricostruire retroattivamente, con perdita di precisione.</p>
+    </div>
+    <div class="compare-card var-a">
+      <div class="compare-tag">Ordine ottimale</div>
+      <div class="compare-text">Il <span class="highlight-a">principio di Bayes nella sua forma estesa</span> è: [formula]. Adesso ti do un problema. Applica a questo problema il principio appena definito: [...].</div>
+      <p class="compare-note">Il principio è definito prima di essere richiamato. Ogni token che ne parla successivamente ha già accesso alla definizione completa nel suo contesto di elaborazione.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">07 — Le saldature con il percorso</div>
+  <h2>Perché tutte le regole del percorso convergono qui</h2>
+
+  <p>
+    L'idea della causalità dell'attenzione si lega in modo profondo a diverse cose che abbiamo
+    discusso lungo i cinque report, e vale la pena fare i collegamenti espliciti. Vedrai che,
+    in un certo senso, <strong>il Report F è il fondamento meccanico nascosto sotto tutto il
+    percorso</strong>.
+  </p>
+
+  <p>
+    <strong>Si lega all'ordine canonico del Report D.</strong> Adesso capisci meglio perché
+    istruzioni → contesto → esempi → richiesta funziona così bene: ogni parte fornisce il
+    quadro per quella successiva, e nessuna parte ha bisogno di "guardare avanti" per essere
+    ben elaborata. Il prompt scorre coerente attraverso il muro causale dell'attenzione, e ogni
+    token usa la sua computazione per un solo compito locale.
+  </p>
+
+  <p>
+    <strong>Si lega al Chain-of-Thought del Report E.</strong> Adesso capisci meglio perché il
+    CoT funziona: ogni passo intermedio diventa contesto causalmente disponibile per il passo
+    successivo. Le dipendenze causali dell'attenzione sono usate a tuo favore — ogni token di
+    ragionamento è disponibile per la generazione dei token che seguono. Senza CoT, il modello
+    dovrebbe produrre la risposta finale senza il supporto causale dei ragionamenti intermedi:
+    è un disallineamento computazionale per costruzione.
+  </p>
+
+  <p>
+    <strong>Si lega alla salienza ai bordi del Report C.</strong> L'apertura di un'unità è
+    privilegiata anche perché stabilisce il quadro per tutto quello che verrà dopo, sfruttando
+    l'asimmetria causale: i token iniziali influenzano tutti i successivi, ma non viceversa. Il
+    "lost in the middle" del Report D ha una dimensione causale: la metà del prompt deve sia
+    aver assorbito quanto la precede sia preparare quanto seguirà, e questo carico doppio è
+    parte del motivo per cui è zona "sfocata".
+  </p>
+
+  <p>
+    <strong>Si lega persino alla scelta delle parole del Report A.</strong> Quando dicevamo
+    che le parole "strutturali" (connettivi, ancore referenziali, modificatori di polarità)
+    pesano di più, una delle ragioni profonde è proprio l'asimmetria causale: queste parole
+    inclinano la traiettoria di tutto quello che verrà dopo, e quell'inclinazione non si può
+    annullare consultando le parole iniziali alla fine. Sono scelte che cristallizzano lungo
+    la catena di strati.
+  </p>
+
+  <div class="callout callout-teal">
+    <h4>Il fondamento sotto tutto</h4>
+    <p>
+      Ogni regola pratica che il percorso ha derivato — sulla scelta delle parole, sulla forma,
+      sulla punteggiatura, sull'ordine, sull'obbedienza — ha alla sua base questa proprietà
+      architetturale: <strong>l'attenzione è causale, e le rappresentazioni si stratificano in
+      modo che ciò che viene prima condiziona ciò che viene dopo, ma non viceversa</strong>.
+      Il prompt non è un documento da leggere: è una sequenza di decisioni di allocazione
+      computazionale, ognuna costruita sulle precedenti.
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-num">Sintesi finale</div>
+  <h2>Sette cose da portarsi via dal Report F</h2>
+
+  <div class="takeaways">
+    <h3>I punti da fissare</h3>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">01</div>
+      <div class="takeaway-text">
+        <strong>L'attenzione è causale.</strong> Il modello vede tutti i token simultaneamente,
+        ma ogni token può "guardare" solo i token che lo precedono nella sequenza, mai quelli
+        che lo seguono. È una conseguenza permanente del modo in cui il modello è stato
+        addestrato a predire il prossimo token.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">02</div>
+      <div class="takeaway-text">
+        <strong>L'ultimo token vede tutto, ma vede rappresentazioni cristallizzate.</strong>
+        Quando consulta i token precedenti, non vede gli embedding iniziali ma vettori elaborati
+        attraverso decine di strati. Quei vettori sono stati costruiti senza poter incorporare
+        l'informazione che arriverà dopo, e questa limitazione è permanente.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">03</div>
+      <div class="takeaway-text">
+        <strong>La stratificazione è la chiave.</strong> Il modello fa molte passate sul prompt,
+        non una sola. A ogni strato i vettori si arricchiscono, ma sempre rispettando la
+        causalità. Il primo token, attraverso tutti gli strati, non incorpora mai informazione
+        dai successivi; l'ultimo, in ogni strato, ne incorpora progressivamente di più ricca.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">04</div>
+      <div class="takeaway-text">
+        <strong>Il recupero retroattivo esiste ma è imperfetto.</strong> Quando una
+        chiarificazione arriva dopo un riferimento ambiguo, i token chiarificatori possono
+        ricostruire retroattivamente il significato. Ma questa ricostruzione vive nei vettori
+        dei chiarificatori, non in quelli dei chiariti, ed è il risultato di un doppio carico
+        di compiti sugli stessi strati.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">05</div>
+      <div class="takeaway-text">
+        <strong>Tutti i token hanno lo stesso numero di strati.</strong> La differenza non è di
+        quantità di computazione, ma di <em>concentrazione di compiti</em>. Un token "fortunato"
+        usa i suoi strati per un solo lavoro locale; un token "sovraccaricato" deve fare anche
+        il lavoro di token precedenti che erano stati lasciati incompleti.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">06</div>
+      <div class="takeaway-text">
+        <strong>L'ordine del prompt è allocazione di computazione.</strong> Cambiare l'ordine
+        delle informazioni non cambia <em>cosa</em> c'è nel prompt, ma cambia <em>come</em> il
+        modello distribuisce il proprio carico computazionale. Un prompt ben ordinato fa
+        lavorare ogni token su un compito semplice; uno mal ordinato concentra il lavoro in
+        meno punti.
+      </div>
+    </div>
+
+    <div class="takeaway-item">
+      <div class="takeaway-num">07</div>
+      <div class="takeaway-text">
+        <strong>Quattro regole derivano direttamente dalla causalità.</strong> Definizioni prima
+        dell'uso, istruzioni complesse prima del materiale, evitare riferimenti in avanti,
+        preferire anafore a catafore. Non sono consigli stilistici: sono conseguenze necessarie
+        dell'architettura.
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Report F — L'asimmetria causale dell'attenzione</p>
+  <p>Approfondimenti sulla struttura del prompt · Documento di approfondimento</p>
+</footer>
+
+</body>
+</html>
