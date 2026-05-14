@@ -174,5 +174,13 @@
     "titolo": "Come il modello 'capisce' istruzioni ed esempi",
     "descrizione": "Perché un modello obbedisce, come distingue un'istruzione da una descrizione, come gestisce i vincoli quantitativi, come funziona il Chain-of-Thought, perché il role-play cambia tutto.",
     "link": "report-e-istruzioni-esempi.html"
+  },
+  {
+    "id": 23,
+    "filone": 3,
+    "indice": "Report F",
+    "titolo": "L'asimmetria causale dell'attenzione",
+    "descrizione": "Perché l'ordine delle informazioni nel prompt conta — anche se l'ultimo token vede tutto. Il fondamento meccanico sotto tutte le regole pratiche del percorso.",
+    "link": "report-f-asimmetria-causale.html"
   }
 ]
